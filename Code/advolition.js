@@ -1,5 +1,6 @@
 class Advolition {
 
+    #data = null;
     #robot = new Robot(1,1);
 
     #map = [
@@ -10,8 +11,10 @@ class Advolition {
         [1,1,1,1,1]
     ]
 
-    constructor() {
-      console.log("Advolition constructed");
+    constructor(data) {
+        this.#data = data;
+        console.log("Advolition constructed");
+        console.log(this.#data.objects[0].name);
     }
 
     enter() {
