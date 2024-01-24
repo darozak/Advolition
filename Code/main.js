@@ -1,6 +1,6 @@
 
 console.log("This is main!");
-const test = new Advolition(data);
-test.set(0,0,9);
-test.hello();
-test.whereAmI();
+const robot = new Robot(data);
+console.log(robot.data.monsters[0].name);
+robot.move(0);
+robot.move(1);

@@ -1,10 +1,13 @@
 class Robot {
-    #xpos = 0;
-    #ypos = 0;
+    #xpos = 3;
+    #ypos = 3;
 
-    constructor(x, y) {
-        this.#xpos = x;
-        this.#ypos = y;
+    #data = null;
+    #dungeon = null;
+    
+    constructor(data) {
+        this.data = data;
+        this.#dungeon = new Dungeon(data);
     }
 
     move(dir) {
@@ -19,6 +22,8 @@ class Robot {
         } else if (dir == 3 || dir == 4 || dir == 5) {
             this.#ypos += 1;
         }
+        console.log(this.#xpos, " ", this.#ypos, ": ",this.#dungeon.getObject(this.#xpos,this.#ypos));
+        console.log(this.#dungeon.getObject(1,1));
     }
 
     get xpos() {
