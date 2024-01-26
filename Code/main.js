@@ -1,6 +1,10 @@
 
 console.log("This is main!");
 const robot = new Robot(data);
-console.log(robot.data.monsters[0].name);
+console.log(robot.stats);
 robot.move(0);
-robot.move(1);
+console.log(robot.stats);
+robot.move(0);
+console.log(robot.stats);
+robot.move(0);
+console.log(robot.stats);

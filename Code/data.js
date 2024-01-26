@@ -1,20 +1,24 @@
 const data = {
-    objects: [
+    tiles: [
         {
             name: "Floor",
-            key: "."
+            key: ".",
+            speed: 1.0
         },
         {
             name: "Wall",
-            key: "#"
+            key: "#",
+            speed: 0.0
         },
         {
             name: "Open Door",
-            key: "/"
+            key: "/",
+            speed: 1.0
         },
         {
             name: "Closed Door",
-            key: "+"
+            key: "+",
+            speed: 0.0
         }
     ],
     monsters: [
@@ -27,7 +31,7 @@ const data = {
             type: "Creature"
         }
     ],
-    tiles: [
+    cards: [
         {
             map:
             [

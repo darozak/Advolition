@@ -1,6 +1,12 @@
 class Robot {
-    #xpos = 3;
-    #ypos = 3;
+
+    stats = {
+        xpos: 3,
+        ypos: 3,
+        xtarg: 0,
+        ytarg: 0,
+        speed: 1.0 // Meters per second
+    }
 
     #data = null;
     #dungeon = null;
@@ -12,25 +18,24 @@ class Robot {
 
     move(dir) {
         if(dir == 1 || dir == 2 || dir == 3) {
-            this.#xpos += 1;
+            this.stats.xtarg = this.stats.xpos + 1;
         } else if (dir == 5 || dir == 6 || dir == 7) {
-            this.#xpos -= 1;
+            this.stats.xtarg = this.stats.xpos - 1;
+        } else {
+            this.stats.xtarg = this.stats.xpos;
         }
 
         if(dir == 7 || dir == 0 || dir == 1) {
-            this.#ypos -= 1;
+            this.stats.ytarg = this.stats.ypos - 1;
         } else if (dir == 3 || dir == 4 || dir == 5) {
-            this.#ypos += 1;
+            this.stats.ytarg = this.stats.ypos + 1;
+        } else {
+            this.stats.ytarg = this.stats.ypos;
         }
-        console.log(this.#xpos, " ", this.#ypos, ": ",this.#dungeon.getObject(this.#xpos,this.#ypos));
-        console.log(this.#dungeon.getObject(1,1));
-    }
 
-    get xpos() {
-        return this.#xpos;
-    } 
-
-    get ypos() {
-        return this.#ypos;
+        if (this.#dungeon.getTileSpeed(this.stats.xtarg, this.stats.ytarg) > 0) {
+            this.stats.xpos = this.stats.xtarg;
+            this.stats.ypos = this.stats.ytarg;
+        }
     }
 }
