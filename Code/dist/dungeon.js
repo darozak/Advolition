@@ -8,16 +8,22 @@ class Dungeon {
         "#...#",
         "#####"
     ];
+    #enter = new Vector(3, 3);
     constructor(data) {
         this.#data = data;
         console.log("Dungeon constructed");
         console.log(this.#data.tiles[0].name);
     }
-    // Returns the index value of the object occupying location x, y.
-    getTileID(x, y) {
-        return this.#data.tiles.findLastIndex(d => d.key === this.#map[x][y]);
+    get enter() { return this.#enter; }
+    getTile(pos) {
+        return this.#map[pos.x][pos.y];
     }
-    getTileSpeed(x, y) {
-        return this.#data.tiles[0].speed;
+    // Returns the index value of the object occupying location x, y.
+    getTileID(pos) {
+        console.log(this.#map[pos.x][pos.y]);
+        return this.#data.tiles.findLastIndex(d => d.key === this.#map[pos.x][pos.y]);
+    }
+    getTileSpeed(pos) {
+        return this.#data.tiles[this.getTileID(pos)].speed;
     }
 }
