@@ -14,6 +14,7 @@ class Engine {
         new Vector(-1, -1)
     ];
     #status = {
+        time: 0,
         pos: new Vector(0, 3),
         targ: new Vector(0, 3),
         tile: "x",
@@ -27,28 +28,34 @@ class Engine {
         this.#status.targ = this.#dungeon.enter;
         this.#status.tile = this.#dungeon.getTile(this.#status.pos);
     }
+    wait(time) {
+        for (let i = 0; i < time; i++) {
+            this.#status.time++;
+            this.evaluate();
+        }
+    }
     addAction(type, params, delay) {
-        this.#actions.push(new Action(type, params, delay));
-        this.evaluate();
+        this.#actions.push(new Action(type, params, this.#status.time + delay));
     }
     move(dir) {
         this.#status.targ = this.#status.pos.add(this.#direction[dir]);
-        console.log(this.#dungeon.getTileID(this.#status.targ));
         if (this.#dungeon.getTileSpeed(this.#status.targ) > 0) {
             this.#status.pos = this.#status.targ;
         }
     }
     evaluate() {
         if (this.#actions.length > 0) {
-            switch (this.#actions[0].type) {
-                case "move":
-                    this.move(this.#actions[0].params);
+            this.#actions.sort((a, b) => a.time - b.time);
+            if (this.#actions[0].time <= this.#status.time) {
+                switch (this.#actions[0].type) {
+                    case "move":
+                        this.move(this.#actions[0].params);
+                }
+                this.#actions.shift();
             }
-            this.#actions.shift();
         }
     }
     get status() {
-        this.evaluate();
         return this.#status;
     }
 }

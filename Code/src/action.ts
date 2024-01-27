@@ -7,7 +7,7 @@ class Action {
     constructor(type: string, params: any, delay: number) {
         this.type = type;
         this.params = params;
-        this.time = Date.now()/1000 + delay;
+        this.time = delay;
     }
 
     
