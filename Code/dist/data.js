@@ -1,3 +1,4 @@
+"use strict";
 const data = {
     tiles: [
         {
@@ -21,26 +22,12 @@ const data = {
             speed: 0.0
         }
     ],
-    monsters: [
+    npcs: [
         {
             name: "Orc",
-            type: "Humanoid"
         },
         {
             name: "Dragon",
-            type: "Creature"
-        }
-    ],
-    cards: [
-        {
-            map:
-            [
-                "#####",
-                "#...#",
-                "#...#",
-                "#...#",
-                "#####"
-            ]
         }
     ]
 };
