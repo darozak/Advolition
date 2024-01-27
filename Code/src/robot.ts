@@ -7,15 +7,15 @@ class Robot {
         this.#engine = new Engine(data);
     }
 
-    wait(timer: number) {
-        /**
-         * Summary
-         * Waits for time to pass.
-         * @remarks
-         * Guess what I'm doing now?
-         * @param time - amount of time in seconds.
-         */
-        this.#engine.wait(timer);
+    /**
+     * The robot will wait a number of seconds in game time.
+     * This will allow scheduled actions to occur.
+     * 
+     * @param time An amount of time in seconds.
+     */
+    wait(time: number) {
+        
+        this.#engine.wait(time);
     }
 
     move(direction: number) {

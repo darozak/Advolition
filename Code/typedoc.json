@@ -3,5 +3,5 @@
     "name": "Advolition",
     "entryPointStrategy": "expand",
     "entryPoints": ["./src"],
-    "out": "doc"
+    "out": "docs"
 }
