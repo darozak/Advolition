@@ -1,4 +1,5 @@
-const data: Data = {
+"use strict";
+const gaia = {
     tiles: [
         {
             name: "Floor",
@@ -30,18 +31,3 @@ const data: Data = {
         }
     ]
 };
-
-interface Tile {
-    name: string;
-    key: string;
-    speed: number;
-}
-
-interface NPC {
-    name: string;
-}
-
-interface Data {
-    tiles: Tile[];
-    npcs: NPC[];
-}

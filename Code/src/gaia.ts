@@ -1,5 +1,4 @@
-"use strict";
-const data = {
+const gaia: World = {
     tiles: [
         {
             name: "Floor",
@@ -31,3 +30,4 @@ const data = {
         }
     ]
 };
+

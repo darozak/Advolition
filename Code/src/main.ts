@@ -1,10 +1,10 @@
 
 console.log("This is main!");
-const robot = new Robot(data);
-console.log(robot.stats);
+const robot = new Robot(gaia);
+console.log(robot.status);
 robot.move(0);
-console.log(robot.stats);
+console.log(robot.status);
 robot.move(0);
-console.log(robot.stats);
+console.log(robot.status);
 robot.move(0);
-console.log(robot.stats);
+console.log(robot.status);

@@ -1,6 +1,6 @@
 class Dungeon {
 
-    #data: Data;
+    #world: World;
     #map: string[] = [
         "#####",
         "#...#",
@@ -10,10 +10,10 @@ class Dungeon {
     ];
     #enter = new Vector(3,3);
 
-    constructor(data: Data) {
-        this.#data = data;
+    constructor(world: World) {
+        this.#world = world;
         console.log("Dungeon constructed");
-        console.log(this.#data.tiles[0].name);
+        console.log(this.#world.tiles[0].name);
     }
 
     get enter() {return this.#enter}
@@ -27,10 +27,10 @@ class Dungeon {
     // Returns the index value of the object occupying location x, y.
     getTileID(pos: Vector) {    
         console.log(this.#map[pos.x][pos.y]);    
-        return this.#data.tiles.findLastIndex(d => d.key === this.#map[pos.x][pos.y]);
+        return this.#world.tiles.findLastIndex(d => d.key === this.#map[pos.x][pos.y]);
     }
 
     getTileSpeed(pos: Vector) {
-        return this.#data.tiles[this.getTileID(pos)].speed;
+        return this.#world.tiles[this.getTileID(pos)].speed;
     }
   }
