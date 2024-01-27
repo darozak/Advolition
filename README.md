@@ -1,4 +1,5 @@
 # Advolition
+- This is a great game!
 - Program robots to explore a maze, kill monsters, and collect loot.
 - Robots are programmed in C++ or a comparable object oriented language.
 - The entire game is contained in a single class, which generates a maze, moves monsters, and accepts commands to move the player's robot.

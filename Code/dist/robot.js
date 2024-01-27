@@ -7,6 +7,11 @@ class Robot {
         this.#engine = new Engine(data);
     }
     wait(time) {
+        /**
+         * Waits for time to pass.
+         *
+         * @param time - amount of time in seconds.
+         */
         this.#engine.wait(time);
     }
     move(direction) {

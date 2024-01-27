@@ -7,7 +7,7 @@ class Dungeon {
         "#...#",
         "#...#",
         "#####"
-    ];
+    ]; 
     #enter = new Vector(3,3);
 
     constructor(world: World) {
