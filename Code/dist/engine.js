@@ -17,6 +17,8 @@ class Engine {
         time: 0,
         pos: new Vector(0, 3),
         targ: new Vector(0, 3),
+        isMoving: false,
+        isScanning: false,
         tile: "x",
         speed: 1.0 // Meters per second
     };
