@@ -33,11 +33,11 @@ class Engine {
      */
     constructor(world) {
         this.#world = world;
-        this.#dungeon = new Dungeon(world);
+        this.#dungeon = new Dungeon(world, 10);
         this.#actions = [];
         this.#status.pos = this.#dungeon.enter;
         this.#status.targ = this.#dungeon.enter;
-        this.#status.tile = this.#dungeon.getTile(this.#status.pos);
+        // this.#status.tile = this.#dungeon.getTile(this.#status.pos);
     }
     /**
      * Instructs the game engine to process game events for a number of seconds while the

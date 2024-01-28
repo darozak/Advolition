@@ -1,4 +1,4 @@
-interface Tile {
+interface Feature {
     name: string;
     key: string;
     speed: number;
@@ -9,6 +9,7 @@ interface NPC {
 }
 
 interface World {
-    tiles: Tile[];
+    tiles: Feature[];
     npcs: NPC[];
 }
+
