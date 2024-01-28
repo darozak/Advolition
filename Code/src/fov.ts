@@ -1,12 +1,5 @@
-// import { DIRS } from "../constants.js";
-
-// export 
-interface LightPassesCallback { (x: number, y: number): boolean };
-
-// export 
 interface VisibilityCallback { (x: number, y: number, r: number, visibility: number): void };
-
-// export 
+ 
 interface Options {
 	topology: 4 | 6 | 8
 }
@@ -17,32 +10,29 @@ const DIRS = {
 	6: [[-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1], [-2, 0]]
 };
 
-// export default 
 abstract class FOV {
-	_lightPasses: LightPassesCallback;
 	_options: Options;
-
-
 
 	/**
 	 * @class Abstract FOV algorithm
-	 * @param {function} lightPassesCallback Does the light pass through x,y?
 	 * @param {object} [options]
 	 * @param {int} [options.topology=8] 4/6/8
 	 */
-	constructor(lightPassesCallback: LightPassesCallback, options: Partial<Options> = {}) {
-		this._lightPasses = lightPassesCallback;
+	constructor( options: Partial<Options> = {}) {
 		this._options = Object.assign({topology: 8}, options);
 	}
 
 	/**
 	 * Compute visibility for a 360-degree circle
-	 * @param {int} x
-	 * @param {int} y
-	 * @param {int} R Maximum visibility radius
-	 * @param {function} callback
+	 * @param {int} x The x position of the observer.
+	 * @param {int} y The y position of the observer.
+	 * @param {int} R Maximum visibility radius of the scan.
+	 * @param {boolen} mask A boolean array to indicate which tiles allow the light from the scan
+	 * to pass through them.
+	 * @param {function} callback A callback function that parses the returned visibility value
+	 * for each tile in the scanned radius.
 	 */
-	abstract compute(x: number, y: number, R: number, callback: VisibilityCallback): void;
+	abstract compute(x: number, y: number, R: number, mask: boolean[][], callback: VisibilityCallback): void;
 
 	/**
 	 * Return all neighbors in a concentric ring

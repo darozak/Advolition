@@ -6,11 +6,44 @@
  */
 // export default 
 class PreciseShadowcasting extends FOV {
-    compute(x, y, R, callback) {
+    /**
+     * Guards against queries that are greater than the size of the mask.
+     * Returns true or false from the mask array and false of the coordinates
+     * are outside the array.
+     *
+     * @param x
+     * @param y
+     * @param mask
+     * @returns
+     */
+    _lightPasses(x, y, mask) {
+        if (x >= 0 && x <= mask.length && y >= 0 && y <= mask[0].length) {
+            return mask[x][y];
+        }
+        return false;
+    }
+    /**
+     * Computes whether or not a tile is visible based on whether the corresponding
+     * point in the boolean mask array is true or false.  A true value in the mask
+     * means that liqht can pass through the tile and it doesn't block the scan.
+     *
+     * The callback function parses the results into an array of values between 0 and 1
+     * that indicate whether the particular tile is visible in the scan.
+     *
+     * @param x The x position of the observer.
+     * @param y The y position of the observer.
+     * @param R The radius of the scan.
+     * @param mask A boolean array that indicates whether light from the can can pass
+     * through a particular tile.
+     * @param callback A callback function that is used to parse the visibility result
+     * that is returned for each position.
+     * @returns
+     */
+    compute(x, y, R, mask, callback) {
         /* this place is always visible */
         callback(x, y, 0, 1);
         /* standing in a dark place. FIXME is this a good idea?  */
-        if (!this._lightPasses(x, y)) {
+        if (!this._lightPasses(x, y, mask)) {
             return;
         }
         /* list of all shadows */
@@ -27,7 +60,7 @@ class PreciseShadowcasting extends FOV {
                 /* shift half-an-angle backwards to maintain consistency of 0-th cells */
                 A1 = [i ? 2 * i - 1 : 2 * neighborCount - 1, 2 * neighborCount];
                 A2 = [2 * i + 1, 2 * neighborCount];
-                blocks = !this._lightPasses(cx, cy);
+                blocks = !this._lightPasses(cx, cy, mask);
                 visibility = this._checkVisibility(A1, A2, blocks, SHADOWS);
                 if (visibility) {
                     callback(cx, cy, r, visibility);

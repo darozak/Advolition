@@ -4,25 +4,24 @@ class Dungeon {
     sketch = [
         "#####",
         "#...#",
-        "#...#",
+        "#.###",
         "#...#",
         "#####"
     ];
     visible;
     #map;
+    mask;
     #enter = new Vector(3, 3);
     constructor(world, size) {
         this.#world = world;
         this.#map = [];
         this.visible = [];
-        // Create map from sketch.
-        for (var i = 0; i < this.sketch.length; i++) {
-            this.#map[i] = [];
-            this.visible[i] = [];
-            for (var j = 0; j < this.sketch[i].length; j++) {
-                this.visible[i][j] = 0;
-                this.#map[i][j] =
-                    new Tile(this.#world.tiles.findLastIndex(d => d.key === this.sketch[i][j]));
+        this.mask = [];
+        // Create a light mask from the sketch.
+        for (var i = 0; i < 5; i++) {
+            this.mask[i] = [];
+            for (var j = 0; j < 5; j++) {
+                this.mask[i][j] = this.sketch[i][j] === ".";
             }
         }
     }
@@ -37,38 +36,6 @@ class Dungeon {
     getTileSpeed(pos) {
         return this.#world.tiles[this.getTileID(pos)].speed;
     }
-    /* input callback */
-    // lightPasses(x: number, y: number) {
-    //     var key = x+","+y;
-    //     if (key in data) { return (data[key] == 0); }
-    //     return false;
-    // }
-    lightPasses(x, y) {
-        var sketch = [
-            "#####",
-            "#...#",
-            "#.###",
-            "#...#",
-            "#####"
-        ];
-        if (x >= 0 && x <= 4 && y >= 0 && y <= 4) {
-            return sketch[x][y] === ".";
-        }
-        return false;
-        // return true;
-    }
-    /* output callback */
-    // render() {
-    //     var fov = new PreciseShadowcasting(this.lightPasses);
-    //     fov.compute(50, 22, 10, function(x, y, r, visibility) {
-    //         var ch = (r ? "" : "@");
-    //         var color = (data[x+","+y] ? "#aa0": "#660");
-    //         display.draw(x, y, ch, "#fff", color);
-    //     });
-    // }
-    // toVisible(x:number, y:number, visibility: number) {
-    //     this.visible[x][y] = visibility;
-    // }
     render() {
         var visible;
         visible = [
@@ -78,14 +45,8 @@ class Dungeon {
             [0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0]
         ];
-        // for(var i = 0; i < 5; i++) {
-        //     this.visible[i] = [];
-        //     for(var j = 0; j < 5; j++) {
-        //         visible[i][j] = 0;
-        //     }
-        // }
-        var fov = new PreciseShadowcasting(this.lightPasses);
-        fov.compute(1, 1, 5, function (x, y, r, visibility) {
+        var fov = new PreciseShadowcasting();
+        fov.compute(1, 1, 5, this.mask, function (x, y, r, visibility) {
             if (x >= 0 && x <= 4 && y >= 0 && y <= 4) {
                 visible[x][y] = visibility;
             }

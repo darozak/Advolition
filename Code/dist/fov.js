@@ -1,24 +1,18 @@
 "use strict";
-// import { DIRS } from "../constants.js";
-;
 ;
 const DIRS = {
     4: [[0, -1], [1, 0], [0, 1], [-1, 0]],
     8: [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]],
     6: [[-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1], [-2, 0]]
 };
-// export default 
 class FOV {
-    _lightPasses;
     _options;
     /**
      * @class Abstract FOV algorithm
-     * @param {function} lightPassesCallback Does the light pass through x,y?
      * @param {object} [options]
      * @param {int} [options.topology=8] 4/6/8
      */
-    constructor(lightPassesCallback, options = {}) {
-        this._lightPasses = lightPassesCallback;
+    constructor(options = {}) {
         this._options = Object.assign({ topology: 8 }, options);
     }
     /**
