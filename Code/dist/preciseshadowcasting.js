@@ -35,16 +35,23 @@ class PreciseShadowcasting extends FOV {
      * @param R The radius of the scan.
      * @param mask A boolean array that indicates whether light from the can can pass
      * through a particular tile.
-     * @param callback A callback function that is used to parse the visibility result
-     * that is returned for each position.
-     * @returns
+     * @returns Returns a 2D array of numbers that is the same size as the mask. The numbers
+     * range from 0-1 and indicate the degree to which the tile is visible in the scan.
      */
-    compute(x, y, R, mask, callback) {
-        /* this place is always visible */
-        callback(x, y, 0, 1);
+    compute(x, y, R, mask) {
+        // Create a results array that is the same size as the input mask.
+        var scanResult = [];
+        for (var i = 0; i < mask.length; i++) {
+            scanResult[i] = [];
+            for (var j = 0; j < mask[0].length; j++) {
+                scanResult[i][j] = 0;
+            }
+        }
+        // The observer's tile is always visible.
+        scanResult[x][y] = 1;
         /* standing in a dark place. FIXME is this a good idea?  */
         if (!this._lightPasses(x, y, mask)) {
-            return;
+            return scanResult;
         }
         /* list of all shadows */
         let SHADOWS = [];
@@ -63,13 +70,14 @@ class PreciseShadowcasting extends FOV {
                 blocks = !this._lightPasses(cx, cy, mask);
                 visibility = this._checkVisibility(A1, A2, blocks, SHADOWS);
                 if (visibility) {
-                    callback(cx, cy, r, visibility);
+                    scanResult[cx][cy] = visibility;
                 }
                 if (SHADOWS.length == 2 && SHADOWS[0][0] == 0 && SHADOWS[1][0] == SHADOWS[1][1]) {
-                    return;
+                    return scanResult;
                 } /* cutoff? */
             } /* for all cells in this ring */
         } /* for all rings */
+        return scanResult;
     }
     /**
      * @param {int[2]} A1 arc start

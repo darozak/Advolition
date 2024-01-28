@@ -47,20 +47,8 @@ class Dungeon {
 
     render() {
         var visible: number[][];
-        visible=[
-            [0,0,0,0,0],
-            [0,0,0,0,0],
-            [0,0,0,0,0],
-            [0,0,0,0,0],
-            [0,0,0,0,0]
-        ];
-        
         var fov = new PreciseShadowcasting();
-        fov.compute(1, 1, 5, this.mask, function(x, y, r, visibility) {
-            if(x >= 0 && x <= 4 && y >= 0 && y <= 4) {
-                 visible[x][y]=visibility;
-            }
-        });
+        visible = fov.compute(1, 1, 5, this.mask);
         console.log(visible);
         return visible;
     }

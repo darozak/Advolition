@@ -39,16 +39,25 @@ class PreciseShadowcasting extends FOV {
 	 * @param R The radius of the scan.
 	 * @param mask A boolean array that indicates whether light from the can can pass 
 	 * through a particular tile.
-	 * @param callback A callback function that is used to parse the visibility result
-	 * that is returned for each position.
-	 * @returns 
+	 * @returns Returns a 2D array of numbers that is the same size as the mask. The numbers
+	 * range from 0-1 and indicate the degree to which the tile is visible in the scan.
 	 */
-	compute(x: number, y: number, R: number, mask: boolean[][], callback: VisibilityCallback): void {
-		/* this place is always visible */
-		callback(x, y, 0, 1);
+	compute(x: number, y: number, R: number, mask: boolean[][]): number[][] {
+		
+		// Create a results array that is the same size as the input mask.
+		var scanResult: number[][] = [];
+		for(var i = 0; i < mask.length; i++) {
+			scanResult[i]=[];
+			for(var j = 0; j < mask[0].length; j++) {
+				scanResult[i][j] = 0;
+			}
+		}
+
+		// The observer's tile is always visible.
+		scanResult[x][y]=1;
 
 		/* standing in a dark place. FIXME is this a good idea?  */
-		if (!this._lightPasses(x,y,mask)) { return; }
+		if (!this._lightPasses(x,y,mask)) { return scanResult; }
 		
 		/* list of all shadows */
 		let SHADOWS: Arc[] = [];
@@ -70,12 +79,17 @@ class PreciseShadowcasting extends FOV {
 				
 				blocks = !this._lightPasses(cx,cy,mask);
 				visibility = this._checkVisibility(A1 as Arc, A2 as Arc, blocks, SHADOWS);
-				if (visibility) { callback(cx, cy, r, visibility); }
+				if (visibility) { 
+					scanResult[cx][cy] = visibility;
+				}
 
-				if (SHADOWS.length == 2 && SHADOWS[0][0] == 0 && SHADOWS[1][0] == SHADOWS[1][1]) { return; } /* cutoff? */
+				if (SHADOWS.length == 2 && SHADOWS[0][0] == 0 && SHADOWS[1][0] == SHADOWS[1][1]) { return scanResult; } /* cutoff? */
 
 			} /* for all cells in this ring */
+
 		} /* for all rings */
+
+		return scanResult;
 	}
 
 	/**
