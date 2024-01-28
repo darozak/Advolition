@@ -1,4 +1,4 @@
-import FOV, { VisibilityCallback } from "./fov.js";
+// import FOV, { VisibilityCallback } from "./fov.js";
 
 type Arc = [number, number];
 
@@ -6,8 +6,9 @@ type Arc = [number, number];
  * @class Precise shadowcasting algorithm
  * @augments ROT.FOV
  */
-export default class PreciseShadowcasting extends FOV {
-	compute(x: number, y: number, R: number, callback: VisibilityCallback) {
+// export default 
+class PreciseShadowcasting extends FOV {
+	compute(x: number, y: number, R: number, callback: VisibilityCallback): void {
 		/* this place is always visible */
 		callback(x, y, 0, 1);
 
@@ -21,6 +22,7 @@ export default class PreciseShadowcasting extends FOV {
 
 		/* analyze surrounding cells in concentric rings, starting from the center */
 		for (let r=1; r<=R; r++) {
+			console.log(r);
 			let neighbors = this._getCircle(x, y, r);
 			let neighborCount = neighbors.length;
 

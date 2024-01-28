@@ -37,6 +37,7 @@ class Engine {
         this.#world = world;
         this.#dungeon = new Dungeon(world, 10);
         this.#actions = [];
+        this.#dungeon.render();
 
         this.#status.pos = this.#dungeon.enter;
         this.#status.targ = this.#dungeon.enter;
@@ -106,4 +107,10 @@ class Engine {
     get status() {
         return this.#status;
     }
+
+
+
+
+
+
 }

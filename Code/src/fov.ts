@@ -1,10 +1,13 @@
 // import { DIRS } from "../constants.js";
 
-export interface LightPassesCallback { (x: number, y: number): boolean };
+// export 
+interface LightPassesCallback { (x: number, y: number): boolean };
 
-export interface VisibilityCallback { (x: number, y: number, r: number, visibility: number): void };
+// export 
+interface VisibilityCallback { (x: number, y: number, r: number, visibility: number): void };
 
-export interface Options {
+// export 
+interface Options {
 	topology: 4 | 6 | 8
 }
 
@@ -14,7 +17,8 @@ const DIRS = {
 	6: [[-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1], [-2, 0]]
 };
 
-export default abstract class FOV {
+// export default 
+abstract class FOV {
 	_lightPasses: LightPassesCallback;
 	_options: Options;
 

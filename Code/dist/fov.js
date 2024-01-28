@@ -1,6 +1,5 @@
 "use strict";
 // import { DIRS } from "../constants.js";
-Object.defineProperty(exports, "__esModule", { value: true });
 ;
 ;
 const DIRS = {
@@ -8,6 +7,7 @@ const DIRS = {
     8: [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]],
     6: [[-1, -1], [1, -1], [2, 0], [1, 1], [-1, 1], [-2, 0]]
 };
+// export default 
 class FOV {
     _lightPasses;
     _options;
@@ -69,4 +69,3 @@ class FOV {
         return result;
     }
 }
-exports.default = FOV;
