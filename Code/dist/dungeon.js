@@ -47,11 +47,14 @@ class Dungeon {
         var sketch = [
             "#####",
             "#...#",
-            "#..##",
+            "#.###",
             "#...#",
             "#####"
         ];
-        return sketch[x][y] === ".";
+        if (x >= 0 && x <= 4 && y >= 0 && y <= 4) {
+            return sketch[x][y] === ".";
+        }
+        return false;
         // return true;
     }
     /* output callback */
@@ -82,8 +85,10 @@ class Dungeon {
         //     }
         // }
         var fov = new PreciseShadowcasting(this.lightPasses);
-        fov.compute(3, 3, 1, function (x, y, r, visibility) {
-            visible[x][y] = visibility;
+        fov.compute(1, 1, 5, function (x, y, r, visibility) {
+            if (x >= 0 && x <= 4 && y >= 0 && y <= 4) {
+                visible[x][y] = visibility;
+            }
         });
         console.log(visible);
         return visible;
