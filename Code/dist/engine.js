@@ -7,6 +7,7 @@ class Engine {
     #world;
     #actions;
     #dungeon;
+    #hero;
     #direction = [
         new Vector(0, -1),
         new Vector(1, -1),
@@ -17,27 +18,28 @@ class Engine {
         new Vector(-1, 0),
         new Vector(-1, -1)
     ];
-    #status = {
-        time: 0,
-        pos: new Vector(0, 3),
-        targ: new Vector(0, 3),
-        isMoving: false,
-        isScanning: false,
-        tile: "x",
-        speed: 1.0 // Meters per second
-    };
+    // #status = {
+    //     time: 0,
+    //     pos: new Vector(0,3),
+    //     targ: new Vector(0,3),
+    //     isMoving: false,
+    //     isScanning: false,
+    //     tile: "x",
+    //     speed: 1.0 // Meters per second
+    // }
     /**
      * Creates a game engine object that is based on the specified world parameters.
      *
      * @param world The set of parameters that define the game world.
      */
-    constructor(world) {
+    constructor(world, hero) {
         this.#world = world;
+        this.#hero = hero;
         this.#dungeon = new Dungeon(world, 10);
         this.#actions = [];
-        this.#dungeon.render();
-        this.#status.pos = this.#dungeon.enter;
-        this.#status.targ = this.#dungeon.enter;
+        this.#dungeon.scan();
+        this.#hero.pos = this.#dungeon.enter;
+        this.#hero.targ = this.#dungeon.enter;
         // this.#status.tile = this.#dungeon.getTile(this.#status.pos);
     }
     /**
@@ -48,7 +50,7 @@ class Engine {
      */
     wait(time) {
         for (let i = 0; i < time; i++) {
-            this.#status.time++;
+            this.#hero.time++;
             this.#evaluate();
         }
     }
@@ -61,7 +63,7 @@ class Engine {
      * @param completed This is the time in seconds that the action will be completed.
      */
     addAction(type, params, completed) {
-        this.#actions.push(new Action(type, params, this.#status.time + completed));
+        this.#actions.push(new Action(type, params, this.#hero.time + completed));
     }
     /**
      * Evaluates the move action.
@@ -71,11 +73,11 @@ class Engine {
      * in a clockwise direction.
      */
     #move(direction) {
-        this.#status.targ = this.#status.pos.add(this.#direction[direction]);
-        if (this.#dungeon.getTileSpeed(this.#status.targ) > 0) {
-            this.#status.pos = this.#status.targ;
+        this.#hero.targ = this.#hero.pos.add(this.#direction[direction]);
+        if (this.#dungeon.getTileSpeed(this.#hero.targ) > 0) {
+            this.#hero.pos = this.#hero.targ;
         }
-        this.#status.isMoving = false;
+        this.#hero.isMoving = false;
     }
     /**
      * Evaluates any actions in the action buffer that need to be performed and evaluates
@@ -84,7 +86,7 @@ class Engine {
     #evaluate() {
         if (this.#actions.length > 0) {
             this.#actions.sort((a, b) => a.time - b.time);
-            if (this.#actions[0].time <= this.#status.time) {
+            if (this.#actions[0].time <= this.#hero.time) {
                 switch (this.#actions[0].type) {
                     case "move":
                         this.#move(this.#actions[0].params);
@@ -97,6 +99,6 @@ class Engine {
      * Returns the robot's current status.
      */
     get status() {
-        return this.#status;
+        return this.#hero;
     }
 }

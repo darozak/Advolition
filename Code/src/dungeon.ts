@@ -9,16 +9,17 @@ class Dungeon {
         "#####"
     ]; 
 
-    visible: number[][];
+    // visible: number[][];
     #map: Tile[][];
     mask: boolean[][];
+    fov = new PreciseShadowcasting();
     
     #enter = new Vector(3,3);
 
     constructor(world: World, size: number) {
         this.#world = world;
         this.#map = [];
-        this.visible = [];
+        // this.visible = [];
         this.mask = [];
 
         // Create a light mask from the sketch.
@@ -45,11 +46,10 @@ class Dungeon {
         return this.#world.tiles[this.getTileID(pos)].speed;
     }
 
-    render() {
-        var visible: number[][];
-        var fov = new PreciseShadowcasting();
-        visible = fov.compute(1, 1, 5, this.mask);
+    scan() {
+        var visible: number[][] = this.fov.compute(1, 1, 5, this.mask);
         console.log(visible);
         return visible;
     }
 }
+ 

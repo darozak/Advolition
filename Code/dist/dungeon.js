@@ -8,14 +8,15 @@ class Dungeon {
         "#...#",
         "#####"
     ];
-    visible;
+    // visible: number[][];
     #map;
     mask;
+    fov = new PreciseShadowcasting();
     #enter = new Vector(3, 3);
     constructor(world, size) {
         this.#world = world;
         this.#map = [];
-        this.visible = [];
+        // this.visible = [];
         this.mask = [];
         // Create a light mask from the sketch.
         for (var i = 0; i < 5; i++) {
@@ -36,10 +37,8 @@ class Dungeon {
     getTileSpeed(pos) {
         return this.#world.tiles[this.getTileID(pos)].speed;
     }
-    render() {
-        var visible;
-        var fov = new PreciseShadowcasting();
-        visible = fov.compute(1, 1, 5, this.mask);
+    scan() {
+        var visible = this.fov.compute(1, 1, 5, this.mask);
         console.log(visible);
         return visible;
     }

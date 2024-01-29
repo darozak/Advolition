@@ -4,6 +4,7 @@
  */
 class Robot {
     #world: World;
+    #stats: Hero;
     #engine: Engine;
     
     /**
@@ -14,9 +15,10 @@ class Robot {
      * @param world Pass the data structure to the robot that defines what it's word
      * will look like. 
      */
-    constructor(world: World) {
+    constructor(world: World, worldSize: Vector) {
         this.#world = world;
-        this.#engine = new Engine(world);
+        this.#stats = new Hero(worldSize);
+        this.#engine = new Engine(world, this.#stats);
     }
 
     /**
@@ -52,7 +54,8 @@ class Robot {
     /**
      * Retreives the robot's current stats in a data structure.
      */
-    get status() {
-        return structuredClone(this.#engine.status);
+    get stats() {
+        return structuredClone(this.#stats);
     }
+
 }

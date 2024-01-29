@@ -5,6 +5,7 @@
  */
 class Robot {
     #world;
+    #stats;
     #engine;
     /**
      * Use the constructor to create an instance of this class in your code that
@@ -14,9 +15,10 @@ class Robot {
      * @param world Pass the data structure to the robot that defines what it's word
      * will look like.
      */
-    constructor(world) {
+    constructor(world, worldSize) {
         this.#world = world;
-        this.#engine = new Engine(world);
+        this.#stats = new Hero(worldSize);
+        this.#engine = new Engine(world, this.#stats);
     }
     /**
      * The robot will wait a number of seconds in game time.
@@ -49,7 +51,7 @@ class Robot {
     /**
      * Retreives the robot's current stats in a data structure.
      */
-    get status() {
-        return structuredClone(this.#engine.status);
+    get stats() {
+        return structuredClone(this.#stats);
     }
 }
