@@ -13,11 +13,11 @@ class Hero {
      * Creates a hero for the given world size.
      * @param worldSize 
      */
-    constructor(worldSize: Vector) {
+    constructor(world: World) {
         this.time = 0;
         this.pos = new Vector(0,0); 
         this.targ = new Vector(0,0);
-        this.grid = new Grid(worldSize);
+        this.grid = new Grid(world);
         this.isMoving = false;
         this.isScanning = false;
     }

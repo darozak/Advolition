@@ -8,7 +8,5 @@ class Action {
         this.type = type;
         this.params = params;
         this.time = delay;
-    }
-
-    
+    }  
 }

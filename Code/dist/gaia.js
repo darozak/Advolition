@@ -1,5 +1,14 @@
 "use strict";
 const gaia = {
+    size: new Vector(5, 5),
+    entrance: new Vector(1, 1),
+    sketch: [
+        "#####",
+        "#...#",
+        "#.###",
+        "#...#",
+        "#####"
+    ],
     tiles: [
         {
             name: "Floor",

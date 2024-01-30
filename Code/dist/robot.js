@@ -15,9 +15,9 @@ class Robot {
      * @param world Pass the data structure to the robot that defines what it's word
      * will look like.
      */
-    constructor(world, worldSize) {
+    constructor(world) {
         this.#world = world;
-        this.#stats = new Hero(worldSize);
+        this.#stats = new Hero(world);
         this.#engine = new Engine(world, this.#stats);
     }
     /**

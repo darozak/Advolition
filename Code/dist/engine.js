@@ -6,6 +6,7 @@
 class Engine {
     #world;
     #actions;
+    // #dungeon: Dungeon;
     #dungeon;
     #hero;
     #direction = [
@@ -18,15 +19,6 @@ class Engine {
         new Vector(-1, 0),
         new Vector(-1, -1)
     ];
-    // #status = {
-    //     time: 0,
-    //     pos: new Vector(0,3),
-    //     targ: new Vector(0,3),
-    //     isMoving: false,
-    //     isScanning: false,
-    //     tile: "x",
-    //     speed: 1.0 // Meters per second
-    // }
     /**
      * Creates a game engine object that is based on the specified world parameters.
      *
@@ -35,11 +27,13 @@ class Engine {
     constructor(world, hero) {
         this.#world = world;
         this.#hero = hero;
-        this.#dungeon = new Dungeon(world, 10);
+        // this.#dungeon = new Dungeon(world, 10);
+        this.#dungeon = new Grid(world);
+        this.#dungeon.generate();
         this.#actions = [];
-        this.#dungeon.scan();
         this.#hero.pos = this.#dungeon.enter;
         this.#hero.targ = this.#dungeon.enter;
+        this.#dungeon.scan(hero.pos, 3, this.#dungeon);
         // this.#status.tile = this.#dungeon.getTile(this.#status.pos);
     }
     /**

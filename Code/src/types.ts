@@ -9,6 +9,9 @@ interface NPC {
 }
 
 interface World {
+    size: Vector;
+    entrance: Vector;
+    sketch: string[];
     tiles: Feature[];
     npcs: NPC[];
 }
