@@ -33,7 +33,7 @@ class Engine {
         this.#actions = [];
         this.#hero.pos = this.#dungeon.enter;
         this.#hero.targ = this.#dungeon.enter;
-        this.#dungeon.scan(hero.pos, 3, this.#dungeon);
+        this.#dungeon.scan(hero.pos, 3);
         // this.#status.tile = this.#dungeon.getTile(this.#status.pos);
     }
     /**

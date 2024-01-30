@@ -34,19 +34,50 @@ class Grid {
         }
     }
     generate() {
-        // Create a light mask from the sketch.
+        // Make sure world size matches sketch.
+        this.world.size.x = this.world.sketch.length;
+        this.world.size.y = this.world.sketch[0].length;
+        // Use scetch to populate mask and tile arrays.
         for (var i = 0; i < this.world.size.x; i++) {
             this.mask[i] = [];
+            this.tiles[i] = [];
             for (var j = 0; j < this.world.size.y; j++) {
                 this.mask[i][j] = this.world.sketch[i][j] === ".";
+                this.tiles[i][j] =
+                    this.world.tiles.findLastIndex(d => d.key === this.world.sketch[i][j]);
             }
         }
     }
     populate() { }
-    scan(pov, scanRadius, targetGrid) {
-        var visible = this.fov.compute(pov.x, pov.y, scanRadius, targetGrid.mask);
-        console.log(visible);
-        return visible;
+    /**
+     * Scans the map based on the specified point of view (pov) and scan radius.
+     * @param pov A 2D vector indicating the center of the scan.
+     * @param scanRadius  An integer radius of the scan.
+     * @returns Returns a packaged set of 2D scan layers. One layer maps the scanned tiles
+     * and the other layer maps the NPCs.  Unscanned regions of the grid are indicated
+     * by a -1.
+     */
+    scan(pov, scanRadius) {
+        var visible = this.fov.compute(pov.x, pov.y, scanRadius, this.mask);
+        var tiles = [];
+        var npcs = [];
+        var output = { tiles: tiles, npcs: npcs };
+        for (var i = 0; i < this.world.size.x; i++) {
+            tiles[i] = [];
+            npcs[i] = [];
+            for (var j = 0; j < this.world.size.y; j++) {
+                if (visible[i][j] > 0) {
+                    tiles[i][j] = this.tiles[i][j];
+                    npcs[i][j] = this.npcs[i][j];
+                }
+                else {
+                    tiles[i][j] = -1;
+                    npcs[i][j] = -1;
+                }
+            }
+        }
+        console.log(output);
+        return output;
     }
     get enter() { return this.world.entrance; }
     // Returns the index value of the object occupying location x, y.
