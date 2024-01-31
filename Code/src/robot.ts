@@ -52,6 +52,20 @@ class Robot {
     }
 
     /**
+     * Scans the robot's environment to generate a map of the local room.
+     * @returns Returns the amount of time that the scan will take.
+     */
+    scan() {
+        let duration = 0;
+        if(!this.#engine.status.isScanning) {
+            duration = 4;
+            this.#engine.addAction("scan", 0, duration);
+            this.#engine.status.isScanning = true;
+        }
+        return duration
+    }
+
+    /**
      * Retreives the robot's current stats in a data structure.
      */
     get stats() {

@@ -73,6 +73,10 @@ class Engine {
         }
         this.#hero.isMoving = false;
     }
+    #scan() {
+        this.#hero.scan = this.#dungeon.scan(this.#hero.pos, 5);
+        this.#hero.isScanning = false;
+    }
     /**
      * Evaluates any actions in the action buffer that need to be performed and evaluates
      * them in the order that they are scheduled to be completed.
@@ -84,6 +88,10 @@ class Engine {
                 switch (this.#actions[0].type) {
                     case "move":
                         this.#move(this.#actions[0].params);
+                        break;
+                    case "scan":
+                        this.#scan();
+                        break;
                 }
                 this.#actions.shift();
             }

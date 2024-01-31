@@ -76,7 +76,7 @@ class Grid {
                 }
             }
         }
-        console.log(output);
+        // console.log(output);
         return output;
     }
     get enter() { return this.world.entrance; }

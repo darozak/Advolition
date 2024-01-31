@@ -8,7 +8,7 @@ class Hero {
     targ;
     isMoving;
     isScanning;
-    grid;
+    scan;
     /**
      * Creates a hero for the given world size.
      * @param worldSize
@@ -17,7 +17,7 @@ class Hero {
         this.time = 0;
         this.pos = new Vector(0, 0);
         this.targ = new Vector(0, 0);
-        this.grid = new Grid(world);
+        this.scan = [];
         this.isMoving = false;
         this.isScanning = false;
     }
