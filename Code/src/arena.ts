@@ -1,31 +1,32 @@
-"use strict";
 /**
  * This class manages a layered map grid with information on scan times, tiles,
  * and NPCs for each x, y position.
  */
-class Grid {
-    world;
-    mask;
-    scans;
-    tiles;
-    npcs;
+class Arena {
+    world: World;
+    mask: boolean[][];
+    scans: number[][];
+    tiles: number[][];
+    npcs: number[][];
+
     fov = new PreciseShadowcasting();
+
     /**
      * Creates a layerd map grid of the indicated size.
-     * @param size
+     * @param size 
      */
-    constructor(world) {
+    constructor(world: World) {
         this.world = world;
         this.mask = [];
         this.scans = [];
         this.tiles = [];
         this.npcs = [];
-        for (var i = 0; i < this.world.size.x; i++) {
+        for(var i = 0; i < this.world.size.x; i ++) {
             this.mask[i] = [];
             this.scans[i] = [];
             this.tiles[i] = [];
             this.npcs[i] = [];
-            for (var j = 0; j < this.world.size.y; j++) {
+            for(var j = 0; j < this.world.size.y; j ++) {
                 this.mask[i][j] = false;
                 this.scans[i][j] = 0;
                 this.tiles[i][j] = 0;
@@ -33,22 +34,26 @@ class Grid {
             }
         }
     }
+
     generate() {
         // Make sure world size matches sketch.
         this.world.size.x = this.world.sketch.length;
         this.world.size.y = this.world.sketch[0].length;
+
         // Use scetch to populate mask and tile arrays.
-        for (var i = 0; i < this.world.size.x; i++) {
+        for(var i = 0; i < this.world.size.x; i++) {
             this.mask[i] = [];
             this.tiles[i] = [];
-            for (var j = 0; j < this.world.size.y; j++) {
-                this.mask[i][j] = this.world.sketch[i][j] === ".";
+            for(var j = 0; j < this.world.size.y; j++) {
+                this.mask[i][j] = this.world.sketch[i][j]===".";
                 this.tiles[i][j] =
                     this.world.tiles.findLastIndex(d => d.key === this.world.sketch[i][j]);
             }
         }
     }
-    populate() { }
+
+    populate() {}
+
     /**
      * Scans the map based on the specified point of view (pov) and scan radius.
      * @param pov A 2D vector indicating the center of the scan.
@@ -57,20 +62,19 @@ class Grid {
      * and the other layer maps the NPCs.  Unscanned regions of the grid are indicated
      * by a -1.
      */
-    scan(pov, scanRadius) {
-        var visible = this.fov.compute(pov.x, pov.y, scanRadius, this.mask);
-        var tiles = [];
-        var npcs = [];
-        var output = { tiles: tiles, npcs: npcs };
-        for (var i = 0; i < this.world.size.x; i++) {
+    scan(pov: Vector, scanRadius: number) {
+        var visible: number[][] = this.fov.compute(pov.x, pov.y, scanRadius, this.mask);
+        var tiles: number[][] = []
+        var npcs: number[][] = []
+        var output = {tiles: tiles, npcs: npcs}
+        for(var i = 0; i < this.world.size.x; i++) {
             tiles[i] = [];
             npcs[i] = [];
-            for (var j = 0; j < this.world.size.y; j++) {
-                if (visible[i][j] > 0) {
+            for(var j = 0; j < this.world.size.y; j++) {
+                if(visible[i][j] > 0) {
                     tiles[i][j] = this.tiles[i][j];
                     npcs[i][j] = this.npcs[i][j];
-                }
-                else {
+                } else {
                     tiles[i][j] = -1;
                     npcs[i][j] = -1;
                 }
@@ -79,12 +83,15 @@ class Grid {
         // console.log(output);
         return output;
     }
-    get enter() { return this.world.entrance; }
+
+    get enter() {return this.world.entrance}
+
     // Returns the index value of the object occupying location x, y.
-    getTileID(pos) {
+    getTileID(pos: Vector) {       
         return this.world.tiles.findLastIndex(d => d.key === this.world.sketch[pos.x][pos.y]);
     }
-    getTileSpeed(pos) {
+
+    getTileSpeed(pos: Vector) {
         return this.world.tiles[this.getTileID(pos)].speed;
     }
 }

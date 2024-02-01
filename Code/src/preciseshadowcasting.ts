@@ -66,7 +66,6 @@ class PreciseShadowcasting extends FOV {
 
 		/* analyze surrounding cells in concentric rings, starting from the center */
 		for (let r=1; r<=R; r++) {
-			console.log(r);
 			let neighbors = this._getCircle(x, y, r);
 			let neighborCount = neighbors.length;
 

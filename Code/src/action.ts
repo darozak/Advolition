@@ -1,12 +1,12 @@
 class Action {
     
     time: number;
-    type: String;
-    params: any;
+    botID: number;
+    call: Call;
 
-    constructor(type: string, params: any, delay: number) {
-        this.type = type;
-        this.params = params;
-        this.time = delay;
+    constructor(botID: number, call: Call, time: number) {
+        this.botID = botID;
+        this.call = call;
+        this.time = time;
     }  
-}
+} 

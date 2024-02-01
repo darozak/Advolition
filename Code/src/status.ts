@@ -1,7 +1,5 @@
-/**
- * This class handles all the information about the hero character.
- */
-class Hero {
+
+class Status {
     time: number = 0;
     pos: Vector;
     targ: Vector;
@@ -9,13 +7,9 @@ class Hero {
     isScanning: boolean;
     scan: any;
 
-    /**
-     * Creates a hero for the given world size.
-     * @param worldSize 
-     */
-    constructor(world: World) {
+    constructor() {
         this.time = 0;
-        this.pos = new Vector(0,0); 
+        this.pos = new Vector(1,1); 
         this.targ = new Vector(0,0);
         this.scan = [];
         this.isMoving = false;
