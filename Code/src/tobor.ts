@@ -2,6 +2,7 @@ class Tobor extends Robot {
     state = "start";
 
     evaluate(world: World, status: Status, call: Call) {
+        console.log("My turn!")
 
         switch (this.state) {
             case "start":
@@ -10,10 +11,12 @@ class Tobor extends Robot {
                 this.state = "target";
                 return;
             case "target":
+                console.log("target state");
                 console.log(status.scan);
                 this.state = "end";
                 return;
             case "end":
+                console.log("end state");
                 return;
         }
     }

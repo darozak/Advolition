@@ -34,28 +34,35 @@ class Game {
     }
 
     run() {
+
+        // Cycle through the game loop until an end-game condition is met.
         while(this.time < 10) {
+
+            console.log(structuredClone(this.actions));
+
+            // Increment game time
             this.time ++;
 
-            // Request Actions
+            // Evaluate bots that don't have active actions
             for(var i = 0; i < this.bots.length; i++) {
-                var call = new Call();
-                this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
-                switch (call.params.command) {
-                    case "move":
-                        this.requestMove(i, call);
-                        break;
-                    case "scan":
-                        this.requestScan(i, call);
-                        break;
+                if(!this.actions.some(d =>d.botID == i)){
+                    var call = new Call();
+                    this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
+                    switch (call.params.command) {
+                        case "move":
+                            this.requestMove(i, call);
+                            break;
+                        case "scan":
+                            this.requestScan(i, call);
+                            break;
+                    }
                 }
-            
             }
 
-            // Evaluate Actions
+            // Resolve and remove any actions that are occuring now.
             if(this.actions.length > 0) {
                 this.actions.sort((a,b) => a.time - b.time);
-                if(this.actions[0].time <= this.time) {
+                while(this.actions[0].time <= this.time) {
                     switch (this.actions[0].call.params.command) {
                         case "move":
                             this.resolveMove(this.actions[0]);
@@ -65,6 +72,7 @@ class Game {
                             break;
                     }
                     this.actions.shift();
+                    if(this.actions.length == 0) break;
                 }
             }
         } 
@@ -76,7 +84,7 @@ class Game {
     }
 
     requestScan(botID: number, call: Call) {
-        var time = this.time + 0;
+        var time = this.time + 4;
         this.actions.push(new Action(botID, call, time));
     }
 
