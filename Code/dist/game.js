@@ -6,6 +6,7 @@ class Game {
     actions;
     bots;
     stats;
+    paper = new Paper();
     #direction = [
         new Vector(0, -1),
         new Vector(1, -1),
@@ -24,6 +25,8 @@ class Game {
         this.actions = [];
         this.arena = new Arena(world);
         this.arena.generate();
+        this.paper.drawTile(new Vector(10, 10), new Vector(1, 5));
+        this.paper.drawTile(new Vector(10, 10), new Vector(1, 6));
     }
     addBot(bot) {
         this.bots.push(bot);
