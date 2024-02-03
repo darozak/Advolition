@@ -1,75 +1,69 @@
 "use strict";
 class Game {
-    time;
+    gameTime;
     world;
     arena;
     actions;
     bots;
     stats;
-    paper = new Paper();
-    // #direction = [
-    //     new Vector(0,-1),
-    //     new Vector(1,-1),
-    //     new Vector(1,0),
-    //     new Vector(1,1),
-    //     new Vector(0,1),
-    //     new Vector(-1,1),
-    //     new Vector(-1,0),
-    //     new Vector(-1,-1)
-    // ]
+    paper;
+    sysTime = new Date();
     constructor(world) {
-        this.time = 0;
+        this.gameTime = 0;
         this.world = world;
         this.bots = [];
         this.stats = [];
         this.actions = [];
         this.arena = new Arena(world);
         this.arena.generate();
+        this.paper = new Paper();
     }
     addBot(bot) {
         this.bots.push(bot);
         this.stats.push(new Status(this.world));
     }
     run() {
-        // Cycle through the game loop until an end-game condition is met.
-        while (this.time < 20) {
-            console.log(structuredClone(this.actions));
-            // Increment game time
-            this.time++;
-            // Evaluate bots that don't have active actions
-            for (var i = 0; i < this.bots.length; i++) {
-                if (!this.actions.some(d => d.botID == i)) {
-                    var call = new Call();
-                    this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
-                    switch (call.params.command) {
-                        case "move":
-                            this.requestMove(i, call);
-                            break;
-                        case "scan":
-                            this.requestScan(i, call);
-                            break;
-                    }
-                }
-            }
-            // Resolve and remove any actions that are occuring now.
-            if (this.actions.length > 0) {
-                this.actions.sort((a, b) => a.time - b.time);
-                while (this.actions[0].time <= this.time) {
-                    switch (this.actions[0].call.params.command) {
-                        case "move":
-                            this.resolveMove(this.actions[0]);
-                            break;
-                        case "scan":
-                            this.resolveScan(this.actions[0]);
-                            break;
-                    }
-                    this.actions.shift();
-                    if (this.actions.length == 0)
+        // Increment game time
+        this.gameTime++;
+        // Evaluate bots that don't have active actions
+        for (var i = 0; i < this.bots.length; i++) {
+            if (!this.actions.some(d => d.botID == i)) {
+                var call = new Call();
+                this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
+                switch (call.params.command) {
+                    case "move":
+                        this.requestMove(i, call);
+                        break;
+                    case "scan":
+                        this.requestScan(i, call);
                         break;
                 }
             }
         }
+        // Resolve and remove any actions that are occuring now.
+        if (this.actions.length > 0) {
+            this.actions.sort((a, b) => a.time - b.time);
+            while (this.actions[0].time <= this.gameTime) {
+                switch (this.actions[0].call.params.command) {
+                    case "move":
+                        this.resolveMove(this.actions[0]);
+                        break;
+                    case "scan":
+                        this.resolveScan(this.actions[0]);
+                        break;
+                }
+                this.actions.shift();
+                if (this.actions.length == 0)
+                    break;
+            }
+        }
         this.renderArena(0);
+    }
+    wait(ms) {
+        var start = Date.now(), now = start;
+        while (now - start < ms) {
+            now = Date.now();
+        }
     }
     renderArena(robotID) {
         this.paper.erasePaper();
@@ -84,11 +78,11 @@ class Game {
         this.paper.drawTile(this.stats[robotID].sprite, this.stats[robotID].pos, 1);
     }
     requestMove(botID, call) {
-        var time = this.time + 2;
+        var time = this.gameTime + 2;
         this.actions.push(new Action(botID, call, time));
     }
     requestScan(botID, call) {
-        var time = this.time + 2;
+        var time = this.gameTime + 2;
         this.actions.push(new Action(botID, call, time));
     }
     resolveMove(action) {

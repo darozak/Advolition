@@ -1,5 +1,6 @@
 "use strict";
-console.log("This is main!");
 const game = new Game(gaia);
+// Load robots.
 game.addBot(new Tobor());
-game.run();
+// Game animation loop.
+var intervalID = setInterval(() => game.run(), 200);

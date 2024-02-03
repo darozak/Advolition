@@ -7,7 +7,8 @@ class Tobor extends Robot {
 
         switch (this.state) {
             case "start":
-                console.log("I am Tobor!");    
+                console.log("I am Tobor!");
+                call.scan(10);    
                 this.state = "move";
                 return;
             case "move":

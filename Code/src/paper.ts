@@ -5,19 +5,18 @@ class Paper {
     spriteTileSize = 10;
     renderTileSize = 40;
     image: CanvasImageSource;
+    ctx: CanvasRenderingContext2D;
 
     constructor() {
-
-        this.canvas = document.getElementById('canvas1') as HTMLCanvasElement;       
+        this.canvas = document.getElementById('canvas2') as HTMLCanvasElement;       
         this.image = document.getElementById('source') as HTMLCanvasElement;
-
         this.CANVAS_HEIGHT = this.canvas.height = 600;
         this.CANVAS_WIDTH = this.canvas.width = 600;
+        this.ctx = this.canvas.getContext('2d') as unknown as CanvasRenderingContext2D;
     }
 
-
+    
     drawTile(spriteCoord: Vector, gridCoord: Vector, alpha: number) {
-        
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;
         const sh = this.spriteTileSize;
@@ -33,9 +32,13 @@ class Paper {
     }
 
     erasePaper() {
-        const ctx = this.canvas.getContext('2d');
-        if(ctx) {
-            ctx.clearRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
-        }
+        this.ctx.fillStyle = "black";
+        this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
+    }
+
+    drawRect(x: number, y: number, xsize: number, ysize: number) {
+        console.log(x, y);
+        this.ctx.fillStyle = "green";
+        this.ctx.fillRect(x, y, xsize, ysize);
     }
 }
