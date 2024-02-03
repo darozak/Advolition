@@ -12,7 +12,7 @@ class Paper {
         this.CANVAS_HEIGHT = this.canvas.height = 600;
         this.CANVAS_WIDTH = this.canvas.width = 600;
     }
-    drawTile(spriteCoord, gridCoord) {
+    drawTile(spriteCoord, gridCoord, alpha) {
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;
         const sh = this.spriteTileSize;
@@ -21,6 +21,7 @@ class Paper {
         const ry = this.renderTileSize * gridCoord.y;
         const ctx = this.canvas.getContext('2d');
         if (ctx) {
+            ctx.globalAlpha = alpha;
             ctx.drawImage(this.image, sx, sy, sh, sw, rx, ry, this.renderTileSize, this.renderTileSize);
         }
     }

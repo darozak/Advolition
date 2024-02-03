@@ -16,7 +16,7 @@ class Paper {
     }
 
 
-    drawTile(spriteCoord: Vector, gridCoord: Vector) {
+    drawTile(spriteCoord: Vector, gridCoord: Vector, alpha: number) {
         
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;
@@ -27,6 +27,7 @@ class Paper {
 
         const ctx = this.canvas.getContext('2d');
         if(ctx){
+            ctx.globalAlpha = alpha;
             ctx.drawImage(this.image,sx,sy,sh,sw, rx, ry, this.renderTileSize, this.renderTileSize);
         }
     }

@@ -1,6 +1,7 @@
 interface Feature {
     name: string;
     key: string;
+    sprite: Vector;
     speed: number;
 }
 

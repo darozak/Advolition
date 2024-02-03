@@ -59,25 +59,28 @@ class Arena {
      */
     scan(pov, scanRadius) {
         var visible = this.fov.compute(pov.x, pov.y, scanRadius, this.mask);
-        var tiles = [];
-        var npcs = [];
-        var output = { tiles: tiles, npcs: npcs };
+        var scan = new Scan(this.world.size);
+        // var tiles: number[][] = []
+        // var npcs: number[][] = []
+        // var output = {tiles: tiles, npcs: npcs}
         for (var i = 0; i < this.world.size.x; i++) {
-            tiles[i] = [];
-            npcs[i] = [];
+            // this.scan.tiles[i] = [];
+            // npcs[i] = [];
             for (var j = 0; j < this.world.size.y; j++) {
                 if (visible[i][j] > 0) {
-                    tiles[i][j] = this.tiles[i][j];
-                    npcs[i][j] = this.npcs[i][j];
+                    scan.visible[i][j] = visible[i][j];
+                    scan.tiles[i][j] = this.tiles[i][j];
+                    scan.npcs[i][j] = this.npcs[i][j];
                 }
                 else {
-                    tiles[i][j] = -1;
-                    npcs[i][j] = -1;
+                    scan.visible[i][j] = 0;
+                    scan.tiles[i][j] = -1;
+                    scan.npcs[i][j] = -1;
                 }
             }
         }
         // console.log(output);
-        return output;
+        return scan;
     }
     get enter() { return this.world.entrance; }
     // Returns the index value of the object occupying location x, y.
