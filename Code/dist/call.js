@@ -4,14 +4,13 @@ class Call {
         command: "",
         power: 0,
         coord: new Vector(0, 0),
-        direction: 0,
     };
     constructor() {
     }
-    move(power, direction) {
+    move(power, destination) {
         this.#params.command = "move";
         this.#params.power = power;
-        this.#params.direction = direction;
+        this.#params.coord = destination;
     }
     scan(power) {
         this.#params.command = "scan";

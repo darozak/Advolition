@@ -7,16 +7,16 @@ class Game {
     stats: Status[];
     paper = new Paper();
 
-    #direction = [
-        new Vector(0,-1),
-        new Vector(1,-1),
-        new Vector(1,0),
-        new Vector(1,1),
-        new Vector(0,1),
-        new Vector(-1,1),
-        new Vector(-1,0),
-        new Vector(-1,-1)
-    ]
+    // #direction = [
+    //     new Vector(0,-1),
+    //     new Vector(1,-1),
+    //     new Vector(1,0),
+    //     new Vector(1,1),
+    //     new Vector(0,1),
+    //     new Vector(-1,1),
+    //     new Vector(-1,0),
+    //     new Vector(-1,-1)
+    // ]
 
     constructor(world: World) {
         this.time = 0;
@@ -27,8 +27,7 @@ class Game {
 
         this.arena = new Arena(world);
         this.arena.generate();
-
-    }
+    } 
 
     addBot(bot: Robot) {
         this.bots.push(bot);
@@ -38,7 +37,7 @@ class Game {
     run() {
 
         // Cycle through the game loop until an end-game condition is met.
-        while(this.time < 10) {
+        while(this.time < 20) {
 
             console.log(structuredClone(this.actions));
 
@@ -71,24 +70,19 @@ class Game {
                             break;
                         case "scan":
                             this.resolveScan(this.actions[0]);
-                            this.renderArena(0);
                             break;
                     }
                     this.actions.shift();
                     if(this.actions.length == 0) break;
                 }
-            }
-
-            
+            } 
         } 
-    }
-
-    requestMove(botID: number, call: Call) {
-        var time = this.time + 0;
-        this.actions.push(new Action(botID, call, time)); 
+        this.renderArena(0);
     }
 
     renderArena(robotID: number) {
+
+        this.paper.erasePaper();
 
         for(var i = 0; i < this.world.size.x; i++) {
             for(var j = 0; j < this.world.size.y; j++) {
@@ -106,13 +100,18 @@ class Game {
         
     }
 
+    requestMove(botID: number, call: Call) {
+        var time = this.time + 2;
+        this.actions.push(new Action(botID, call, time)); 
+    }
+
     requestScan(botID: number, call: Call) {
-        var time = this.time + 4;
+        var time = this.time + 2;
         this.actions.push(new Action(botID, call, time));
     }
 
     resolveMove(action: Action) {
-        var destination = this.stats[action.botID].pos.add(this.#direction[action.call.params.direction]);
+        var destination = this.stats[action.botID].pos.getPathTo(action.call.params.coord)[0];
         if (this.arena.getTileSpeed(destination) > 0) {
             this.stats[action.botID].pos = destination;
         }
