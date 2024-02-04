@@ -10,7 +10,14 @@ interface Race   {
     sprite: Vector;
     maxPower: number;
     maxHps: number;
-    move: number;
+    move: {
+        power: number[];
+        speed: number[];
+    };
+    scan: {
+        power: number[];
+        range: number[];
+    };
 }
 
 interface World {

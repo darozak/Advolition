@@ -170,12 +170,17 @@ class Game {
     }
 
     requestMove(botID: number, call: Call) { 
-        var time = this.gameTime + 2;
-        this.actions.push(new Action(botID, call, time)); 
+        this.stats[botID].currentPower -= this.stats[botID].race.move.power[call.params.power];
+        let time = this.stats[botID].race.move.speed[call.params.power];
+
+        this.actions.push(new Action(botID, call, time));     
     }
 
     requestScan(botID: number, call: Call) {
-        var time = this.gameTime + 2;
+        this.stats[botID].currentPower -= this.stats[botID].race.scan.power[call.params.power];
+        call.params.range = this.stats[botID].race.scan.range[call.params.power];
+        let time = 1;
+
         this.actions.push(new Action(botID, call, time));
     }
 
@@ -193,6 +198,8 @@ class Game {
     }
 
     resolveScan(action: Action) {
-        this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, 5);
+        let power = action.call.params.power;
+        let range = this.stats[action.botID].race.scan.range[power];
+        this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, range);
     }
 }

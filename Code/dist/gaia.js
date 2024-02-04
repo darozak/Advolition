@@ -51,14 +51,28 @@ const gaia = {
             sprite: new Vector(23, 35),
             maxPower: 100,
             maxHps: 100,
-            move: 10
+            move: {
+                power: [0, 1, 2],
+                speed: [3, 2, 1]
+            },
+            scan: {
+                power: [0, 1, 2],
+                range: [4, 6, 8]
+            }
         },
         {
             name: "Orc",
             sprite: new Vector(0, 0),
             maxPower: 80,
             maxHps: 80,
-            move: 8
+            move: {
+                power: [0, 1, 2],
+                speed: [3, 2, 1]
+            },
+            scan: {
+                power: [0, 1, 2],
+                range: [4, 6, 8]
+            }
         }
     ]
 };
