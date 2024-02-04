@@ -23,6 +23,7 @@ class Game {
         this.stats.push(new Status(this.world, name));
         let robotID = this.stats.length - 1;
         this.stats[robotID].pos = this.world.players[robotID].entrance;
+        this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;
         this.stats[robotID].sprite = this.world.players[robotID].sprite;
     }
     run() {
@@ -86,21 +87,42 @@ class Game {
         var y1 = this.stats[robotID].pos.y + mapRadius;
         for (var i = x0; i < x1; i++) {
             for (var j = y0; j < y1; j++) {
-                var tileID = -1;
+                var tileScanID = -1;
+                var robotScanID = -1;
                 if (i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
-                    tileID = this.stats[robotID].scan.tiles[i][j];
+                    tileScanID = this.stats[robotID].scan.tiles[i][j];
+                    robotScanID = this.stats[robotID].scan.robots[i][j];
                 }
-                if (tileID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.world.tiles[tileID].sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j]);
+                // Draw tile.
+                if (tileScanID >= 0) {
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.world.tiles[tileScanID].sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
+                }
+                // Draw robot.
+                if (robotScanID >= 0) {
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
                 }
             }
         }
-        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].sprite, new Vector(mapRadius, mapRadius), 1);
+        // Draw self in center of map.
+        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].sprite, new Vector(mapRadius, mapRadius), 1, true);
+        // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name);
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print());
+    }
+    updateRobotPositions() {
+        // Clear grid
+        for (var i = 0; i < this.world.size.x; i++) {
+            for (var j = 0; j < this.world.size.y; j++) {
+                this.arena.robots[i][j] = -1;
+            }
+        }
+        // Add robots
+        for (var i = 0; i < this.stats.length; i++) {
+            this.arena.robots[this.stats[i].pos.x][this.stats[i].pos.y] = i;
+        }
     }
     requestMove(botID, call) {
         var time = this.gameTime + 2;
@@ -113,6 +135,10 @@ class Game {
     resolveMove(action) {
         var destination = this.stats[action.botID].pos.getPathTo(action.call.params.coord)[0];
         if (this.arena.getTileSpeed(destination) > 0) {
+            // Change position in arena.
+            this.arena.robots[this.stats[action.botID].pos.x][this.stats[action.botID].pos.y] = -1;
+            this.arena.robots[destination.x][destination.y] = action.botID;
+            // Change position in stats.
             this.stats[action.botID].pos = destination;
         }
     }

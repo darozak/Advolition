@@ -16,7 +16,7 @@ class Paper {
     }
 
     
-    drawTile(leftFrame: number, topFrame: number, spriteCoord: Vector, gridCoord: Vector, alpha: number) {
+    drawTile(leftFrame: number, topFrame: number, spriteCoord: Vector, gridCoord: Vector, alpha: number, frame: boolean) {
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;
         const sh = this.spriteTileSize;
@@ -24,11 +24,13 @@ class Paper {
         const rx = this.renderTileSize * gridCoord.x + leftFrame;
         const ry = this.renderTileSize * gridCoord.y + topFrame;
 
-        const ctx = this.canvas.getContext('2d');
-        if(ctx){
-            ctx.globalAlpha = alpha;
-            ctx.drawImage(this.image,sx,sy,sh,sw, rx, ry, this.renderTileSize, this.renderTileSize);
+        if(frame) {
+            this.ctx.globalAlpha = 1.0;
+            this.ctx.fillStyle = 'green';
+            this.ctx.strokeRect(rx-2, ry-2, this.renderTileSize+4, this.renderTileSize+4);
         }
+        this.ctx.globalAlpha = alpha;
+        this.ctx.drawImage(this.image,sx,sy,sh,sw, rx, ry, this.renderTileSize, this.renderTileSize);
     }
 
     showStatus(centerFrame: number, topFrame: number, title: string, value: any) {

@@ -8,7 +8,7 @@ class Arena {
     mask;
     scans;
     tiles;
-    npcs;
+    robots;
     fov = new PreciseShadowcasting();
     /**
      * Creates a layerd map grid of the indicated size.
@@ -19,17 +19,17 @@ class Arena {
         this.mask = [];
         this.scans = [];
         this.tiles = [];
-        this.npcs = [];
+        this.robots = [];
         for (var i = 0; i < this.world.size.x; i++) {
             this.mask[i] = [];
             this.scans[i] = [];
             this.tiles[i] = [];
-            this.npcs[i] = [];
+            this.robots[i] = [];
             for (var j = 0; j < this.world.size.y; j++) {
                 this.mask[i][j] = false;
-                this.scans[i][j] = 0;
-                this.tiles[i][j] = 0;
-                this.npcs[i][j] = 0;
+                this.scans[i][j] = -1;
+                this.tiles[i][j] = -1;
+                this.robots[i][j] = -1;
             }
         }
     }
@@ -70,15 +70,17 @@ class Arena {
                 if (visible[i][j] > 0) {
                     scan.visible[i][j] = visible[i][j];
                     scan.tiles[i][j] = this.tiles[i][j];
-                    scan.npcs[i][j] = this.npcs[i][j];
+                    scan.robots[i][j] = this.robots[i][j];
                 }
                 else {
                     scan.visible[i][j] = 0;
                     scan.tiles[i][j] = -1;
-                    scan.npcs[i][j] = -1;
+                    scan.robots[i][j] = -1;
                 }
             }
         }
+        // Erase self from robot scan.
+        scan.robots[pov.x][pov.y] = -1;
         // console.log(output);
         return scan;
     }

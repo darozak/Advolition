@@ -14,18 +14,20 @@ class Paper {
         this.CANVAS_WIDTH = this.canvas.width = 1200;
         this.ctx = this.canvas.getContext('2d');
     }
-    drawTile(leftFrame, topFrame, spriteCoord, gridCoord, alpha) {
+    drawTile(leftFrame, topFrame, spriteCoord, gridCoord, alpha, frame) {
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;
         const sh = this.spriteTileSize;
         const sw = this.spriteTileSize;
         const rx = this.renderTileSize * gridCoord.x + leftFrame;
         const ry = this.renderTileSize * gridCoord.y + topFrame;
-        const ctx = this.canvas.getContext('2d');
-        if (ctx) {
-            ctx.globalAlpha = alpha;
-            ctx.drawImage(this.image, sx, sy, sh, sw, rx, ry, this.renderTileSize, this.renderTileSize);
+        if (frame) {
+            this.ctx.globalAlpha = 1.0;
+            this.ctx.fillStyle = 'green';
+            this.ctx.strokeRect(rx - 2, ry - 2, this.renderTileSize + 4, this.renderTileSize + 4);
         }
+        this.ctx.globalAlpha = alpha;
+        this.ctx.drawImage(this.image, sx, sy, sh, sw, rx, ry, this.renderTileSize, this.renderTileSize);
     }
     showStatus(centerFrame, topFrame, title, value) {
         this.ctx.font = '12px Arial';
