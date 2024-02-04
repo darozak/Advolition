@@ -1,6 +1,24 @@
 const gaia: World = {
     size: new Vector(10,10),
-    entrance: new Vector(1,1),
+    players: [
+        {
+            // sprite: new Vector(17,18),
+            sprite: new Vector(23,32),
+            entrance: new Vector(1,1)
+        },
+        {
+            sprite: new Vector(30,32),
+            entrance: new Vector(8,8)
+        },
+        {
+            sprite: new Vector(23,35),
+            entrance: new Vector(8,1)
+        },
+        {
+            sprite: new Vector(30,35),
+            entrance: new Vector(1,8)
+        }],
+
     sketch: [
         "##########",
         "#........#",

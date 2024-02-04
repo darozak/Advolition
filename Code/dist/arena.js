@@ -82,7 +82,7 @@ class Arena {
         // console.log(output);
         return scan;
     }
-    get enter() { return this.world.entrance; }
+    // get enter() {return this.world.entrances}
     // Returns the index value of the object occupying location x, y.
     getTileID(pos) {
         return this.world.tiles.findLastIndex(d => d.key === this.world.sketch[pos.x][pos.y]);

@@ -17,7 +17,7 @@ class PreciseShadowcasting extends FOV {
      * @returns
      */
     _lightPasses(x, y, mask) {
-        if (x >= 0 && x <= mask.length && y >= 0 && y <= mask[0].length) {
+        if (x >= 0 && x < mask.length && y >= 0 && y < mask[0].length) {
             return mask[x][y];
         }
         return false;

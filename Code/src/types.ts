@@ -5,13 +5,18 @@ interface Feature {
     speed: number;
 }
 
+interface Player {
+    sprite: Vector;
+    entrance: Vector;
+}
+
 interface NPC {
     name: string;
 }
 
 interface World {
     size: Vector;
-    entrance: Vector;
+    players: Player[];
     sketch: string[];
     tiles: Feature[];
     npcs: NPC[];

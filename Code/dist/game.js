@@ -18,9 +18,12 @@ class Game {
         this.arena.generate();
         this.paper = new Paper();
     }
-    addBot(bot) {
+    addBot(bot, name) {
         this.bots.push(bot);
-        this.stats.push(new Status(this.world));
+        this.stats.push(new Status(this.world, name));
+        let robotID = this.stats.length - 1;
+        this.stats[robotID].pos = this.world.players[robotID].entrance;
+        this.stats[robotID].sprite = this.world.players[robotID].sprite;
     }
     run() {
         // Increment game time
@@ -57,7 +60,10 @@ class Game {
                     break;
             }
         }
-        this.renderArena(0);
+        this.paper.erasePaper();
+        for (var i = 0; i < this.stats.length; i++) {
+            this.renderArena(i);
+        }
     }
     wait(ms) {
         var start = Date.now(), now = start;
@@ -66,7 +72,6 @@ class Game {
         }
     }
     renderArena(robotID) {
-        this.paper.erasePaper();
         for (var i = 0; i < this.world.size.x; i++) {
             for (var j = 0; j < this.world.size.y; j++) {
                 const tileID = this.stats[robotID].scan.tiles[i][j];

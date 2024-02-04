@@ -7,8 +7,10 @@ class Status {
     isScanning;
     scan;
     sprite;
-    constructor(world) {
+    name;
+    constructor(world, name) {
         this.world = world;
+        this.name = name;
         this.pos = new Vector(1, 1);
         this.targ = new Vector(0, 0);
         this.scan = new Scan(world.size);
