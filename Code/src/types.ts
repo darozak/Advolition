@@ -5,22 +5,19 @@ interface Feature {
     speed: number;
 }
 
-interface Player {
-    sprite: Vector;
-    entrance: Vector;
-}
-
-interface NPC {
+interface Race   {
     name: string;
+    sprite: Vector;
+    maxPower: number;
+    maxHps: number;
+    move: number;
 }
 
 interface World {
     size: Vector;
-    players: Player[];
+    // players: Player[];
     sketch: string[];
+    entrances: Vector[];
     tiles: Feature[];
-    npcs: NPC[];
+    races: Race[];
 }
-
-
-

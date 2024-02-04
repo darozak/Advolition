@@ -1,24 +1,11 @@
 "use strict";
 const gaia = {
     size: new Vector(10, 10),
-    players: [
-        {
-            // sprite: new Vector(17,18),
-            sprite: new Vector(23, 32),
-            entrance: new Vector(1, 1)
-        },
-        {
-            sprite: new Vector(30, 32),
-            entrance: new Vector(8, 8)
-        },
-        {
-            sprite: new Vector(23, 35),
-            entrance: new Vector(8, 1)
-        },
-        {
-            sprite: new Vector(30, 35),
-            entrance: new Vector(1, 8)
-        }
+    entrances: [
+        new Vector(1, 1),
+        new Vector(8, 8),
+        new Vector(8, 1),
+        new Vector(1, 8)
     ],
     sketch: [
         "##########",
@@ -58,12 +45,20 @@ const gaia = {
             speed: 0.0
         }
     ],
-    npcs: [
+    races: [
         {
-            name: "Orc",
+            name: "Humanoid",
+            sprite: new Vector(23, 35),
+            maxPower: 100,
+            maxHps: 100,
+            move: 10
         },
         {
-            name: "Dragon",
+            name: "Orc",
+            sprite: new Vector(0, 0),
+            maxPower: 80,
+            maxHps: 80,
+            move: 8
         }
     ]
 };

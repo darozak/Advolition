@@ -20,11 +20,9 @@ class Game {
     }
     addBot(bot, name) {
         this.bots.push(bot);
-        this.stats.push(new Status(this.world, name));
-        let robotID = this.stats.length - 1;
-        this.stats[robotID].pos = this.world.players[robotID].entrance;
+        let robotID = this.bots.length - 1;
+        this.stats.push(new Status(this.world, robotID, name));
         this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;
-        this.stats[robotID].sprite = this.world.players[robotID].sprite;
     }
     run() {
         // Increment game time
@@ -99,18 +97,24 @@ class Game {
                 }
                 // Draw robot.
                 if (robotScanID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].race.sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
                 }
             }
         }
         // Draw self in center of map.
-        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].sprite, new Vector(mapRadius, mapRadius), 1, true);
+        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].race.sprite, new Vector(mapRadius, mapRadius), 1, true);
         // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name);
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print());
+        topTextFrame += lineSpacing;
+        let hps = this.stats[robotID].currentHps + '/' + this.stats[robotID].race.maxHps;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps);
+        topTextFrame += lineSpacing;
+        let power = this.stats[robotID].currentPower + '/' + this.stats[robotID].race.maxPower;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power);
     }
     updateRobotPositions() {
         // Clear grid

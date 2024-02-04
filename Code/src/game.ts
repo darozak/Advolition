@@ -22,11 +22,9 @@ class Game {
 
     addBot(bot: Robot, name: string) {
         this.bots.push(bot);
-        this.stats.push(new Status(this.world, name));
-        let robotID = this.stats.length-1;
-        this.stats[robotID].pos = this.world.players[robotID].entrance;
-        this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;
-        this.stats[robotID].sprite = this.world.players[robotID].sprite;
+        let robotID = this.bots.length-1;
+        this.stats.push(new Status(this.world, robotID, name));
+        this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;  
     }
 
     run() {
@@ -122,7 +120,7 @@ class Game {
                     this.paper.drawTile(
                         leftMapFrame,
                         topMapFrame,
-                        this.stats[robotScanID].sprite,
+                        this.stats[robotScanID].race.sprite,
                         new Vector(i-x0, j-y0),
                         this.stats[robotID].scan.visible[i][j],
                         false);
@@ -134,7 +132,7 @@ class Game {
         this.paper.drawTile(
             leftMapFrame, 
             topMapFrame,
-            this.stats[robotID].sprite, 
+            this.stats[robotID].race.sprite, 
             new Vector(mapRadius, mapRadius), 
             1,
             true);
@@ -147,6 +145,14 @@ class Game {
 
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print());
+
+        topTextFrame += lineSpacing;
+        let hps: string = this.stats[robotID].currentHps + '/' + this.stats[robotID].race.maxHps;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps);
+
+        topTextFrame += lineSpacing;
+        let power: string = this.stats[robotID].currentPower + '/' + this.stats[robotID].race.maxPower;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power);
     }
 
     updateRobotPositions() {
