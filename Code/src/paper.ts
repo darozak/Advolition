@@ -16,13 +16,13 @@ class Paper {
     }
 
     
-    drawTile(spriteCoord: Vector, gridCoord: Vector, alpha: number) {
+    drawTile(leftFrame: number, topFrame: number, spriteCoord: Vector, gridCoord: Vector, alpha: number) {
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;
         const sh = this.spriteTileSize;
         const sw = this.spriteTileSize;
-        const rx = this.renderTileSize * gridCoord.x + 20;
-        const ry = this.renderTileSize * gridCoord.y + 20;
+        const rx = this.renderTileSize * gridCoord.x + leftFrame;
+        const ry = this.renderTileSize * gridCoord.y + topFrame;
 
         const ctx = this.canvas.getContext('2d');
         if(ctx){
@@ -34,11 +34,10 @@ class Paper {
     erasePaper() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
-    }
+    } 
 
-    drawRect(x: number, y: number, xsize: number, ysize: number) {
-        console.log(x, y);
-        this.ctx.fillStyle = "green";
-        this.ctx.fillRect(x, y, xsize, ysize);
+    drawFrame(x: number, y: number, xsize: number, ysize: number) {
+        this.ctx.strokeStyle = "green";
+        this.ctx.strokeRect(x, y, xsize, ysize);
     }
 }

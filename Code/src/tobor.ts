@@ -13,7 +13,7 @@ class Tobor extends Robot {
                 return;
             case "move":
                 console.log("move state");
-                // call.move(10, destination);
+                call.move(10, destination);
                 this.state = "scan";
                 return;
             case "scan":

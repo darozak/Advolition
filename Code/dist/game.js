@@ -62,7 +62,7 @@ class Game {
         }
         this.paper.erasePaper();
         for (var i = 0; i < this.stats.length; i++) {
-            this.renderArena(i);
+            this.displayRobotStats(i);
         }
     }
     wait(ms) {
@@ -71,16 +71,28 @@ class Game {
             now = Date.now();
         }
     }
-    renderArena(robotID) {
-        for (var i = 0; i < this.world.size.x; i++) {
-            for (var j = 0; j < this.world.size.y; j++) {
-                const tileID = this.stats[robotID].scan.tiles[i][j];
+    displayRobotStats(robotID) {
+        var mapRadius = 7;
+        var mapFrameSize = (mapRadius * 2 + 1) * 10;
+        var leftMapFrame = 10 + robotID * (mapFrameSize + 10);
+        var topMapFrame = 10;
+        var x0 = this.stats[robotID].pos.x - mapRadius;
+        var y0 = this.stats[robotID].pos.y - mapRadius;
+        var x1 = this.stats[robotID].pos.x + mapRadius;
+        var y1 = this.stats[robotID].pos.y + mapRadius;
+        for (var i = x0; i < x1; i++) {
+            for (var j = y0; j < y1; j++) {
+                var tileID = -1;
+                if (i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
+                    tileID = this.stats[robotID].scan.tiles[i][j];
+                }
                 if (tileID >= 0) {
-                    this.paper.drawTile(this.world.tiles[tileID].sprite, new Vector(i, j), this.stats[robotID].scan.visible[i][j]);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.world.tiles[tileID].sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j]);
                 }
             }
         }
-        this.paper.drawTile(this.stats[robotID].sprite, this.stats[robotID].pos, 1);
+        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].sprite, new Vector(mapRadius, mapRadius), 1);
+        this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
     }
     requestMove(botID, call) {
         var time = this.gameTime + 2;
