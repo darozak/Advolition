@@ -31,6 +31,18 @@ class Paper {
         }
     }
 
+    showStatus(centerFrame: number, topFrame: number, title: string, value: any) {
+        this.ctx.font = '12px Arial';
+
+        this.ctx.fillStyle = 'rgb(120,120,120)';
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText(title, centerFrame - 5, topFrame);
+
+        this.ctx.fillStyle = 'rgb(180,180,180)';
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(value, centerFrame + 5, topFrame);
+    }
+
     erasePaper() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);

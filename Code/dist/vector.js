@@ -6,6 +6,9 @@ class Vector {
         this.x = x;
         this.y = y;
     }
+    print() {
+        return '(' + this.x + ', ' + this.y + ')';
+    }
     add(vector) {
         return new Vector(this.x + vector.x, this.y + vector.y);
     }

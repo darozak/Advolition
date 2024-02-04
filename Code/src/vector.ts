@@ -7,6 +7,10 @@ class Vector {
         this.y = y;
     }
 
+    print(): string {
+        return '(' + this.x + ', ' + this.y + ')';
+    }
+
     add(vector: Vector) {
         return new Vector(this.x + vector.x, this.y + vector.y);
     }

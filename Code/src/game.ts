@@ -80,10 +80,14 @@ class Game {
     }
     
     displayRobotStats(robotID: number) {
+        var spriteWidth = 10;
         var mapRadius = 7;
-        var mapFrameSize = (mapRadius * 2 + 1) * 10;
+        var mapFrameSize = (mapRadius * 2 + 1) * spriteWidth;
         var leftMapFrame = 10 + robotID * (mapFrameSize + 10); 
         var topMapFrame = 10;
+        var centerTextFrame = mapFrameSize / 2 + leftMapFrame;
+        var topTextFrame = topMapFrame + mapFrameSize + 20;
+        var lineSpacing = 20;
         
         var x0 = this.stats[robotID].pos.x - mapRadius;
         var y0 = this.stats[robotID].pos.y - mapRadius;
@@ -113,7 +117,13 @@ class Game {
             this.stats[robotID].sprite, 
             new Vector(mapRadius, mapRadius), 
             1);
-        this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);     
+        this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);  
+        
+        // Display text
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name);
+
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print());
     }
 
     requestMove(botID: number, call: Call) { 
