@@ -170,18 +170,18 @@ class Game {
     }
 
     requestMove(botID: number, call: Call) { 
-        this.stats[botID].currentPower -= this.stats[botID].race.move.power[call.params.power];
-        let time = this.stats[botID].race.move.speed[call.params.power];
+        this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
+        let delay = this.stats[botID].core.speed(call.params.power);
 
-        this.actions.push(new Action(botID, call, time));     
+        this.actions.push(new Action(botID, call, delay + this.gameTime));     
     }
 
     requestScan(botID: number, call: Call) {
-        this.stats[botID].currentPower -= this.stats[botID].race.scan.power[call.params.power];
-        call.params.range = this.stats[botID].race.scan.range[call.params.power];
-        let time = 1;
+        this.stats[botID].currentPower -= this.stats[botID].scanner.power(call.params.power);
+        call.params.range = this.stats[botID].scanner.range(call.params.power);
+        let delay = this.stats[botID].core.speed(call.params.power);
 
-        this.actions.push(new Action(botID, call, time));
+        this.actions.push(new Action(botID, call, delay));
     }
 
     resolveMove(action: Action) {
@@ -198,8 +198,7 @@ class Game {
     }
 
     resolveScan(action: Action) {
-        let power = action.call.params.power;
-        let range = this.stats[action.botID].race.scan.range[power];
+        let range = this.stats[action.botID].scanner.range(action.call.params.power);
         this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, range);
     }
 }

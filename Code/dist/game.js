@@ -129,15 +129,15 @@ class Game {
         }
     }
     requestMove(botID, call) {
-        this.stats[botID].currentPower -= this.stats[botID].race.move.power[call.params.power];
-        let time = this.stats[botID].race.move.speed[call.params.power];
-        this.actions.push(new Action(botID, call, time));
+        this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
+        let delay = this.stats[botID].core.speed(call.params.power);
+        this.actions.push(new Action(botID, call, delay + this.gameTime));
     }
     requestScan(botID, call) {
-        this.stats[botID].currentPower -= this.stats[botID].race.scan.power[call.params.power];
-        call.params.range = this.stats[botID].race.scan.range[call.params.power];
-        let time = 1;
-        this.actions.push(new Action(botID, call, time));
+        this.stats[botID].currentPower -= this.stats[botID].scanner.power(call.params.power);
+        call.params.range = this.stats[botID].scanner.range(call.params.power);
+        let delay = this.stats[botID].core.speed(call.params.power);
+        this.actions.push(new Action(botID, call, delay));
     }
     resolveMove(action) {
         var destination = this.stats[action.botID].pos.getPathTo(action.call.params.coord)[0];
@@ -150,8 +150,7 @@ class Game {
         }
     }
     resolveScan(action) {
-        let power = action.call.params.power;
-        let range = this.stats[action.botID].race.scan.range[power];
+        let range = this.stats[action.botID].scanner.range(action.call.params.power);
         this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, range);
     }
 }

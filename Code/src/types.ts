@@ -10,19 +10,12 @@ interface Race   {
     sprite: Vector;
     maxPower: number;
     maxHps: number;
-    move: {
-        power: number[];
-        speed: number[];
-    };
-    scan: {
-        power: number[];
-        range: number[];
-    };
+    core: Core;
+    scanner: Scanner;
 }
 
 interface World {
     size: Vector;
-    // players: Player[];
     sketch: string[];
     entrances: Vector[];
     tiles: Feature[];

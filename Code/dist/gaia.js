@@ -51,28 +51,34 @@ const gaia = {
             sprite: new Vector(23, 35),
             maxPower: 100,
             maxHps: 100,
-            move: {
-                power: [0, 1, 2],
-                speed: [3, 2, 1]
-            },
-            scan: {
-                power: [0, 1, 2],
-                range: [4, 6, 8]
-            }
+            core: new Core('Selectronic', // Name
+            10, // Mass
+            [0, 1, 2], // Power
+            [3, 2, 1] // Speed
+            ),
+            scanner: new Scanner('Scantron', // Name
+            10, // Mass
+            [1, 2, 3], // Power 
+            [1, 1, 2], // Speed 
+            [3, 5, 7] // Range
+            )
         },
         {
             name: "Orc",
             sprite: new Vector(0, 0),
             maxPower: 80,
             maxHps: 80,
-            move: {
-                power: [0, 1, 2],
-                speed: [3, 2, 1]
-            },
-            scan: {
-                power: [0, 1, 2],
-                range: [4, 6, 8]
-            }
+            core: new Core('Selectronic', // Name
+            10, // Mass
+            [0, 1, 2], // Power
+            [3, 2, 1] // Speed
+            ),
+            scanner: new Scanner('Scantron', // Name
+            10, // Mass
+            [1, 2, 3], // Power 
+            [1, 1, 2], // Speed 
+            [3, 5, 7] // Range
+            )
         }
     ]
 };
