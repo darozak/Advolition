@@ -5,7 +5,7 @@ class Status {
     world: World;
     pos: Vector;
     scan: Scan; 
-    race: Race;
+    model: Model;
 
     currentPower: number;
     currentHps: number;
@@ -18,13 +18,13 @@ class Status {
         this.world = world;
         this.name = name;
         this.scan = new Scan(world.size);
-        this.race = world.races[0];
-        this.currentPower = this.race.maxPower;
-        this.currentHps = this.race.maxHps;
+        this.model = world.model[0];
+        this.currentPower = this.model.maxPower;
+        this.currentHps = this.model.maxHps;
         this.pos = world.entrances[robotID];
 
         // Equip race's equipment
-        this.scanner = this.race.scanner;
-        this.core = this.race.core;
+        this.scanner = this.model.scanner;
+        this.core = this.model.core;
     }
 }

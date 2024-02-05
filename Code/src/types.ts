@@ -5,7 +5,7 @@ interface Feature {
     speed: number;
 }
 
-interface Race   {
+interface Model   {
     name: string;
     sprite: Vector;
     maxPower: number;
@@ -19,5 +19,5 @@ interface World {
     sketch: string[];
     entrances: Vector[];
     tiles: Feature[];
-    races: Race[];
+    model: Model[];
 }

@@ -46,20 +46,20 @@ const gaia: World = {
             speed: 0.0
         }
     ],
-    races: [
+    model: [
         {
             name: "Humanoid",
             sprite: new Vector(23,35),
             maxPower: 100,
             maxHps: 100,
             core: new Core(
-                'Selectronic',  // Name
+                'Power Core',  // Name
                 10,             // Mass
                 [0, 1, 2],      // Power
                 [3, 2, 1]       // Speed
                 ),
             scanner: new Scanner(
-                'Scantron',     // Name
+                'Scantron 8000',     // Name
                 10,             // Mass
                 [1, 2, 3],      // Power 
                 [1, 1, 2],      // Speed 
@@ -72,13 +72,13 @@ const gaia: World = {
             maxPower: 80,
             maxHps: 80,
             core: new Core(
-                'Selectronic',  // Name
+                'Power Core',  // Name
                 10,             // Mass
                 [0, 1, 2],      // Power
                 [3, 2, 1]       // Speed
                 ),
             scanner: new Scanner(
-                'Scantron',     // Name
+                'Scantron 8000',     // Name
                 10,             // Mass
                 [1, 2, 3],      // Power 
                 [1, 1, 2],      // Speed 

@@ -97,24 +97,32 @@ class Game {
                 }
                 // Draw robot.
                 if (robotScanID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].race.sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].model.sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
                 }
             }
         }
         // Draw self in center of map.
-        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].race.sprite, new Vector(mapRadius, mapRadius), 1, true);
+        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].model.sprite, new Vector(mapRadius, mapRadius), 1, true);
         // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name);
         topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Model', this.stats[robotID].model.name);
+        topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print());
         topTextFrame += lineSpacing;
-        let hps = this.stats[robotID].currentHps + '/' + this.stats[robotID].race.maxHps;
+        let hps = this.stats[robotID].currentHps + '/' + this.stats[robotID].model.maxHps;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps);
         topTextFrame += lineSpacing;
-        let power = this.stats[robotID].currentPower + '/' + this.stats[robotID].race.maxPower;
+        let power = this.stats[robotID].currentPower + '/' + this.stats[robotID].model.maxPower;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power);
+        // List equipped equipment
+        topTextFrame += 30;
+        this.paper.drawCenteredList(centerTextFrame, topTextFrame, 'Equipped Items', [
+            this.stats[robotID].core.name,
+            this.stats[robotID].scanner.name
+        ]);
     }
     updateRobotPositions() {
         // Clear grid

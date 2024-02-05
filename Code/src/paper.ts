@@ -45,6 +45,20 @@ class Paper {
         this.ctx.fillText(value, centerFrame + 5, topFrame);
     }
 
+    drawCenteredList(centerFrame: number, topFrame: number, title: string, items: string[]) {
+        this.ctx.font = '12px Arial';
+
+        this.ctx.fillStyle = 'rgb(180,180,180)';
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(title, centerFrame, topFrame);
+
+        this.ctx.fillStyle = 'rgb(120,120,120)';
+        for(var i = 0; i < items.length; i ++) {
+            topFrame += 20;
+            this.ctx.fillText(items[i], centerFrame, topFrame);
+        }
+    }
+
     erasePaper() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
