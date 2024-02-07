@@ -8,6 +8,9 @@ class Game {
     paper: Paper;
     sysTime = new Date();
 
+    scannerListItem: AnimatedListItem[] = [];
+    coreListItem: AnimatedListItem[] = [];
+
     constructor(world: World) {
         this.gameTime = 0;
         this.world = world;
@@ -24,46 +27,52 @@ class Game {
         this.bots.push(bot);
         let robotID = this.bots.length-1;
         this.stats.push(new Status(this.world, robotID, name));
-        this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;  
+        this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID; 
+        
+        this.scannerListItem.push(new AnimatedListItem());
+        this.coreListItem.push(new AnimatedListItem());
     }
 
     run() {
         // Increment game time
         this.gameTime ++;
 
-        // Evaluate bots that don't have active actions
-        for(var i = 0; i < this.bots.length; i++) {
-            if(!this.actions.some(d =>d.botID == i)){
-                var call = new Call();
-                this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
-                switch (call.params.command) {
-                    case "move":
-                        this.requestMove(i, call);
-                        break;
-                    case "scan":
-                        this.requestScan(i, call);
-                        break;
+        // Every ten frames, evaluate the bots that don't have active actions
+        if(this.gameTime % 10 == 0) {
+            for(var i = 0; i < this.bots.length; i++) {
+                if(!this.actions.some(d =>d.botID == i)){
+                    var call = new Call();
+                    this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
+                    switch (call.params.command) {
+                        case "move":
+                            this.requestMove(i, call);
+                            break;
+                        case "scan":
+                            this.requestScan(i, call);
+                            break;
+                    }
                 }
             }
+
+            // Then resolve and remove any actions that are occuring now.
+            if(this.actions.length > 0) {
+                this.actions.sort((a,b) => a.time - b.time);
+                while(this.actions[0].time <= this.gameTime) {
+                    switch (this.actions[0].call.params.command) {
+                        case "move":
+                            this.resolveMove(this.actions[0]);
+                            break;
+                        case "scan":
+                            this.resolveScan(this.actions[0]);
+                            break;
+                    }
+                    this.actions.shift();
+                    if(this.actions.length == 0) break;
+                }
+            } 
         }
 
-        // Resolve and remove any actions that are occuring now.
-        if(this.actions.length > 0) {
-            this.actions.sort((a,b) => a.time - b.time);
-            while(this.actions[0].time <= this.gameTime) {
-                switch (this.actions[0].call.params.command) {
-                    case "move":
-                        this.resolveMove(this.actions[0]);
-                        break;
-                    case "scan":
-                        this.resolveScan(this.actions[0]);
-                        break;
-                }
-                this.actions.shift();
-                if(this.actions.length == 0) break;
-            }
-        } 
-
+        // Every frame, redraw the game window.
         this.paper.erasePaper();
         for(var i = 0; i < this.stats.length; i++) {
             this.displayRobotStats(i);
@@ -159,15 +168,11 @@ class Game {
 
         // List equipped equipment
         topTextFrame += 30;
-        this.paper.drawCenteredList(
-            centerTextFrame,
-            topTextFrame,
-            'Equipped Items', 
-            [
-                this.stats[robotID].core.name,
-                this.stats[robotID].scanner.name
-            ]
-        );
+        this.paper.drawListItem(centerTextFrame, topTextFrame,'Equipped', [180,180,180,100])
+        topTextFrame += lineSpacing;
+        this.scannerListItem[robotID].render(this.stats[robotID].scanner.name, this.paper, centerTextFrame, topTextFrame)
+        topTextFrame += lineSpacing;
+        this.coreListItem[robotID].render(this.stats[robotID].core.name, this.paper, centerTextFrame, topTextFrame)
     } 
 
     updateRobotPositions() {
@@ -188,7 +193,8 @@ class Game {
         this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
         let delay = this.stats[botID].core.speed(call.params.power);
 
-        this.actions.push(new Action(botID, call, delay + this.gameTime));     
+        this.actions.push(new Action(botID, call, delay + this.gameTime)); 
+        this.coreListItem[botID].activate();    
     }
 
     requestScan(botID: number, call: Call) {
@@ -197,6 +203,7 @@ class Game {
         let delay = this.stats[botID].core.speed(call.params.power);
 
         this.actions.push(new Action(botID, call, delay));
+        this.scannerListItem[botID].activate();
     }
 
     resolveMove(action: Action) {
@@ -209,11 +216,17 @@ class Game {
 
             // Change position in stats.
             this.stats[action.botID].pos = destination;
+            this.coreListItem[action.botID].deactivate();
+        } else {
+            // Take damage if you run into something.
+            // this.stats[action.botID].currentHps -= 2;
+            this.coreListItem[action.botID].deactivate();
         }
     }
 
     resolveScan(action: Action) {
         let range = this.stats[action.botID].scanner.range(action.call.params.power);
         this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, range);
+        this.scannerListItem[action.botID].deactivate();
     }
 }

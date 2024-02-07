@@ -49,6 +49,12 @@ class Paper {
             this.ctx.fillText(items[i], centerFrame, topFrame);
         }
     }
+    drawListItem(centerFrame, topFrame, name, rgba) {
+        this.ctx.font = '12px Arial';
+        this.ctx.fillStyle = this.rgbaStrringFromArray(rgba);
+        this.ctx.textAlign = 'center';
+        this.ctx.fillText(name, centerFrame, topFrame);
+    }
     erasePaper() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
@@ -56,5 +62,15 @@ class Paper {
     drawFrame(x, y, xsize, ysize) {
         this.ctx.strokeStyle = "green";
         this.ctx.strokeRect(x, y, xsize, ysize);
+    }
+    rgbStringFromArray(array) {
+        while (array.length < 3)
+            array.push(0);
+        return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
+    }
+    rgbaStrringFromArray(array) {
+        while (array.length < 4)
+            array.push(0);
+        return 'rgba(' + array[0] + ',' + array[1] + ',' + array[2] + ',' + array[3] + ')';
     }
 }
