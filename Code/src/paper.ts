@@ -33,14 +33,14 @@ class Paper {
         this.ctx.drawImage(this.image,sx,sy,sh,sw, rx, ry, this.renderTileSize, this.renderTileSize);
     }
 
-    showStatus(centerFrame: number, topFrame: number, title: string, value: any) {
+    showStatus(centerFrame: number, topFrame: number, title: string, value: any, valueRGB: number[]) {
         this.ctx.font = '12px Arial';
 
         this.ctx.fillStyle = 'rgb(120,120,120)';
         this.ctx.textAlign = 'right';
         this.ctx.fillText(title, centerFrame - 5, topFrame);
 
-        this.ctx.fillStyle = 'rgb(180,180,180)';
+        this.ctx.fillStyle = this.rgbStringFromArray(valueRGB);
         this.ctx.textAlign = 'left';
         this.ctx.fillText(value, centerFrame + 5, topFrame);
     }
@@ -61,7 +61,7 @@ class Paper {
 
     drawListItem(centerFrame: number, topFrame: number, name: string, rgba: number[]) {
         this.ctx.font = '12px Arial';
-        this.ctx.fillStyle = this.rgbaStrringFromArray(rgba);
+        this.ctx.fillStyle = this.rgbaStringFromArray(rgba);
         this.ctx.textAlign = 'center';
         this.ctx.fillText(name, centerFrame, topFrame);
     }
@@ -81,7 +81,7 @@ class Paper {
         return 'rgb(' + array[0] + ',' + array[1] + ',' + array[2] + ')';
     }
 
-    rgbaStrringFromArray(array: number[]) {
+    rgbaStringFromArray(array: number[]) {
         while(array.length < 4) array.push(0);
         return 'rgba(' + array[0] + ',' + array[1] + ',' + array[2] + ',' + array[3] + ')';
     }

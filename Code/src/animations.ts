@@ -5,8 +5,11 @@
  */
 class AnimatedObject {
     frame: number = 0;
+    paper: Paper;
 
-    constructor() {}
+    constructor(paper: Paper) {
+        this.paper = paper;
+    }
 
     rampBetween(initial: number[], final: number[], currentFrame: number, lastFrame: number) {
         
@@ -53,11 +56,10 @@ class AnimatedListItem extends AnimatedObject {
     /**
      * Renders the animated text object at the indicated location.
      * @param text The rendered text.
-     * @param paper The paper object that it is drawn with.
      * @param centerFrame The center of the text.
      * @param topFrame The top of the text.
      */
-    render(text: string, paper: Paper, centerFrame: number, topFrame: number) {
+    render(text: string, centerFrame: number, topFrame: number) {
         this.frame ++;
         var rgbaArray: number[];
 
@@ -77,7 +79,38 @@ class AnimatedListItem extends AnimatedObject {
             ) 
         }
 
-        paper.drawListItem(centerFrame, topFrame, text, rgbaArray);
+        this.paper.drawListItem(centerFrame, topFrame, text, rgbaArray);
+
+    }
+}
+
+class AnimatedStat extends AnimatedObject {
+    duration: number = 0;
+    label: string;
+
+    constructor(paper: Paper, label: string) {
+        super(paper);
+        this.label = label; 
+    }
+
+    flash(duration: number) {
+        this.frame = 0;
+        this.duration = duration;
+    }
+
+
+    render(value: any, centerFrame: number, topFrame: number) {
+        this.frame ++;
+        var rgbArray: number[];
+
+        rgbArray = this.rampBetween(
+            [180, 180, 180],
+            [51,110,156],
+            this.frame,
+            this.duration
+        ) 
+        
+        this.paper.showStatus(centerFrame, topFrame, this.label, value, rgbArray);
 
     }
 }

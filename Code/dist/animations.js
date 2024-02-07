@@ -6,7 +6,10 @@
  */
 class AnimatedObject {
     frame = 0;
-    constructor() { }
+    paper;
+    constructor(paper) {
+        this.paper = paper;
+    }
     rampBetween(initial, final, currentFrame, lastFrame) {
         // Equalize lengths of arrays.
         while (initial.length < final.length)
@@ -47,11 +50,10 @@ class AnimatedListItem extends AnimatedObject {
     /**
      * Renders the animated text object at the indicated location.
      * @param text The rendered text.
-     * @param paper The paper object that it is drawn with.
      * @param centerFrame The center of the text.
      * @param topFrame The top of the text.
      */
-    render(text, paper, centerFrame, topFrame) {
+    render(text, centerFrame, topFrame) {
         this.frame++;
         var rgbaArray;
         if (this.isActive) {
@@ -60,6 +62,24 @@ class AnimatedListItem extends AnimatedObject {
         else {
             rgbaArray = this.rampBetween([51, 110, 156, 100], [80, 80, 80, 100], this.frame, 6);
         }
-        paper.drawListItem(centerFrame, topFrame, text, rgbaArray);
+        this.paper.drawListItem(centerFrame, topFrame, text, rgbaArray);
+    }
+}
+class AnimatedStat extends AnimatedObject {
+    duration = 0;
+    label;
+    constructor(paper, label) {
+        super(paper);
+        this.label = label;
+    }
+    flash(duration) {
+        this.frame = 0;
+        this.duration = duration;
+    }
+    render(value, centerFrame, topFrame) {
+        this.frame++;
+        var rgbArray;
+        rgbArray = this.rampBetween([180, 180, 180], [51, 110, 156], this.frame, this.duration);
+        this.paper.showStatus(centerFrame, topFrame, this.label, value, rgbArray);
     }
 }

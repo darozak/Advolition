@@ -10,6 +10,7 @@ class Game {
     sysTime = new Date();
     scannerListItem = [];
     coreListItem = [];
+    powerDisplay = [];
     constructor(world) {
         this.gameTime = 0;
         this.world = world;
@@ -25,8 +26,9 @@ class Game {
         let robotID = this.bots.length - 1;
         this.stats.push(new Status(this.world, robotID, name));
         this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;
-        this.scannerListItem.push(new AnimatedListItem());
-        this.coreListItem.push(new AnimatedListItem());
+        this.scannerListItem.push(new AnimatedListItem(this.paper));
+        this.coreListItem.push(new AnimatedListItem(this.paper));
+        this.powerDisplay.push(new AnimatedStat(this.paper, "Power"));
     }
     run() {
         // Increment game time
@@ -113,24 +115,26 @@ class Game {
         // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name);
+        let statRGB = [180, 180, 180];
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Model', this.stats[robotID].model.name);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Model', this.stats[robotID].model.name, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print());
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print(), statRGB);
         topTextFrame += lineSpacing;
         let hps = this.stats[robotID].currentHps + '/' + this.stats[robotID].model.maxHps;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps, statRGB);
         topTextFrame += lineSpacing;
         let power = this.stats[robotID].currentPower + '/' + this.stats[robotID].model.maxPower;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power);
+        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, statRGB);
+        this.powerDisplay[robotID].render(power, centerTextFrame, topTextFrame);
         // List equipped equipment
         topTextFrame += 30;
         this.paper.drawListItem(centerTextFrame, topTextFrame, 'Equipped', [180, 180, 180, 100]);
         topTextFrame += lineSpacing;
-        this.scannerListItem[robotID].render(this.stats[robotID].scanner.name, this.paper, centerTextFrame, topTextFrame);
+        this.scannerListItem[robotID].render(this.stats[robotID].scanner.name, centerTextFrame, topTextFrame);
         topTextFrame += lineSpacing;
-        this.coreListItem[robotID].render(this.stats[robotID].core.name, this.paper, centerTextFrame, topTextFrame);
+        this.coreListItem[robotID].render(this.stats[robotID].core.name, centerTextFrame, topTextFrame);
     }
     updateRobotPositions() {
         // Clear grid
@@ -145,7 +149,10 @@ class Game {
         }
     }
     requestMove(botID, call) {
+        // Reduce power.
         this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
+        this.powerDisplay[botID].flash(10);
+        // Set time delay.
         let delay = this.stats[botID].core.speed(call.params.power);
         this.actions.push(new Action(botID, call, delay + this.gameTime));
         this.coreListItem[botID].activate();
