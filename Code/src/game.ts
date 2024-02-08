@@ -158,7 +158,7 @@ class Game {
         this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps, statRGB);
 
         topTextFrame += lineSpacing;
-        let power: string = this.stats[robotID].currentPower + '/' + this.stats[robotID].model.maxPower;
+        let power: string = this.stats[robotID].battery.power + '/' + this.stats[robotID].battery.maxPower;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].currentValue());
 
         // List equipped equipment
@@ -179,6 +179,14 @@ class Game {
             this.stats[robotID].core.name,
             this.coreColor[robotID].currentValue()
             );
+
+        topTextFrame += lineSpacing;
+        this.paper.drawListItem(
+            centerTextFrame, 
+            topTextFrame, 
+            this.stats[robotID].battery.name,
+            [80, 80, 80]
+            );
     } 
 
     updateRobotPositions() {
@@ -196,33 +204,36 @@ class Game {
     }
 
     requestMove(botID: number, call: Call) { 
-        // Reduce power.
-        this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
+        if(this.stats[botID].battery.usePower(this.stats[botID].core.power(call.params.power))) {
+            // Reduce power.
+            // this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
 
-        // Set time delay.
-        let delay = this.stats[botID].core.speed(call.params.power);
+            // Set time delay.
+            let delay = this.stats[botID].core.speed(call.params.power);
 
-        this.actions.push(new Action(botID, call, delay + this.gameTime));   
-        
-        this.coreColor[botID].rampUp();
-        this.powerColor[botID].rampUp();
+            this.actions.push(new Action(botID, call, delay + this.gameTime));   
+            
+            this.coreColor[botID].rampUp();
+            this.powerColor[botID].rampUp();
+        }
     }
 
     requestScan(botID: number, call: Call) {
-        this.stats[botID].currentPower -= this.stats[botID].scanner.power(call.params.power);
-        call.params.range = this.stats[botID].scanner.range(call.params.power);
-        let delay = this.stats[botID].core.speed(call.params.power);
+        if(this.stats[botID].battery.usePower(this.stats[botID].scanner.power(call.params.power))) {
+            // this.stats[botID].currentPower -= this.stats[botID].scanner.power(call.params.power);
+            call.params.range = this.stats[botID].scanner.range(call.params.power);
+            let delay = this.stats[botID].core.speed(call.params.power);
 
-        this.actions.push(new Action(botID, call, delay));
+            this.actions.push(new Action(botID, call, delay));
 
-        this.scannerColor[botID].rampUp();
-        this.powerColor[botID].rampUp();
+            this.scannerColor[botID].rampUp();
+            this.powerColor[botID].rampUp();
+        }
     }
 
     resolveMove(action: Action) {
         var destination = this.stats[action.botID].pos.getPathTo(action.call.params.coord)[0];
         if (this.arena.getTileSpeed(destination) > 0) {
-
             // Change position in arena.
             this.arena.robots[this.stats[action.botID].pos.x][this.stats[action.botID].pos.y] = -1;
             this.arena.robots[destination.x][destination.y] = action.botID;
@@ -239,8 +250,10 @@ class Game {
     }
 
     resolveScan(action: Action) {
+        
         let range = this.stats[action.botID].scanner.range(action.call.params.power);
         this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, range);
+        
 
         this.scannerColor[action.botID].rampDown();
         this.powerColor[action.botID].rampDown();

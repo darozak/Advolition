@@ -61,7 +61,8 @@ const gaia = {
             [1, 2, 3], // Power 
             [1, 1, 2], // Speed 
             [3, 5, 7] // Range
-            )
+            ),
+            battery: new Battery('Power Cell', 10, 110)
         },
         {
             name: "Orc",
@@ -78,7 +79,8 @@ const gaia = {
             [1, 2, 3], // Power 
             [1, 1, 2], // Speed 
             [3, 5, 7] // Range
-            )
+            ),
+            battery: new Battery('Power Cell', 10, 110)
         }
     ]
 };

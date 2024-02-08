@@ -12,6 +12,7 @@ interface Model   {
     maxHps: number;
     core: Core;
     scanner: Scanner;
+    battery: Battery;
 }
 
 interface World {

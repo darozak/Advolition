@@ -7,24 +7,24 @@ class Status {
     scan: Scan; 
     model: Model;
 
-    currentPower: number;
     currentHps: number;
 
     // Equipped eqipment
     core: Core;
     scanner: Scanner;
+    battery: Battery;
 
     constructor(world: World, robotID: number, name: string) {
         this.world = world;
         this.name = name;
         this.scan = new Scan(world.size);
-        this.model = world.model[0];
-        this.currentPower = this.model.maxPower;
+        this.model = this.world.model[0];
         this.currentHps = this.model.maxHps;
         this.pos = world.entrances[robotID];
 
-        // Equip race's equipment
-        this.scanner = this.model.scanner;
+        // Equip model's equipment
+        this.scanner = this.model.scanner;      
         this.core = this.model.core;
+        this.battery = this.model.battery.clone();
     }
 }
