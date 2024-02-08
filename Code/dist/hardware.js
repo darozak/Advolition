@@ -143,12 +143,14 @@ class Battery {
 }
 class Chassis {
     #name;
+    #sprite;
     #mass = 0;
     #type;
     #currentHPs;
     #maxHPs;
-    constructor(name, mass, maxHPS) {
+    constructor(name, sprite, mass, maxHPS) {
         this.#name = name;
+        this.#sprite = sprite;
         this.#type = "chassis";
         this.#mass = mass;
         this.#maxHPs = maxHPS;
@@ -156,7 +158,7 @@ class Chassis {
     }
     clone() {
         // Required to copy private variables.
-        return new Chassis(this.#name, this.#mass, this.#maxHPs);
+        return new Chassis(this.#name, this.#sprite, this.#mass, this.#maxHPs);
     }
     takeDamage(amount) {
         if (amount <= this.#currentHPs) {
@@ -170,6 +172,9 @@ class Chassis {
     }
     isAlive() {
         return this.#currentHPs > 0;
+    }
+    get sprite() {
+        return this.#sprite;
     }
     get HPs() {
         return this.#currentHPs;

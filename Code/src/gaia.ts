@@ -49,9 +49,8 @@ const gaia: World = {
     model: [
         {
             name: "Humanoid",
-            sprite: new Vector(23,35),
-            maxPower: 100,
-            maxHps: 100,
+            // sprite: new Vector(23,35),
+            // maxHps: 100,
             core: new Core(
                 'Power Core',  // Name
                 10,             // Mass
@@ -65,13 +64,13 @@ const gaia: World = {
                 [1, 1, 2],      // Speed 
                 [3, 5, 7]       // Range
                 ),
-            battery: new Battery('Power Cell', 10, 110)
+            battery: new Battery('Power Cell', 10, 110),
+            chassis: new Chassis('Humanoid', new Vector(23,35), 100, 100)
         },
         {
             name: "Orc",
-            sprite: new Vector(0, 0),
-            maxPower: 80,
-            maxHps: 80,
+            // sprite: new Vector(0, 0),
+            // maxHps: 80,
             core: new Core(
                 'Power Core',  // Name
                 10,             // Mass
@@ -85,7 +84,8 @@ const gaia: World = {
                 [1, 1, 2],      // Speed 
                 [3, 5, 7]       // Range
                 ),
-            battery: new Battery('Power Cell', 10, 110)   
+            battery: new Battery('Power Cell', 10, 110),
+            chassis: new Chassis('Humanoid', new Vector(23,35), 100, 100)
         }
     ]
 };

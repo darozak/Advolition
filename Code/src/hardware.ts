@@ -147,3 +147,64 @@ class Battery {
         return this.#name;
     }
 }
+
+class Chassis {
+    #name: string;
+    #sprite: Vector;
+    #mass: number = 0;
+    #type: string;
+    #currentHPs: number;
+    #maxHPs: number;
+
+    constructor(name: string, sprite: Vector, mass:number, maxHPS: number) {
+        this.#name = name;
+        this.#sprite = sprite;
+        this.#type = "chassis";
+        this.#mass = mass;
+        this.#maxHPs = maxHPS;
+        this.#currentHPs = maxHPS;
+    }
+
+    clone() {
+        // Required to copy private variables.
+        return new Chassis(this.#name, this.#sprite, this.#mass, this.#maxHPs); 
+    }
+
+    takeDamage(amount: number) {
+        if(amount <= this.#currentHPs) {
+            this.#currentHPs -= amount;
+            return true;
+        } else {
+            this.#currentHPs = 0;
+            return false;
+        }
+    }
+
+    isAlive() {
+        return this.#currentHPs > 0;
+    }
+
+    get sprite() {
+        return this.#sprite;
+    }
+  
+    get HPs() {
+        return this.#currentHPs;
+    }
+
+    get maxHPs() {
+        return this.#maxHPs;
+    }
+
+    get mass() {
+        return this.#mass;
+    }
+
+    get type() {
+        return this.#type;
+    }
+
+    get name() {
+        return this.#name;
+    }
+}

@@ -7,12 +7,12 @@ interface Feature {
 
 interface Model   {
     name: string;
-    sprite: Vector;
-    maxPower: number;
-    maxHps: number;
+    // sprite: Vector;
+    // maxHps: number;
     core: Core;
     scanner: Scanner;
     battery: Battery;
+    chassis: Chassis;
 }
 
 interface World {

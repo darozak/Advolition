@@ -36,7 +36,7 @@ class Game {
         // Every ten frames, evaluate the bots that don't have active actions
         if (this.gameTime % 10 == 0) {
             for (var i = 0; i < this.bots.length; i++) {
-                if (!this.actions.some(d => d.botID == i)) {
+                if (this.stats[i].chassis.isAlive() && !this.actions.some(d => d.botID == i)) {
                     var call = new Call();
                     this.bots[i].evaluate(this.world, structuredClone(this.stats[i]), call);
                     switch (call.params.command) {
@@ -100,23 +100,23 @@ class Game {
                 }
                 // Draw robot.
                 if (robotScanID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].model.sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotScanID].chassis.sprite, new Vector(i - x0, j - y0), this.stats[robotID].scan.visible[i][j], false);
                 }
             }
         }
         // Draw self in center of map.
-        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].model.sprite, new Vector(mapRadius, mapRadius), 1, true);
+        this.paper.drawTile(leftMapFrame, topMapFrame, this.stats[robotID].chassis.sprite, new Vector(mapRadius, mapRadius), 1, true);
         // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         let statRGB = [180, 180, 180];
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Model', this.stats[robotID].model.name, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.stats[robotID].chassis.name, statRGB);
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print(), statRGB);
         topTextFrame += lineSpacing;
-        let hps = this.stats[robotID].currentHps + '/' + this.stats[robotID].model.maxHps;
+        let hps = this.stats[robotID].chassis.HPs + '/' + this.stats[robotID].chassis.maxHPs;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps, statRGB);
         topTextFrame += lineSpacing;
         let power = this.stats[robotID].battery.power + '/' + this.stats[robotID].battery.maxPower;
@@ -175,7 +175,7 @@ class Game {
         }
         else {
             // Take damage if you run into something.
-            // this.stats[action.botID].currentHps -= 2;
+            this.stats[action.botID].chassis.takeDamage(10);
         }
         this.coreColor[action.botID].rampDown();
         this.powerColor[action.botID].rampDown();
