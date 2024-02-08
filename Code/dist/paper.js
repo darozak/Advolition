@@ -38,20 +38,9 @@ class Paper {
         this.ctx.textAlign = 'left';
         this.ctx.fillText(value, centerFrame + 5, topFrame);
     }
-    drawCenteredList(centerFrame, topFrame, title, items) {
+    drawListItem(centerFrame, topFrame, name, rgb) {
         this.ctx.font = '12px Arial';
-        this.ctx.fillStyle = 'rgb(180,180,180)';
-        this.ctx.textAlign = 'center';
-        this.ctx.fillText(title, centerFrame, topFrame);
-        this.ctx.fillStyle = 'rgb(120,120,120)';
-        for (var i = 0; i < items.length; i++) {
-            topFrame += 20;
-            this.ctx.fillText(items[i], centerFrame, topFrame);
-        }
-    }
-    drawListItem(centerFrame, topFrame, name, rgba) {
-        this.ctx.font = '12px Arial';
-        this.ctx.fillStyle = this.rgbaStringFromArray(rgba);
+        this.ctx.fillStyle = this.rgbStringFromArray(rgb);
         this.ctx.textAlign = 'center';
         this.ctx.fillText(name, centerFrame, topFrame);
     }

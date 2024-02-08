@@ -7,4 +7,4 @@ game.addBot(new Tobor(), "Delta");
 game.addBot(new Tobor(), "Gamma");
 
 // Game animation loop. The interval sets that animation frame rate in ms.
-var intervalID = setInterval(()=>game.run(), 50);
+var intervalID = setInterval(()=>game.run(), 100);

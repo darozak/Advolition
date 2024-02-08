@@ -24,7 +24,8 @@ class Tobor extends Robot {
                 return;
             case "end":
                 console.log("end state");
-                call.move(0, destination);
+                // call.move(0, destination);
+                call.scan(2);
                 return;
         }
     }
