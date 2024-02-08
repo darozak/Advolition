@@ -5,7 +5,6 @@ class Status {
     pos;
     scan;
     model;
-    // currentPower: number;
     currentHps;
     // Equipped eqipment
     core;
@@ -16,7 +15,6 @@ class Status {
         this.name = name;
         this.scan = new Scan(world.size);
         this.model = this.world.model[0];
-        // this.currentPower = this.model.maxPower;
         this.currentHps = this.model.maxHps;
         this.pos = world.entrances[robotID];
         // Equip model's equipment
