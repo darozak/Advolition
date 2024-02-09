@@ -48,8 +48,6 @@ const gaia = {
     model: [
         {
             name: "Humanoid",
-            // sprite: new Vector(23,35),
-            // maxHps: 100,
             core: new Core('Power Core', // Name
             10, // Mass
             [0, 1, 2], // Power
@@ -66,8 +64,6 @@ const gaia = {
         },
         {
             name: "Orc",
-            // sprite: new Vector(0, 0),
-            // maxHps: 80,
             core: new Core('Power Core', // Name
             10, // Mass
             [0, 1, 2], // Power

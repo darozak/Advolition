@@ -7,8 +7,6 @@ class Status {
     scan: Scan; 
     model: Model;
 
-    // currentHps: number;
-
     // Equipped eqipment
     core: Core;
     scanner: Scanner;
@@ -20,7 +18,6 @@ class Status {
         this.name = name;
         this.scan = new Scan(world.size);
         this.model = this.world.model[0];
-        // this.currentHps = this.model.maxHps;
         this.pos = world.entrances[robotID];
 
         // Equip model's equipment

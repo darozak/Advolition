@@ -3,20 +3,20 @@ class Game {
     gameTime;
     world;
     arena;
-    actions;
-    bots;
-    stats;
+    actions = [];
+    bots = [];
+    stats = [];
     paper;
     sysTime = new Date();
     powerColor = [];
+    hpsColor = [];
+    chassisColor = [];
     coreColor = [];
     scannerColor = [];
+    batteryColor = [];
     constructor(world) {
         this.gameTime = 0;
         this.world = world;
-        this.bots = [];
-        this.stats = [];
-        this.actions = [];
         this.arena = new Arena(world);
         this.arena.generate();
         this.paper = new Paper();
@@ -26,9 +26,12 @@ class Game {
         let robotID = this.bots.length - 1;
         this.stats.push(new Status(this.world, robotID, name));
         this.arena.robots[this.stats[robotID].pos.x][this.stats[robotID].pos.y] = robotID;
-        this.powerColor.push(new RampedArray([80, 80, 80], [51, 110, 156], 6));
-        this.coreColor.push(new RampedArray([80, 80, 80], [51, 110, 156], 6));
-        this.scannerColor.push(new RampedArray([80, 80, 80], [51, 110, 156], 6));
+        this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
+        this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
+        this.chassisColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
+        this.coreColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
+        this.scannerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
+        this.batteryColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
     }
     run() {
         // Increment game time
@@ -112,24 +115,24 @@ class Game {
         let statRGB = [180, 180, 180];
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.stats[robotID].name, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.stats[robotID].chassis.name, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.stats[robotID].chassis.name, this.chassisColor[robotID].value());
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.stats[robotID].pos.print(), statRGB);
         topTextFrame += lineSpacing;
         let hps = this.stats[robotID].chassis.HPs + '/' + this.stats[robotID].chassis.maxHPs;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPS', hps, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
         topTextFrame += lineSpacing;
         let power = this.stats[robotID].battery.power + '/' + this.stats[robotID].battery.maxPower;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].currentValue());
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
         // List equipped equipment
         topTextFrame += 30;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Equipped', [180, 180, 180, 100]);
+        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Equipped', [120, 120, 120, 100]);
         topTextFrame += lineSpacing;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, this.stats[robotID].scanner.name, this.scannerColor[robotID].currentValue());
+        this.paper.drawListItem(centerTextFrame, topTextFrame, this.stats[robotID].scanner.name, this.scannerColor[robotID].value());
         topTextFrame += lineSpacing;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, this.stats[robotID].core.name, this.coreColor[robotID].currentValue());
+        this.paper.drawListItem(centerTextFrame, topTextFrame, this.stats[robotID].core.name, this.coreColor[robotID].value());
         topTextFrame += lineSpacing;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, this.stats[robotID].battery.name, [80, 80, 80]);
+        this.paper.drawListItem(centerTextFrame, topTextFrame, this.stats[robotID].battery.name, this.batteryColor[robotID].value());
     }
     updateRobotPositions() {
         // Clear grid
@@ -145,23 +148,22 @@ class Game {
     }
     requestMove(botID, call) {
         if (this.stats[botID].battery.usePower(this.stats[botID].core.power(call.params.power))) {
-            // Reduce power.
-            // this.stats[botID].currentPower -= this.stats[botID].core.power(call.params.power);
             // Set time delay.
             let delay = this.stats[botID].core.speed(call.params.power);
             this.actions.push(new Action(botID, call, delay + this.gameTime));
-            this.coreColor[botID].rampUp();
-            this.powerColor[botID].rampUp();
+            this.coreColor[botID].activate();
+            this.batteryColor[botID].activate();
+            this.powerColor[botID].activate();
         }
     }
     requestScan(botID, call) {
         if (this.stats[botID].battery.usePower(this.stats[botID].scanner.power(call.params.power))) {
-            // this.stats[botID].currentPower -= this.stats[botID].scanner.power(call.params.power);
             call.params.range = this.stats[botID].scanner.range(call.params.power);
             let delay = this.stats[botID].core.speed(call.params.power);
             this.actions.push(new Action(botID, call, delay));
-            this.scannerColor[botID].rampUp();
-            this.powerColor[botID].rampUp();
+            this.scannerColor[botID].activate();
+            this.batteryColor[botID].activate();
+            this.powerColor[botID].activate();
         }
     }
     resolveMove(action) {
@@ -176,14 +178,18 @@ class Game {
         else {
             // Take damage if you run into something.
             this.stats[action.botID].chassis.takeDamage(10);
+            this.hpsColor[action.botID].pulse();
+            this.chassisColor[action.botID].pulse();
         }
-        this.coreColor[action.botID].rampDown();
-        this.powerColor[action.botID].rampDown();
+        this.coreColor[action.botID].deactivate();
+        this.batteryColor[action.botID].deactivate();
+        this.powerColor[action.botID].deactivate();
     }
     resolveScan(action) {
         let range = this.stats[action.botID].scanner.range(action.call.params.power);
         this.stats[action.botID].scan = this.arena.scan(this.stats[action.botID].pos, range);
-        this.scannerColor[action.botID].rampDown();
-        this.powerColor[action.botID].rampDown();
+        this.scannerColor[action.botID].deactivate();
+        this.batteryColor[action.botID].deactivate();
+        this.powerColor[action.botID].deactivate();
     }
 }

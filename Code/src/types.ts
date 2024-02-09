@@ -7,8 +7,6 @@ interface Feature {
 
 interface Model   {
     name: string;
-    // sprite: Vector;
-    // maxHps: number;
     core: Core;
     scanner: Scanner;
     battery: Battery;

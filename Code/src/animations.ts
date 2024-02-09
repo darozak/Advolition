@@ -3,43 +3,61 @@
  * of animation frames.
  */
 class RampedArray {
-    currentFrame: number = 0;
-    lastFrame: number;
-    firstArray: number[];
-    secondArray: number[];    
-    isRampingUp: boolean = true;
+    currentFrame: number;
+    pulsePattern: number[] = [];
+    endPoint: number[] = [];
+
+    restingArray: number[];
+    activatedArray: number[];    
+    hold: boolean = false;
 
     /**
      * Creats an object to track the transition from one array to another over a number
      * of animation frames.
-     * @param firstArray The starting array.
-     * @param secondArray The ending array.
-     * @param frameCount The number of animation frames over which the first array will
-     * transform into the second array.
+     * @param restingArray The array when in a resting state.
+     * @param activatedArray The array when in an acivated state.
+     * @param pulsePattern A three number array that indicates the number of frames that
+     * are spent ramping up to the activated array, holding there, and then ramping down
+     * to the resting array.
      */
-    constructor(firstArray: number[], secondArray: number[], frameCount: number) {
-        this.firstArray = firstArray;
-        this.secondArray = secondArray;
-        this.lastFrame = frameCount;
+    constructor(restingArray: number[], activatedArray: number[], pulsePattern: number[]) {
+        this.restingArray = restingArray;
+        this.activatedArray = activatedArray;
+
+        this.pulsePattern = pulsePattern;
+        while(this.pulsePattern.length < 3) this.pulsePattern.push(0);
+
+        this.endPoint[0] = this.pulsePattern[0];
+        this.endPoint[1] = this.endPoint[0] + this.pulsePattern[1];
+        this.endPoint[2] = this.endPoint[1] + this.pulsePattern[2];
+
+        this.currentFrame = this.endPoint[2];
 
         // Equalize lengths of arrays.
-        while (this.firstArray.length < this.secondArray.length) this.firstArray.push(0);
-        while (this.secondArray.length < this.firstArray.length) this.secondArray.push(0);
+        while (this.restingArray.length < this.activatedArray.length) this.restingArray.push(0);
+        while (this.activatedArray.length < this.restingArray.length) this.activatedArray.push(0);
     }
 
     /**
-     * Tells the object to start a transition from the first array up to the second array.
+     * Tells the object to start a transition from the resting array up to the activated array.
      */
-    rampUp() {
-        this.isRampingUp = true;
+    activate() {
+        this.hold = true;
         this.currentFrame = 0;
     }
 
     /**
-     * Tells the object to start a transition from the second array down to the first array.
+     * Tells the object to start a transition from the activated array down to the resting array.
      */
-    rampDown() {
-        this.isRampingUp = false;
+    deactivate() {
+        this.hold = false;
+    }
+
+    /**
+     * Tells the object to transition to an activated state and back without pausing.
+     */
+    pulse() {
+        this.hold = false;
         this.currentFrame = 0;
     }
 
@@ -47,23 +65,26 @@ class RampedArray {
      * Returns the current value of the array in the animation sequence.
      * @returns The current value of the array in the animation sequence.
      */
-    currentValue() {
+    value() {
         var output: number[] = [];
         this.currentFrame ++;
-        
-        // Hold on last frame.
-        if(this.currentFrame > this.lastFrame) this.currentFrame = this.lastFrame;
 
         // Smoothly transition between the two arrays.
-        if(this.isRampingUp) {
-            for(var i = 0; i < this.firstArray.length; i++) {
-                output[i] = this.firstArray[i] + Math.round((this.secondArray[i]-this.firstArray[i]) * this.currentFrame / this.lastFrame);
+        if(this.currentFrame < this.endPoint[0]) {
+            for(var i = 0; i < this.restingArray.length; i++) {
+                output[i] = this.restingArray[i] + Math.round((this.activatedArray[i]-this.restingArray[i]) * this.currentFrame / this.endPoint[0]);
+            }
+        } else if(this.currentFrame < this.endPoint[1]) {
+            output = this.activatedArray;
+            if(this.hold) this.currentFrame = this.endPoint[1] - 1;
+        } else if(this.currentFrame < this.endPoint[2]) {
+            for(var i = 0; i < this.restingArray.length; i++) {
+                output[i] = this.activatedArray[i] + Math.round((this.restingArray[i]-this.activatedArray[i]) * (this.currentFrame - this.endPoint[1]) / this.endPoint[2]);
             }
         } else {
-            for(var i = 0; i < this.firstArray.length; i++) {
-                output[i] = this.secondArray[i] + Math.round((this.firstArray[i]-this.secondArray[i]) * this.currentFrame / this.lastFrame);
-            }
+            output = this.restingArray;
         }
         return output;
     } 
 }
+

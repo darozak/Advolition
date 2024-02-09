@@ -49,16 +49,14 @@ const gaia: World = {
     model: [
         {
             name: "Humanoid",
-            // sprite: new Vector(23,35),
-            // maxHps: 100,
             core: new Core(
-                'Power Core',  // Name
+                'Power Core',   // Name
                 10,             // Mass
                 [0, 1, 2],      // Power
                 [3, 2, 1]       // Speed
                 ),
             scanner: new Scanner(
-                'Scantron 8000',     // Name
+                'Scantron 8000',// Name
                 10,             // Mass
                 [1, 2, 3],      // Power 
                 [1, 1, 2],      // Speed 
@@ -69,16 +67,14 @@ const gaia: World = {
         },
         {
             name: "Orc",
-            // sprite: new Vector(0, 0),
-            // maxHps: 80,
             core: new Core(
-                'Power Core',  // Name
+                'Power Core',   // Name
                 10,             // Mass
                 [0, 1, 2],      // Power
                 [3, 2, 1]       // Speed
                 ),
             scanner: new Scanner(
-                'Scantron 8000',     // Name
+                'Scantron 8000',// Name
                 10,             // Mass
                 [1, 2, 3],      // Power 
                 [1, 1, 2],      // Speed 
