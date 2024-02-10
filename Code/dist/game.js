@@ -41,22 +41,29 @@ class Game {
         // Every ten frames, evaluate the bots that don't have active actions
         if (this.gameTime % 10 == 0) {
             for (var i = 0; i < this.programs.length; i++) {
+                // If the robot is still alive and isn't doing anything.
                 if (this.robotData[i].chassis.isAlive() && !this.events.some(d => d.botID == i)) {
-                    var call = new Action();
-                    this.programs[i].run(i, structuredClone(this.scanData[i]), call);
-                    switch (call.params.command) {
+                    var action = new Action();
+                    // Make sure the robot's personal data is up to date in scanData.
+                    this.scanData[i].robots[i] = this.robotData[i].clone(this.gameTime);
+                    // Let the robot run it's code.
+                    this.programs[i].run(i, structuredClone(this.scanData[i]), action);
+                    // Evaluate the requested action.
+                    switch (action.params.command) {
                         case "move":
-                            this.requestMove(i, call);
+                            this.requestMove(i, action);
                             break;
                         case "scan":
-                            this.requestScan(i, call);
+                            this.requestScan(i, action);
                             break;
                     }
                 }
             }
             // Then resolve and remove any actions that are occuring now.
             if (this.events.length > 0) {
+                // Sort the events in chronological order.
                 this.events.sort((a, b) => a.time - b.time);
+                // Evaluate any events that should have occurred by now.
                 while (this.events[0].time <= this.gameTime) {
                     switch (this.events[0].call.params.command) {
                         case "move":
@@ -66,6 +73,7 @@ class Game {
                             this.resolveScan(this.events[0]);
                             break;
                     }
+                    // Remove the processed event break if this was the last event.
                     this.events.shift();
                     if (this.events.length == 0)
                         break;
