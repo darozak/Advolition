@@ -1,12 +1,33 @@
 class Action {
     
-    time: number;
-    botID: number;
-    call: Call;
-    
-    constructor(botID: number, call: Call, time: number) {
-        this.botID = botID;
-        this.call = call;
-        this.time = time;
+    #params = {
+        command: "",
+        power: 0,
+        coord: new Vector(0, 0),
+        range: 0
     }
-} 
+
+    constructor(){}
+
+    move(power: number, destination: Vector) {
+        this.#params.command = "move";
+        this.#params.power = this.#boundPower(power);
+        this.#params.coord = destination;
+    }
+
+    scan(power: number) {
+        this.#params.command = "scan";
+        this.#params.power = this.#boundPower(power);
+    }
+
+    #boundPower(power: number) {
+        if(power < 0 || power > 2) {
+            return 0;
+        }
+        return power;
+    }
+
+    get params() {
+        return this.#params;
+    }
+}

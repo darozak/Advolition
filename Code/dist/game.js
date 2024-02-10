@@ -3,7 +3,7 @@ class Game {
     gameTime;
     world;
     arena;
-    actions = [];
+    events = [];
     programs = [];
     robotData = [];
     scanData = [];
@@ -41,9 +41,9 @@ class Game {
         // Every ten frames, evaluate the bots that don't have active actions
         if (this.gameTime % 10 == 0) {
             for (var i = 0; i < this.programs.length; i++) {
-                if (this.robotData[i].chassis.isAlive() && !this.actions.some(d => d.botID == i)) {
-                    var call = new Call();
-                    this.programs[i].evaluate(this.world, structuredClone(this.robotData[i]), call);
+                if (this.robotData[i].chassis.isAlive() && !this.events.some(d => d.botID == i)) {
+                    var call = new Action();
+                    this.programs[i].run(i, structuredClone(this.scanData[i]), call);
                     switch (call.params.command) {
                         case "move":
                             this.requestMove(i, call);
@@ -55,19 +55,19 @@ class Game {
                 }
             }
             // Then resolve and remove any actions that are occuring now.
-            if (this.actions.length > 0) {
-                this.actions.sort((a, b) => a.time - b.time);
-                while (this.actions[0].time <= this.gameTime) {
-                    switch (this.actions[0].call.params.command) {
+            if (this.events.length > 0) {
+                this.events.sort((a, b) => a.time - b.time);
+                while (this.events[0].time <= this.gameTime) {
+                    switch (this.events[0].call.params.command) {
                         case "move":
-                            this.resolveMove(this.actions[0]);
+                            this.resolveMove(this.events[0]);
                             break;
                         case "scan":
-                            this.resolveScan(this.actions[0]);
+                            this.resolveScan(this.events[0]);
                             break;
                     }
-                    this.actions.shift();
-                    if (this.actions.length == 0)
+                    this.events.shift();
+                    if (this.events.length == 0)
                         break;
                 }
             }
@@ -153,7 +153,7 @@ class Game {
         if (this.robotData[botID].battery.usePower(this.robotData[botID].core.power(call.params.power))) {
             // Set time delay.
             let delay = this.robotData[botID].core.speed(call.params.power);
-            this.actions.push(new Action(botID, call, delay + this.gameTime));
+            this.events.push(new GameEvent(botID, call, delay + this.gameTime));
             this.coreColor[botID].activate();
             this.batteryColor[botID].activate();
             this.powerColor[botID].activate();
@@ -163,7 +163,7 @@ class Game {
         if (this.robotData[botID].battery.usePower(this.robotData[botID].scanner.power(call.params.power))) {
             call.params.range = this.robotData[botID].scanner.range(call.params.power);
             let delay = this.robotData[botID].core.speed(call.params.power);
-            this.actions.push(new Action(botID, call, delay));
+            this.events.push(new GameEvent(botID, call, delay));
             this.scannerColor[botID].activate();
             this.batteryColor[botID].activate();
             this.powerColor[botID].activate();

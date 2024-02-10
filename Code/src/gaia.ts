@@ -1,4 +1,4 @@
-const gaia: World = {
+const gaia: WorldData = {
     maxRobotCount: 10,
     size: new Vector(10,10),
     

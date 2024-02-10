@@ -1,29 +1,27 @@
 "use strict";
 class Tobor extends Program {
     state = "start";
-    evaluate(world, status, call) {
-        console.log("My turn!");
+    run(myID, myData, myAction) {
         var destination = new Vector(4, 4);
         switch (this.state) {
             case "start":
-                console.log("I am Tobor!");
-                call.scan(0);
+                myAction.scan(0);
                 this.state = "move";
                 return;
             case "move":
                 console.log("move state");
-                call.move(1, destination);
+                myAction.move(1, destination);
                 this.state = "scan";
                 return;
             case "scan":
                 console.log("scan state");
-                call.scan(2);
-                // console.log(status.scan);
+                myAction.scan(2);
+                console.log(myData.robots[myID].core.mass);
                 this.state = "end";
                 return;
             case "end":
                 console.log("end state");
-                call.move(0, destination);
+                myAction.move(0, destination);
                 // call.scan(2);
                 return;
         }

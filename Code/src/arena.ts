@@ -3,7 +3,7 @@
  * and NPCs for each x, y position.
  */
 class Arena {
-    world: World;
+    world: WorldData;
     mask: boolean[][] = [];
     scans: number[][] = [];
     tileMap: number[][] = [];
@@ -12,7 +12,7 @@ class Arena {
 
     fov = new PreciseShadowcasting();
 
-    constructor(world: World, robots: RobotData[]) {
+    constructor(world: WorldData, robots: RobotData[]) {
         this.world = world;
         this.robots = robots;
 

@@ -13,7 +13,7 @@ interface Model   {
     chassis: Chassis;
 }
 
-interface World {
+interface WorldData {
     maxRobotCount: number;
     size: Vector;
     sketch: string[];

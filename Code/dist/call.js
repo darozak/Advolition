@@ -1,5 +1,5 @@
 "use strict";
-class Call {
+class Action {
     #params = {
         command: "",
         power: 0,

@@ -6,7 +6,7 @@ class ScanData {
     robotMap: number[][] = [];
     robots: RobotData[] = [];
 
-    constructor(world: World, robot: RobotData) {
+    constructor(world: WorldData, robot: RobotData) {
 
         for(var i = 0; i < world.maxRobotCount; i++) {
             this.robots.push(robot.clone(0));

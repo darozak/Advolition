@@ -1,7 +1,3 @@
 class Program {
-
-    evaluate(world: World, status: RobotData, call: Call): void {
-        
-    }
-    
+    run(myID: number, myData: ScanData, myAction: Action) {} 
 }
