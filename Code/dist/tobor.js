@@ -15,14 +15,14 @@ class Tobor extends Program {
                 return;
             case "scan":
                 console.log("scan state");
-                myAction.scan(2);
+                myAction.scan(0);
                 console.log(myData.robots[myID].core.mass);
                 this.state = "end";
                 return;
             case "end":
                 console.log("end state");
                 myAction.move(0, destination);
-                // call.scan(2);
+                // myAction.scan(0);
                 return;
         }
     }

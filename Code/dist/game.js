@@ -99,25 +99,32 @@ class Game {
         var y0 = this.robotData[robotID].pos.y - mapRadius;
         var x1 = this.robotData[robotID].pos.x + mapRadius;
         var y1 = this.robotData[robotID].pos.y + mapRadius;
+        // Cycle through all the tiles in the scan display box.
         for (var i = x0; i < x1; i++) {
             for (var j = y0; j < y1; j++) {
                 var tileScanID = -1;
                 var robotScanID = -1;
+                var tileAlpha = 0;
+                var robotAlpha = 0;
+                // Grab tile and robot IDs if the plotted region doesn't fall outside of the arena map.
                 if (i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
                     tileScanID = this.scanData[robotID].tileMap[i][j];
                     robotScanID = this.scanData[robotID].robotMap[i][j];
+                    // Scan will fade as data ages.
+                    let decayRate = 0.02;
+                    let decayFloor = 0.3;
+                    tileAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].scanTime[i][j]);
+                    if (robotScanID >= 0) {
+                        robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].lastScan);
+                    }
                 }
                 // Draw tile.
                 if (tileScanID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.world.tiles[tileScanID].sprite, new Vector(i - x0, j - y0), 
-                    // this.scanData[robotID].visible[i][j],
-                    1, false);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.world.tiles[tileScanID].sprite, new Vector(i - x0, j - y0), tileAlpha, false);
                 }
                 // Draw robot.
                 if (robotScanID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotScanID].chassis.sprite, new Vector(i - x0, j - y0), 
-                    // this.scanData[robotID].visible[i][j],
-                    1, false);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotScanID].chassis.sprite, new Vector(i - x0, j - y0), robotAlpha, false);
                 }
             }
         }
@@ -144,6 +151,14 @@ class Game {
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Core', this.robotData[robotID].core.name, this.coreColor[robotID].value());
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Scanner', this.robotData[robotID].scanner.name, this.scannerColor[robotID].value());
+    }
+    decay(decayRate, decayFloor, elapsedTime) {
+        if (decayRate > 1)
+            decayRate = 1;
+        if (decayFloor > 1)
+            decayFloor = 1;
+        // f(x) = (1-f)(1 – r)^t
+        return (1 - decayFloor) * Math.pow((1 - decayRate), elapsedTime) + decayFloor;
     }
     updateRobotPositions() {
         // Clear grid
