@@ -1,5 +1,6 @@
 "use strict";
 const gaia = {
+    maxRobotCount: 10,
     size: new Vector(10, 10),
     entrances: [
         new Vector(1, 1),

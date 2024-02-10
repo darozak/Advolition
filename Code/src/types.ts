@@ -14,6 +14,7 @@ interface Model   {
 }
 
 interface World {
+    maxRobotCount: number;
     size: Vector;
     sketch: string[];
     entrances: Vector[];

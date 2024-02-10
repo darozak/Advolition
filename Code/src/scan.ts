@@ -1,22 +1,28 @@
-class Scan {
+class ScanData {
 
-    visible: number[][];
-    tiles: number[][];
-    robots: number[][];
+    // visible: number[][] = [];
+    scanTime: number[][] = [];
+    tileMap: number[][] = [];
+    robotMap: number[][] = [];
+    robots: RobotData[] = [];
 
-    constructor(size: Vector) {
-        this.visible = [];
-        this.tiles = [];
-        this.robots = [];
-        for(var i = 0; i < size.x; i++) {
-            this.visible[i] = [];
-            this.tiles[i] = [];
-            this.robots[i] = [];
+    constructor(world: World, robot: RobotData) {
 
-            for(var j = 0; j < size.y; j++) {
-                this.visible[i][j] = -1;
-                this.tiles[i][j] = -1;
-                this.robots[i][j] = -1;
+        for(var i = 0; i < world.maxRobotCount; i++) {
+            this.robots.push(robot.clone(0));
+        }
+
+        for(var i = 0; i < world.size.x; i++) {
+            // this.visible[i] = [];
+            this.tileMap[i] = [];
+            this.robotMap[i] = [];
+            this.scanTime[i] = []
+
+            for(var j = 0; j < world.size.y; j++) {
+                // this.visible[i][j] = -1;
+                this.tileMap[i][j] = -1;
+                this.robotMap[i][j] = -1;
+                this.scanTime[i][j] = 0;
             }
         }
     }

@@ -1,7 +1,7 @@
-class Tobor extends Robot {
+class Tobor extends Program {
     state = "start";
 
-    evaluate(world: World, status: Status, call: Call) {
+    evaluate(world: World, status: RobotData, call: Call) {
         console.log("My turn!")
         var destination = new Vector(4,4);
 
@@ -19,7 +19,7 @@ class Tobor extends Robot {
             case "scan":
                 console.log("scan state");
                 call.scan(2);
-                console.log(status.scan);
+                // console.log(status.scan);
                 this.state = "end";
                 return;
             case "end":

@@ -1,4 +1,5 @@
 const gaia: World = {
+    maxRobotCount: 10,
     size: new Vector(10,10),
     
     entrances: [

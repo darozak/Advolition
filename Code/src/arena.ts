@@ -4,33 +4,28 @@
  */
 class Arena {
     world: World;
-    mask: boolean[][];
-    scans: number[][];
-    tiles: number[][];
-    robots: number[][];
+    mask: boolean[][] = [];
+    scans: number[][] = [];
+    tileMap: number[][] = [];
+    robotMap: number[][] = [];
+    robots: RobotData[] = [];
 
     fov = new PreciseShadowcasting();
 
-    /**
-     * Creates a layerd map grid of the indicated size.
-     * @param size 
-     */
-    constructor(world: World) {
+    constructor(world: World, robots: RobotData[]) {
         this.world = world;
-        this.mask = [];
-        this.scans = [];
-        this.tiles = [];
-        this.robots = [];
+        this.robots = robots;
+
         for(var i = 0; i < this.world.size.x; i ++) {
             this.mask[i] = [];
             this.scans[i] = [];
-            this.tiles[i] = [];
-            this.robots[i] = [];
+            this.tileMap[i] = [];
+            this.robotMap[i] = [];
             for(var j = 0; j < this.world.size.y; j ++) {
                 this.mask[i][j] = false;
                 this.scans[i][j] = -1;
-                this.tiles[i][j] = -1;
-                this.robots[i][j] = -1;
+                this.tileMap[i][j] = -1;
+                this.robotMap[i][j] = -1;
             }
         }
     }
@@ -43,56 +38,38 @@ class Arena {
         // Use scetch to populate mask and tile arrays.
         for(var i = 0; i < this.world.size.x; i++) {
             this.mask[i] = [];
-            this.tiles[i] = [];
+            this.tileMap[i] = [];
             for(var j = 0; j < this.world.size.y; j++) {
                 this.mask[i][j] = this.world.sketch[i][j]===".";
-                this.tiles[i][j] =
+                this.tileMap[i][j] =
                     this.world.tiles.findLastIndex(d => d.key === this.world.sketch[i][j]);
             }
         }
     }
-
-    populate() {}
-
-    /**
-     * Scans the map based on the specified point of view (pov) and scan radius.
-     * @param pov A 2D vector indicating the center of the scan.
-     * @param scanRadius  An integer radius of the scan.
-     * @returns Returns a packaged set of 2D scan layers. One layer maps the scanned tiles
-     * and the other layer maps the NPCs.  Unscanned regions of the grid are indicated
-     * by a -1.
-     */
-    scan(pov: Vector, scanRadius: number) {
+  
+    scan(pov: Vector, scanRadius: number, scan: ScanData, scanTime: number) {
         var visible: number[][] = this.fov.compute(pov.x, pov.y, scanRadius, this.mask);
-        var scan = new Scan(this.world.size);
 
-        // var tiles: number[][] = []
-        // var npcs: number[][] = []
-        // var output = {tiles: tiles, npcs: npcs}
         for(var i = 0; i < this.world.size.x; i++) {
-            // this.scan.tiles[i] = [];
-            // npcs[i] = [];
+
             for(var j = 0; j < this.world.size.y; j++) {
                 if(visible[i][j] > 0) {
-                    scan.visible[i][j] = visible[i][j];
-                    scan.tiles[i][j] = this.tiles[i][j];
-                    scan.robots[i][j] = this.robots[i][j];
-                } else {
-                    scan.visible[i][j] = 0;
-                    scan.tiles[i][j] = -1;
-                    scan.robots[i][j] = -1;
+                    scan.scanTime[i][j] = scanTime;
+                    // scan.visible[i][j] = visible[i][j];
+                    scan.tileMap[i][j] = this.tileMap[i][j];
+                    scan.robotMap[i][j] = this.robotMap[i][j];
+                    if(this.robotMap[i][j] >= 0) {
+                        scan.robots[this.robotMap[i][j]] = this.robots[this.robotMap[i][j]].clone(scanTime);
+                    }
                 }
             }
         }
 
         // Erase self from robot scan.
-        scan.robots[pov.x][pov.y] = -1;
+        scan.robotMap[pov.x][pov.y] = -1;
 
-        // console.log(output);
         return scan;
     }
-
-    // get enter() {return this.world.entrances}
 
     // Returns the index value of the object occupying location x, y.
     getTileID(pos: Vector) {       

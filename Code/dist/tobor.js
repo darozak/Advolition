@@ -1,5 +1,5 @@
 "use strict";
-class Tobor extends Robot {
+class Tobor extends Program {
     state = "start";
     evaluate(world, status, call) {
         console.log("My turn!");
@@ -18,7 +18,7 @@ class Tobor extends Robot {
             case "scan":
                 console.log("scan state");
                 call.scan(2);
-                console.log(status.scan);
+                // console.log(status.scan);
                 this.state = "end";
                 return;
             case "end":
