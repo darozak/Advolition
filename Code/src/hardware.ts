@@ -98,53 +98,33 @@ class Core extends Equipment {
 }
 
 class Battery {
-    #name: string;
-    #mass: number = 0;
-    #type: string;
-    #currentPower: number;
-    #maxPower: number;
+    name: string;
+    mass: number = 0;
+    type: string;
+    currentPower: number;
+    maxPower: number;
 
     constructor(name: string, mass:number, maxPower: number) {
-        this.#name = name;
-        this.#type = "battery";
-        this.#mass = mass;
-        this.#maxPower = maxPower;
-        this.#currentPower = maxPower;
+        this.name = name;
+        this.type = "battery";
+        this.mass = mass;
+        this.maxPower = maxPower;
+        this.currentPower = maxPower;
     }
 
     clone() {
         // Required to copy private variables.
-        return new Battery(this.#name, this.#mass, this.#maxPower); 
+        return new Battery(this.name, this.mass, this.maxPower); 
     }
 
     usePower(amount: number) {
-        if(amount <= this.#currentPower) {
-            this.#currentPower -= amount;
+        if(amount <= this.currentPower) {
+            this.currentPower -= amount;
             return true;
         } else {
-            this.#currentPower = 0;
+            this.currentPower = 0;
             return false;
         }
-    }
-  
-    get power() {
-        return this.#currentPower;
-    }
-
-    get maxPower() {
-        return this.#maxPower;
-    }
-
-    get mass() {
-        return this.#mass;
-    }
-
-    get type() {
-        return this.#type;
-    }
-
-    get name() {
-        return this.#name;
     }
 }
 

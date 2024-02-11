@@ -15,6 +15,11 @@ class Action {
         this.#params.coord = destination;
     }
 
+    activate(target: Vector) {
+        this.#params.command = "activate";
+        this.#params.coord = target;
+    }
+
     scan(power: number) {
         this.#params.command = "scan";
         this.#params.power = this.#boundPower(power);

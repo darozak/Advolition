@@ -1,11 +1,11 @@
 "use strict";
 class GameEvent {
-    time;
-    botID;
-    call;
+    duration;
+    robotID;
+    action;
     constructor(botID, call, time) {
-        this.botID = botID;
-        this.call = call;
-        this.time = time;
+        this.robotID = botID;
+        this.action = call;
+        this.duration = time;
     }
 }

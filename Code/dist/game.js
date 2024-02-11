@@ -42,7 +42,7 @@ class Game {
         if (this.gameTime % 10 == 0) {
             for (var i = 0; i < this.programs.length; i++) {
                 // If the robot is still alive and isn't doing anything.
-                if (this.robotData[i].chassis.isAlive() && !this.events.some(d => d.botID == i)) {
+                if (this.robotData[i].chassis.isAlive() && !this.events.some(d => d.robotID == i)) {
                     var action = new Action();
                     // Make sure the robot's personal data is up to date in scanData.
                     this.scanData[i].robots[i] = this.robotData[i].clone(this.gameTime);
@@ -56,21 +56,27 @@ class Game {
                         case "scan":
                             this.requestScan(i, action);
                             break;
+                        case "activate":
+                            this.requestActivate(i, action);
+                            break;
                     }
                 }
             }
             // Then resolve and remove any actions that are occuring now.
             if (this.events.length > 0) {
                 // Sort the events in chronological order.
-                this.events.sort((a, b) => a.time - b.time);
+                this.events.sort((a, b) => a.duration - b.duration);
                 // Evaluate any events that should have occurred by now.
-                while (this.events[0].time <= this.gameTime) {
-                    switch (this.events[0].call.params.command) {
+                while (this.events[0].duration <= this.gameTime) {
+                    switch (this.events[0].action.params.command) {
                         case "move":
                             this.resolveMove(this.events[0]);
                             break;
                         case "scan":
                             this.resolveScan(this.events[0]);
+                            break;
+                        case "activate":
+                            this.resolveActivate(this.events[0]);
                             break;
                     }
                     // Remove the processed event break if this was the last event.
@@ -141,7 +147,7 @@ class Game {
         let hps = this.robotData[robotID].chassis.HPs + '/' + this.robotData[robotID].chassis.maxHPs;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
         topTextFrame += lineSpacing;
-        let power = this.robotData[robotID].battery.power + '/' + this.robotData[robotID].battery.maxPower;
+        let power = this.robotData[robotID].battery.currentPower + '/' + this.robotData[robotID].battery.maxPower;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
         topTextFrame += lineSpacing * 2;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.robotData[robotID].chassis.name, this.chassisColor[robotID].value());
@@ -173,49 +179,103 @@ class Game {
         }
     }
     requestMove(botID, call) {
+        // Is there power for this action?
         if (this.robotData[botID].battery.usePower(this.robotData[botID].core.power(call.params.power))) {
             // Set time delay.
             let delay = this.robotData[botID].core.speed(call.params.power);
+            // Add action to event que.
             this.events.push(new GameEvent(botID, call, delay + this.gameTime));
+            // Animate display elements
             this.coreColor[botID].activate();
             this.batteryColor[botID].activate();
             this.powerColor[botID].activate();
         }
     }
+    resolveMove(action) {
+        var destination = this.robotData[action.robotID].pos.getPathTo(action.action.params.coord)[0];
+        if (this.arena.getTileSpeed(destination) > 0) {
+            // Change position in arena.
+            this.arena.robotMap[this.robotData[action.robotID].pos.x][this.robotData[action.robotID].pos.y] = -1;
+            this.arena.robotMap[destination.x][destination.y] = action.robotID;
+            // Change position in stats.
+            this.robotData[action.robotID].pos = destination;
+        }
+        else {
+            // Take damage if you run into something.
+            this.robotData[action.robotID].chassis.takeDamage(10);
+            this.hpsColor[action.robotID].pulse();
+            this.chassisColor[action.robotID].pulse();
+        }
+        // Animate display elements.
+        this.coreColor[action.robotID].deactivate();
+        this.batteryColor[action.robotID].deactivate();
+        this.powerColor[action.robotID].deactivate();
+    }
+    resolveScan(event) {
+        // Set rane and perform scan.        
+        let range = this.robotData[event.robotID].scanner.range(event.action.params.power);
+        this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
+        // Animate display elements.
+        this.scannerColor[event.robotID].deactivate();
+        this.batteryColor[event.robotID].deactivate();
+        this.powerColor[event.robotID].deactivate();
+    }
     requestScan(botID, call) {
+        // Is there power for this action?
         if (this.robotData[botID].battery.usePower(this.robotData[botID].scanner.power(call.params.power))) {
+            // Set scan range and delay.
             call.params.range = this.robotData[botID].scanner.range(call.params.power);
             let delay = this.robotData[botID].core.speed(call.params.power);
+            // Add action to event queue.
             this.events.push(new GameEvent(botID, call, delay));
+            // Animate display elements.
             this.scannerColor[botID].activate();
             this.batteryColor[botID].activate();
             this.powerColor[botID].activate();
         }
     }
-    resolveMove(action) {
-        var destination = this.robotData[action.botID].pos.getPathTo(action.call.params.coord)[0];
-        if (this.arena.getTileSpeed(destination) > 0) {
-            // Change position in arena.
-            this.arena.robotMap[this.robotData[action.botID].pos.x][this.robotData[action.botID].pos.y] = -1;
-            this.arena.robotMap[destination.x][destination.y] = action.botID;
-            // Change position in stats.
-            this.robotData[action.botID].pos = destination;
+    requestActivate(robotID, action) {
+        let robotCoord = this.robotData[robotID].pos;
+        let targetCoord = action.params.coord;
+        let reach = 1.8;
+        let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
+        let tileName = gaia.tiles[tileID].name;
+        // Is there power for this action?
+        if (this.robotData[robotID].battery.usePower(this.robotData[robotID].core.power(action.params.power))) {
+            // Only act if the object is in reach.    
+            if (robotCoord.getDistanceTo(targetCoord) < reach) {
+                // Select action based on target.
+                switch (tileName) {
+                    case "Power Station":
+                        // Set time delay.
+                        let delay = 1;
+                        // Add action to event que.
+                        this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+                        // Animate display elements
+                        this.batteryColor[robotID].activate();
+                        this.powerColor[robotID].activate();
+                        return;
+                }
+            }
         }
-        else {
-            // Take damage if you run into something.
-            this.robotData[action.botID].chassis.takeDamage(10);
-            this.hpsColor[action.botID].pulse();
-            this.chassisColor[action.botID].pulse();
-        }
-        this.coreColor[action.botID].deactivate();
-        this.batteryColor[action.botID].deactivate();
-        this.powerColor[action.botID].deactivate();
     }
-    resolveScan(action) {
-        let range = this.robotData[action.botID].scanner.range(action.call.params.power);
-        this.scanData[action.botID] = this.arena.scan(this.robotData[action.botID].pos, range, this.scanData[action.botID], this.gameTime);
-        this.scannerColor[action.botID].deactivate();
-        this.batteryColor[action.botID].deactivate();
-        this.powerColor[action.botID].deactivate();
+    resolveActivate(event) {
+        let robotCoord = this.robotData[event.robotID].pos;
+        let targetCoord = event.action.params.coord;
+        let reach = 1.8;
+        let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
+        let tileName = gaia.tiles[tileID].name;
+        // Only act if the object is in reach.    
+        if (robotCoord.getDistanceTo(targetCoord) < reach) {
+            // Select action based on target.
+            switch (tileName) {
+                case "Power Station":
+                    this.robotData[event.robotID].battery.currentPower = this.robotData[event.robotID].battery.maxPower;
+                    // Animate display elements
+                    this.batteryColor[event.robotID].deactivate();
+                    this.powerColor[event.robotID].deactivate();
+                    return;
+            }
+        }
     }
 }

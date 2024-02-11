@@ -12,6 +12,13 @@ class Vector {
     add(vector) {
         return new Vector(this.x + vector.x, this.y + vector.y);
     }
+    subtract(vector) {
+        return new Vector(this.x - vector.x, this.y - vector.y);
+    }
+    getDistanceTo(vector) {
+        let delta = this.subtract(vector);
+        return Math.sqrt((Math.pow(delta.x, 2) + Math.pow(delta.y, 2)));
+    }
     getPathTo(destination) {
         var path = [];
         var x0 = this.x;

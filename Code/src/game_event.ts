@@ -1,12 +1,12 @@
 class GameEvent {
     
-    time: number;
-    botID: number;
-    call: Action;
+    duration: number;
+    robotID: number;
+    action: Action;
     
     constructor(botID: number, call: Action, time: number) {
-        this.botID = botID;
-        this.call = call;
-        this.time = time;
+        this.robotID = botID;
+        this.action = call;
+        this.duration = time;
     }
 } 

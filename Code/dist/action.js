@@ -12,6 +12,10 @@ class Action {
         this.#params.power = this.#boundPower(power);
         this.#params.coord = destination;
     }
+    activate(target) {
+        this.#params.command = "activate";
+        this.#params.coord = target;
+    }
     scan(power) {
         this.#params.command = "scan";
         this.#params.power = this.#boundPower(power);

@@ -6,8 +6,12 @@ class Tobor extends Program {
 
         switch (this.state) {
             case "start":
-                myAction.scan(0);    
-                this.state = "move";
+                myAction.scan(2);    
+                if(myData.robots[myID].battery.currentPower < 100) this.state = "recharge";
+                return;
+            case "recharge":
+                myAction.activate(new Vector(1,2));
+                this.state = "start";
                 return;
             case "move":
                 console.log("move state");
