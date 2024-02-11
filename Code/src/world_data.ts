@@ -2,6 +2,7 @@ interface Feature {
     name: string;
     key: string;
     sprite: Vector;
+    transparent: boolean;
     speed: number;
 }
 

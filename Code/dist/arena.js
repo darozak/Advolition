@@ -31,14 +31,14 @@ class Arena {
         // Make sure world size matches sketch.
         this.world.size.x = this.world.sketch.length;
         this.world.size.y = this.world.sketch[0].length;
-        // Use scetch to populate mask and tile arrays.
+        // Use sketch to populate mask and tile arrays.
         for (var i = 0; i < this.world.size.x; i++) {
             this.mask[i] = [];
             this.tileMap[i] = [];
             for (var j = 0; j < this.world.size.y; j++) {
-                this.mask[i][j] = this.world.sketch[i][j] === ".";
-                this.tileMap[i][j] =
-                    this.world.tiles.findLastIndex(d => d.key === this.world.sketch[i][j]);
+                let tileID = this.world.tiles.findLastIndex(d => d.key === this.world.sketch[i][j]);
+                this.mask[i][j] = this.world.tiles[tileID].transparent;
+                this.tileMap[i][j] = tileID;
             }
         }
     }

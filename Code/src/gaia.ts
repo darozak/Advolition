@@ -11,7 +11,7 @@ const gaia: WorldData = {
 
     sketch: [
         "##########",
-        "#........#",
+        "#.*......#",
         "#........#",
         "#.......##",
         "##..######",
@@ -20,31 +20,43 @@ const gaia: WorldData = {
         "#........#",
         "#........#",
         "##########"
-    ], 
+    ],  
     tiles: [
         {
             name: "Floor",
             key: ".",
             sprite: new Vector(16,31),
+            transparent: true,
             speed: 1.0
         },
         {
             name: "Wall",
             key: "#",
             sprite: new Vector(10,10),
+            transparent: false,
             speed: 0.0
         },
         {
             name: "Open Door",
             key: "/",
             sprite: new Vector(13,3),
+            transparent: true,
             speed: 1.0
         },
         {
             name: "Closed Door",
             key: "+",
             sprite: new Vector(12,3),
+            transparent: false,
             speed: 0.0
+        },
+        {
+            name: "Power Station",
+            key: "*",
+            sprite: new Vector(18, 21),
+            // sprite: new Vector(12,3),
+            transparent: true,
+            speed: 0.0,
         }
     ],
     model: [
