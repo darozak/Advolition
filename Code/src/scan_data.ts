@@ -3,13 +3,18 @@ class ScanData {
     // visible: number[][] = [];
     scanTime: number[][] = [];
     tileMap: number[][] = [];
+    tiles: Feature[] = [];
     robotMap: number[][] = [];
     robots: RobotData[] = [];
 
     constructor(world: WorldData, robot: RobotData) {
 
         for(var i = 0; i < world.maxRobotCount; i++) {
-            this.robots.push(robot.clone(0));
+            this.robots.push(structuredClone(robot));
+        }
+
+        for(var i = 0; i < world.tiles.length; i++) {
+            this.tiles.push(structuredClone(world.tiles[i]));
         }
 
         for(var i = 0; i < world.size.x; i++) {

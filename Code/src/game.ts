@@ -50,12 +50,13 @@ class Game {
             for(var i = 0; i < this.programs.length; i++) {
 
                 // If the robot is still alive and isn't doing anything.
-                if(this.robotData[i].chassis.isAlive() && !this.events.some(d =>d.robotID == i)){
+                if(this.robotData[i].chassis.HPs > 0 && !this.events.some(d =>d.robotID == i)){
                     var action = new Action(); 
 
                     // Make sure the robot's personal data is up to date in scanData.
-                    this.scanData[i].robots[i] = this.robotData[i].clone(this.gameTime);
-
+                    this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
+                    this.scanData[i].robots[i].scanTime = this.gameTime;
+ 
                     // Let the robot run it's code.
                     this.programs[i].run(i, structuredClone(this.scanData[i]), action);
 
@@ -142,7 +143,7 @@ class Game {
                     let decayFloor = 0.3;
                     tileAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].scanTime[i][j]);
                     if(robotScanID >= 0) {
-                        robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].lastScan);
+                        robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].scanTime);
                     }
                 }
 
@@ -224,7 +225,7 @@ class Game {
         for(var i = 0; i < this.world.size.x; i++) {
             for(var j = 0; j < this.world.size.y; j++) {
                 this.arena.robotMap[i][j] = -1;
-            }
+            } 
         }
 
         // Add robots
@@ -235,11 +236,16 @@ class Game {
 
     requestMove(botID: number, call: Action) { 
 
+        let powerCost = this.robotData[botID].core.power[call.params.power];
+
         // Is there power for this action?
-        if(this.robotData[botID].battery.usePower(this.robotData[botID].core.power(call.params.power))) {
+        if(this.robotData[botID].battery.currentPower >= powerCost) {
+
+            // Drain power
+            this.robotData[botID].battery.currentPower -= powerCost;
 
             // Set time delay.
-            let delay = this.robotData[botID].core.speed(call.params.power);
+            let delay = this.robotData[botID].core.speed[call.params.power];
 
             // Add action to event que.
             this.events.push(new GameEvent(botID, call, delay + this.gameTime));   
@@ -264,7 +270,7 @@ class Game {
             
         } else {
             // Take damage if you run into something.
-            this.robotData[action.robotID].chassis.takeDamage(10);
+            this.robotData[action.robotID].chassis.HPs -= 10;
             this.hpsColor[action.robotID].pulse();
             this.chassisColor[action.robotID].pulse();
         }
@@ -278,7 +284,7 @@ class Game {
     resolveScan(event: GameEvent) {
 
         // Set rane and perform scan.        
-        let range = this.robotData[event.robotID].scanner.range(event.action.params.power);
+        let range = this.robotData[event.robotID].scanner.range[event.action.params.power];
         this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         
         // Animate display elements.
@@ -289,12 +295,17 @@ class Game {
 
     requestScan(botID: number, call: Action) {
 
+        let powerCost = this.robotData[botID].scanner.power[call.params.power];
+        
         // Is there power for this action?
-        if(this.robotData[botID].battery.usePower(this.robotData[botID].scanner.power(call.params.power))) {
+        if(this.robotData[botID].battery.currentPower >= powerCost) {
             
+            // Drain power
+            this.robotData[botID].battery.currentPower -= powerCost;
+
             // Set scan range and delay.
-            call.params.range = this.robotData[botID].scanner.range(call.params.power);
-            let delay = this.robotData[botID].core.speed(call.params.power);
+            call.params.range = this.robotData[botID].scanner.range[call.params.power];
+            let delay = this.robotData[botID].core.speed[call.params.power];
 
             // Add action to event queue.
             this.events.push(new GameEvent(botID, call, delay));
@@ -314,8 +325,13 @@ class Game {
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
         let tileName = gaia.tiles[tileID].name; 
 
+        let powerCost = this.robotData[robotID].core.power[action.params.power];
+
         // Is there power for this action?
-        if(this.robotData[robotID].battery.usePower(this.robotData[robotID].core.power(action.params.power))) {
+        if(this.robotData[robotID].battery.currentPower >= powerCost) {
+
+            // Drain power
+            this.robotData[robotID].battery.currentPower -= powerCost;
 
             // Only act if the object is in reach.    
             if(robotCoord.getDistanceTo(targetCoord) < reach) {
@@ -361,11 +377,4 @@ class Game {
         }
 
     }
-
-
-
-
-
-
-
 }

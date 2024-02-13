@@ -3,7 +3,7 @@ class Tobor extends Program {
 
     run(myID: number, myData: ScanData, myAction: Action) {
         var destination = new Vector(4,4);
-
+    
         switch (this.state) {
             case "start":
                 myAction.scan(2);    

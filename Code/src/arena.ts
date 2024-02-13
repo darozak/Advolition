@@ -59,7 +59,7 @@ class Arena {
                     scan.tileMap[i][j] = this.tileMap[i][j];
                     scan.robotMap[i][j] = this.robotMap[i][j];
                     if(this.robotMap[i][j] >= 0) {
-                        scan.robots[this.robotMap[i][j]] = this.robots[this.robotMap[i][j]].clone(scanTime);
+                        scan.robots[this.robotMap[i][j]] = structuredClone(this.robots[this.robotMap[i][j]]);
                     }
                 }
             }

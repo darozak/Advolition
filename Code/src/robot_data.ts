@@ -1,12 +1,10 @@
 
 class RobotData {
 
-    lastScan: number = 0;
+    scanTime: number = 0;
     robotID: number;
     name: string;
-    world: WorldData;
     pos: Vector;
-    model: Model;
 
     // Equipped eqipment 
     core: Core;
@@ -15,28 +13,16 @@ class RobotData {
     chassis: Chassis;
 
     constructor(world: WorldData, robotID: number, name: string) {
-        this.world = world;
+        // this.world = world;
         this.robotID = robotID;
         this.name = name;
-        this.model = this.world.model[0];
+        let model = world.model[0];
         this.pos = world.entrances[robotID];
 
         // Add model's equipment
-        this.scanner = this.model.scanner;      
-        this.core = this.model.core;
-        this.battery = this.model.battery.clone();
-        this.chassis = this.model.chassis.clone();
+        this.scanner = model.scanner;      
+        this.core = model.core;
+        this.battery = structuredClone(model.battery);
+        this.chassis = structuredClone(model.chassis);
     }
-
-    clone(clonedTime: number) {
-        var clone = new RobotData(this.world, this.robotID, this.name);
-        clone.lastScan = clonedTime;
-        clone.pos = this.pos;
-        clone.chassis = this.chassis;
-        clone.battery = this.battery; 
-        clone.core = this.core;
-
-        return clone;
-    }
-
 }
