@@ -1,3 +1,3 @@
 class Program {
-    run(myID: number, myData: ScanData, myAction: Action) {} 
+    run(myID: number, myData: ScanData, myAction: Action) { return myAction; } 
 }

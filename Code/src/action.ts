@@ -1,38 +1,38 @@
 class Action {
     
-    #params = {
-        command: "",
-        power: 0,
-        coord: new Vector(0, 0),
-        range: 0
-    }
+    command: string =  "";
+    powerLevel: number = 0;
+    target: Vector = new Vector(0, 0);
+    range: number = 0;
 
     constructor(){}
+}
 
-    move(power: number, destination: Vector) {
-        this.#params.command = "move";
-        this.#params.power = this.#boundPower(power);
-        this.#params.coord = destination;
+class Move extends Action {
+
+    constructor(power: number, destination: Vector) {
+        super();
+        this.command = "move"
+        if(power < 0 || power > 2) this.powerLevel = 0; 
+        else this.powerLevel = power;
+        this.target = destination;
     }
+}
 
-    activate(target: Vector) {
-        this.#params.command = "activate";
-        this.#params.coord = target;
+class Activate extends Action {
+
+    constructor(target: Vector) {
+        super();
+        this.command = "activate";
+        this.target = target;
     }
+}
 
-    scan(power: number) {
-        this.#params.command = "scan";
-        this.#params.power = this.#boundPower(power);
-    }
-
-    #boundPower(power: number) {
-        if(power < 0 || power > 2) {
-            return 0;
-        }
-        return power;
-    }
-
-    get params() {
-        return this.#params;
+class Scan extends Action {
+    constructor(power: number) {
+        super()
+        this.command = "scan";
+        if(power < 0 || power > 2) this.powerLevel = 0; 
+        else this.powerLevel = power;
     }
 }

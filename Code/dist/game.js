@@ -38,19 +38,17 @@ class Game {
     run() {
         // Increment game time
         this.gameTime++;
-        // Every ten frames, evaluate the bots that don't have active actions
-        if (this.gameTime % 10 == 0) {
-            for (var i = 0; i < this.programs.length; i++) {
-                // If the robot is still alive and isn't doing anything.
-                if (this.robotData[i].chassis.HPs > 0 && !this.events.some(d => d.robotID == i)) {
-                    var action = new Action();
-                    // Make sure the robot's personal data is up to date in scanData.
-                    this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
-                    this.scanData[i].robots[i].scanTime = this.gameTime;
-                    // Let the robot run it's code.
-                    this.programs[i].run(i, structuredClone(this.scanData[i]), action);
-                    // Evaluate the requested action.
-                    switch (action.params.command) {
+        for (var i = 0; i < this.programs.length; i++) {
+            // If the robot is still alive and isn't doing anything.
+            if (this.robotData[i].chassis.HPs > 0 && !this.events.some(d => d.robotID == i)) {
+                var action = new Action();
+                // Make sure the robot's personal data is up to date in scanData.
+                this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
+                this.scanData[i].robots[i].scanTime = this.gameTime;
+                // Let the robot run it's code.
+                action = this.programs[i].run(i, structuredClone(this.scanData[i]), action);
+                if (action) {
+                    switch (action.command) {
                         case "move":
                             this.requestMove(i, action);
                             break;
@@ -63,28 +61,28 @@ class Game {
                     }
                 }
             }
-            // Then resolve and remove any actions that are occuring now.
-            if (this.events.length > 0) {
-                // Sort the events in chronological order.
-                this.events.sort((a, b) => a.duration - b.duration);
-                // Evaluate any events that should have occurred by now.
-                while (this.events[0].duration <= this.gameTime) {
-                    switch (this.events[0].action.params.command) {
-                        case "move":
-                            this.resolveMove(this.events[0]);
-                            break;
-                        case "scan":
-                            this.resolveScan(this.events[0]);
-                            break;
-                        case "activate":
-                            this.resolveActivate(this.events[0]);
-                            break;
-                    }
-                    // Remove the processed event break if this was the last event.
-                    this.events.shift();
-                    if (this.events.length == 0)
+        }
+        // Then resolve and remove any actions that are occuring now.
+        if (this.events.length > 0) {
+            // Sort the events in chronological order.
+            this.events.sort((a, b) => a.duration - b.duration);
+            // Evaluate any events that should have occurred by now.
+            while (this.events[0].duration <= this.gameTime) {
+                switch (this.events[0].action.command) {
+                    case "move":
+                        this.resolveMove(this.events[0]);
+                        break;
+                    case "scan":
+                        this.resolveScan(this.events[0]);
+                        break;
+                    case "activate":
+                        this.resolveActivate(this.events[0]);
                         break;
                 }
+                // Remove the processed event break if this was the last event.
+                this.events.shift();
+                if (this.events.length == 0)
+                    break;
             }
         }
         // Every frame, redraw the game window.
@@ -180,13 +178,13 @@ class Game {
         }
     }
     requestMove(botID, call) {
-        let powerCost = this.robotData[botID].core.power[call.params.power];
+        let powerCost = this.robotData[botID].core.power[call.powerLevel];
         // Is there power for this action?
         if (this.robotData[botID].battery.currentPower >= powerCost) {
             // Drain power
             this.robotData[botID].battery.currentPower -= powerCost;
             // Set time delay.
-            let delay = this.robotData[botID].core.speed[call.params.power];
+            let delay = this.robotData[botID].core.speed[call.powerLevel];
             // Add action to event que.
             this.events.push(new GameEvent(botID, call, delay + this.gameTime));
             // Animate display elements
@@ -196,7 +194,7 @@ class Game {
         }
     }
     resolveMove(action) {
-        var destination = this.robotData[action.robotID].pos.getPathTo(action.action.params.coord)[0];
+        var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
         if (this.arena.getTileSpeed(destination) > 0) {
             // Change position in arena.
             this.arena.robotMap[this.robotData[action.robotID].pos.x][this.robotData[action.robotID].pos.y] = -1;
@@ -215,39 +213,39 @@ class Game {
         this.batteryColor[action.robotID].deactivate();
         this.powerColor[action.robotID].deactivate();
     }
-    resolveScan(event) {
-        // Set rane and perform scan.        
-        let range = this.robotData[event.robotID].scanner.range[event.action.params.power];
-        this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
-        // Animate display elements.
-        this.scannerColor[event.robotID].deactivate();
-        this.batteryColor[event.robotID].deactivate();
-        this.powerColor[event.robotID].deactivate();
-    }
     requestScan(botID, call) {
-        let powerCost = this.robotData[botID].scanner.power[call.params.power];
+        let powerCost = this.robotData[botID].scanner.power[call.powerLevel];
         // Is there power for this action?
         if (this.robotData[botID].battery.currentPower >= powerCost) {
             // Drain power
             this.robotData[botID].battery.currentPower -= powerCost;
             // Set scan range and delay.
-            call.params.range = this.robotData[botID].scanner.range[call.params.power];
-            let delay = this.robotData[botID].core.speed[call.params.power];
+            call.range = this.robotData[botID].scanner.range[call.powerLevel];
+            let delay = this.robotData[botID].core.speed[call.powerLevel];
             // Add action to event queue.
-            this.events.push(new GameEvent(botID, call, delay));
+            this.events.push(new GameEvent(botID, call, delay + this.gameTime));
             // Animate display elements.
             this.scannerColor[botID].activate();
             this.batteryColor[botID].activate();
             this.powerColor[botID].activate();
         }
     }
+    resolveScan(event) {
+        // Set rane and perform scan.        
+        let range = this.robotData[event.robotID].scanner.range[event.action.powerLevel];
+        this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
+        // Animate display elements.
+        this.scannerColor[event.robotID].deactivate();
+        this.batteryColor[event.robotID].deactivate();
+        this.powerColor[event.robotID].deactivate();
+    }
     requestActivate(robotID, action) {
         let robotCoord = this.robotData[robotID].pos;
-        let targetCoord = action.params.coord;
+        let targetCoord = action.target;
         let reach = 1.8;
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
         let tileName = gaia.tiles[tileID].name;
-        let powerCost = this.robotData[robotID].core.power[action.params.power];
+        let powerCost = this.robotData[robotID].core.power[action.powerLevel];
         // Is there power for this action?
         if (this.robotData[robotID].battery.currentPower >= powerCost) {
             // Drain power
@@ -264,14 +262,14 @@ class Game {
                         // Animate display elements
                         this.batteryColor[robotID].activate();
                         this.powerColor[robotID].activate();
-                        return;
+                        break;
                 }
             }
         }
     }
     resolveActivate(event) {
         let robotCoord = this.robotData[event.robotID].pos;
-        let targetCoord = event.action.params.coord;
+        let targetCoord = event.action.target;
         let reach = 1.8;
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
         let tileName = gaia.tiles[tileID].name;

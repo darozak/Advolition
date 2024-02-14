@@ -66,13 +66,13 @@ const gaia: WorldData = {
                 'Power Core',   // Name
                 10,             // Mass
                 [0, 1, 2],      // Power
-                [3, 2, 1]       // Speed
+                [10, 6, 4]      // Speed
                 ),
             scanner: new Scanner(
                 'Scantron 8000',// Name
                 10,             // Mass
                 [1, 2, 3],      // Power 
-                [1, 1, 2],      // Speed 
+                [4, 8, 12],     // Speed 
                 [3, 5, 7]       // Range
                 ),
             battery: new Battery('Power Cell', 10, 110),
