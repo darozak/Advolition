@@ -177,20 +177,22 @@ class Game {
             this.arena.robotMap[this.robotData[i].pos.x][this.robotData[i].pos.y] = i;
         }
     }
-    requestMove(botID, call) {
-        let powerCost = this.robotData[botID].core.power[call.powerLevel];
+    requestMove(robotID, action) {
+        let powerCost = this.robotData[robotID].core.power[action.powerLevel];
+        let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
         // Is there power for this action?
-        if (this.robotData[botID].battery.currentPower >= powerCost) {
-            // Drain power
-            this.robotData[botID].battery.currentPower -= powerCost;
-            // Set time delay.
-            let delay = this.robotData[botID].core.speed[call.powerLevel];
+        if (this.robotData[robotID].battery.currentPower >= powerCost) {
+            // Drain power 
+            this.robotData[robotID].battery.currentPower -= powerCost;
+            // Set time delay and adjust for distance across diagonals.
+            let delay = this.robotData[robotID].core.speed[action.powerLevel];
+            delay *= this.robotData[robotID].pos.getDistanceTo(destination);
             // Add action to event que.
-            this.events.push(new GameEvent(botID, call, delay + this.gameTime));
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
             // Animate display elements
-            this.coreColor[botID].activate();
-            this.batteryColor[botID].activate();
-            this.powerColor[botID].activate();
+            this.coreColor[robotID].activate();
+            this.batteryColor[robotID].activate();
+            this.powerColor[robotID].activate();
         }
     }
     resolveMove(action) {
