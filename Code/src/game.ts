@@ -243,7 +243,7 @@ class Game {
         // Is there power for this action?
         if(this.robotData[robotID].battery.currentPower >= powerCost) {
 
-            // Drain power 
+            // Drain power  
             this.robotData[robotID].battery.currentPower -= powerCost;
 
             // Set time delay and adjust for distance across diagonals.
@@ -327,6 +327,7 @@ class Game {
         let reach = 1.8;
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
         let tileName = gaia.tiles[tileID].name; 
+        console.log(tileName);
 
         let powerCost = this.robotData[robotID].core.power[action.powerLevel];
 
@@ -339,20 +340,30 @@ class Game {
             // Only act if the object is in reach.    
             if(robotCoord.getDistanceTo(targetCoord) < reach) {
 
+                var delay = 0;
+
                 // Select action based on target.
                 switch(tileName) {
                     case "Power Station":
                         // Set time delay.
-                        let delay  = 1;
-
-                        // Add action to event que.
-                        this.events.push(new GameEvent(robotID, action, delay + this.gameTime));   
-                        
-                        // Animate display elements
-                        this.batteryColor[robotID].activate();
-                        this.powerColor[robotID].activate();    
+                        delay  = 1;
+                        break;
+                    case "Closed Door":
+                        // Set time delay.
+                        delay  = 1;
+                        break;
+                    case "Open Door":
+                        // Set time delay.
+                        delay  = 1;
                         break;
                 }
+
+                // Add action to event que.
+                this.events.push(new GameEvent(robotID, action, delay + this.gameTime));   
+                        
+                // Animate display elements
+                this.batteryColor[robotID].activate();
+                this.powerColor[robotID].activate();  
             }
         }
     }
@@ -371,12 +382,18 @@ class Game {
             switch(tileName) {
                 case "Power Station":
                     this.robotData[event.robotID].battery.currentPower = this.robotData[event.robotID].battery.maxPower;
-
-                    // Animate display elements
-                    this.batteryColor[event.robotID].deactivate();
-                    this.powerColor[event.robotID].deactivate();
-                return;
+                    break;
+                case "Closed Door":
+                    this.arena.toggleDoor(targetCoord);
+                    break;
+                case "Open Door":
+                    this.arena.toggleDoor(targetCoord);
+                    break;
             }
+            
+            // Animate display elements
+            this.batteryColor[event.robotID].deactivate();
+            this.powerColor[event.robotID].deactivate();
         }
 
     }

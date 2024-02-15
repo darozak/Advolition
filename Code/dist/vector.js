@@ -15,6 +15,9 @@ class Vector {
     subtract(vector) {
         return new Vector(this.x - vector.x, this.y - vector.y);
     }
+    isEqualTo(vector) {
+        return (this.x === vector.x && this.y === vector.y);
+    }
     getDistanceTo(vector) {
         let delta = this.subtract(vector);
         return Math.sqrt((Math.pow(delta.x, 2) + Math.pow(delta.y, 2)));
@@ -32,7 +35,6 @@ class Vector {
         var err = dx - dy;
         while (true) {
             path.push(new Vector(x0, y0));
-            // setPixel(x0, y0); // Do what you need to for this
             if ((x0 === x1) && (y0 === y1))
                 break;
             var e2 = 2 * err;
@@ -45,7 +47,11 @@ class Vector {
                 y0 += sy;
             }
         }
-        path.shift();
+        // Only remove starting position if it won't empty the array.
+        // Otherwise this could produce an error elsehere.
+        if (path.length > 1) {
+            path.shift();
+        }
         return path;
     }
 }

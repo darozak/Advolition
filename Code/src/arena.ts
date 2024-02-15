@@ -71,12 +71,23 @@ class Arena {
         return scan;
     }
 
-    // Returns the index value of the object occupying location x, y.
-    getTileID(pos: Vector) {       
-        return this.world.tiles.findLastIndex(d => d.key === this.world.sketch[pos.x][pos.y]);
+    getTileSpeed(pos: Vector) {
+        return this.world.tiles[this.tileMap[pos.x][pos.y]].speed;
     }
 
-    getTileSpeed(pos: Vector) {
-        return this.world.tiles[this.getTileID(pos)].speed;
+    toggleDoor(target: Vector) {
+        let tileID = this.tileMap[target.x][target.y];
+        switch(gaia.tiles[tileID].name) {
+            case "Closed Door":
+                let openDoorID = this.world.tiles.findLastIndex(d => d.name === "Open Door");
+                this.tileMap[target.x][target.y] = openDoorID;
+                this.mask[target.x][target.y] = true;
+                break;
+            case "Open Door":
+                let closedDoorID = this.world.tiles.findLastIndex(d => d.name === "Closed Door");
+                this.tileMap[target.x][target.y] = closedDoorID;
+                this.mask[target.x][target.y] = false;
+                break;
+        }
     }
 }
