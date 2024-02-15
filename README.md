@@ -11,14 +11,14 @@ Here are my goals for making this game:
 These are the things that I need to accomplish to consider this a complete game:
 
 - Terrain features:
-    - Power Stations charge robots.
+    - [Done] Power Stations charge robots.
     - Repair Stations heal robots.
-    - Doors can be opened and closed with keys.
+    - [Done] Doors can be opened and closed.
 - Major equipment classes
-    - Batteries
-    - Scanners
+    - [Done] Batteries
+    - [Done] Scanners
     - Shields
-    - Cores
+    - [Done] Cores
     - Weapons
     - Digital keys - Allow the robot to activate different terrain features.
 - Equipment management
