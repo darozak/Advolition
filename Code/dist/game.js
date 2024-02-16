@@ -28,6 +28,7 @@ class Game {
         this.robotData.push(new RobotData(this.world, robotID, name));
         this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID;
+        this.robotData[robotID].chassis.HPs = 50;
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
         this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
         this.chassisColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
@@ -262,6 +263,10 @@ class Game {
                         // Set time delay.
                         delay = 1;
                         break;
+                    case "Repair Bay":
+                        // Set time delay.
+                        delay = 1;
+                        break;
                     case "Closed Door":
                         // Set time delay.
                         delay = 1;
@@ -291,6 +296,9 @@ class Game {
             switch (tileName) {
                 case "Power Station":
                     this.robotData[event.robotID].battery.currentPower = this.robotData[event.robotID].battery.maxPower;
+                    break;
+                case "Repair Bay":
+                    this.robotData[event.robotID].chassis.HPs = this.robotData[event.robotID].chassis.maxHPs;
                     break;
                 case "Closed Door":
                     this.arena.toggleDoor(targetCoord);

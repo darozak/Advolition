@@ -13,7 +13,7 @@ const gaia: WorldData = {
         "##########",
         "#.*......#",
         "#........#",
-        "#.......##",
+        "#...&...##",
         "###+######",
         "#........#",
         "#........#",
@@ -54,7 +54,13 @@ const gaia: WorldData = {
             name: "Power Station",
             key: "*",
             sprite: new Vector(18, 21),
-            // sprite: new Vector(12,3),
+            transparent: true,
+            speed: 0.0,
+        },
+        {
+            name: "Repair Bay",
+            key: "&",
+            sprite: new Vector(17, 20),
             transparent: true,
             speed: 0.0,
         }

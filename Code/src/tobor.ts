@@ -5,7 +5,7 @@ class Tobor extends Program {
     run(myID: number, myData: ScanData, myAction: Action) {
         var destination = new Vector(3,3);
         var destination2 = new Vector(6,3);
-        var target = new Vector(4, 3);
+        var target = new Vector(3, 4);
 
         // myAction = new Scan(2);
     
