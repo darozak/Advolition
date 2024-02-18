@@ -51,6 +51,9 @@ class Game {
             }
         }
 
+        // Recompute attributes based on equipped items.
+        this.applyEquippedMods(this.robotData[robotID]);
+
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
         this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
         this.chassisColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
@@ -498,6 +501,9 @@ class Game {
             }
         }
 
+        // Recompute attributes based on equipped items.
+        this.applyEquippedMods(this.robotData[event.robotID]);
+
     }
 
     requestScan(botID: number, call: Action) {
@@ -536,31 +542,26 @@ class Game {
         this.powerColor[event.robotID].deactivate();
     }
 
-
-
-
-
-
     modAttributes(attributes: Attributes, modifications: Attributes) {
-        attributes.HPs.current, modifications.HPs.current;
-        attributes.maxHPs.current, modifications.maxHPs.current;
+        attributes.HPs.current += modifications.HPs.current;
+        attributes.maxHPs.current += modifications.maxHPs.current;
 
-        attributes.power.current, modifications.power.current;
-        attributes.maxPower.current, modifications.maxPower.current;
+        attributes.power.current += modifications.power.current;
+        attributes.maxPower.current += modifications.maxPower.current;
 
-        attributes.offensePower.current, modifications.offensePower.current;
-        attributes.offenseTime.current, modifications.offenseTime.current;
-        attributes.kineticDamage.current, modifications.kineticDamage.current;
-        attributes.thermalDamage.current, modifications.thermalDamage.current;
+        attributes.offensePower.current += modifications.offensePower.current;
+        attributes.offenseTime.current += modifications.offenseTime.current;
+        attributes.kineticDamage.current += modifications.kineticDamage.current;
+        attributes.thermalDamage.current += modifications.thermalDamage.current;
 
-        attributes.defensePower.current, modifications.defensePower.current;
-        attributes.kineticDefense.current, modifications.kineticDefense.current;
-        attributes.thermalDefense.current, modifications.thermalDefense.current;
+        attributes.defensePower.current += modifications.defensePower.current;
+        attributes.kineticDefense.current += modifications.kineticDefense.current;
+        attributes.thermalDefense.current += modifications.thermalDefense.current;
 
-        attributes.movePower.current, modifications.movePower.current;
-        attributes.moveTime.current, modifications.moveTime.current;
+        attributes.movePower.current += modifications.movePower.current;
+        attributes.moveTime.current += modifications.moveTime.current;
 
-        attributes.backgroundPower.current, modifications.backgroundPower.current;
+        attributes.backgroundPower.current += modifications.backgroundPower.current;
     }
 
     resetAttributes(attributes: Attributes) {
@@ -587,8 +588,6 @@ class Game {
 
     applyEquippedMods(robot: RobotData) {
         this.resetAttributes(robot.attributes);
-
-        // Identify equipped items.
 
         // Apply mods from equipped items.
         for(var i = 0; i < robot.items.length; i ++) {
