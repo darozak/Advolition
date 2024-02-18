@@ -3,7 +3,7 @@ class ScanData {
     // visible: number[][] = [];
     scanTime: number[][] = [];
     tileMap: number[][] = [];
-    tiles: Feature[] = [];
+    tiles: Tile[] = [];
     robotMap: number[][] = [];
     robots: RobotData[] = [];
 
@@ -30,5 +30,9 @@ class ScanData {
                 this.scanTime[i][j] = 0;
             }
         }
+    }
+
+    testMethod() {
+        return 1;
     }
 }

@@ -77,7 +77,7 @@ class Arena {
 
     toggleDoor(target: Vector) {
         let tileID = this.tileMap[target.x][target.y];
-        switch(gaia.tiles[tileID].name) {
+        switch(this.world.tiles[tileID].name) {
             case "Closed Door":
                 let openDoorID = this.world.tiles.findLastIndex(d => d.name === "Open Door");
                 this.tileMap[target.x][target.y] = openDoorID;

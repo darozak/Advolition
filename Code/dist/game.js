@@ -157,6 +157,25 @@ class Game {
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Core', this.robotData[robotID].core.name, this.coreColor[robotID].value());
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Scanner', this.robotData[robotID].scanner.name, this.scannerColor[robotID].value());
+        topTextFrame += lineSpacing * 2;
+        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Slots', [120, 120, 120]);
+        for (var i = 0; i < this.robotData[robotID].slots.length; i++) {
+            topTextFrame += lineSpacing;
+            let slotName = this.robotData[robotID].slots[i].name;
+            let slotCount = this.robotData[robotID].slots[i].count;
+            if (slotCount > 0) {
+                this.paper.showStatus(centerTextFrame, topTextFrame, slotName, slotCount, [180, 180, 180]);
+            }
+        }
+        topTextFrame += lineSpacing * 2;
+        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
+        for (var i = 0; i < this.robotData[robotID].items.length; i++) {
+            var color = [180, 180, 180];
+            if (this.robotData[robotID].items[i].isEquipped)
+                color = [51, 110, 156];
+            topTextFrame += lineSpacing;
+            this.paper.drawListItem(centerTextFrame, topTextFrame, this.robotData[robotID].items[i].name, color);
+        }
     }
     decay(decayRate, decayFloor, elapsedTime) {
         if (decayRate > 1)
@@ -204,6 +223,8 @@ class Game {
             this.arena.robotMap[destination.x][destination.y] = action.robotID;
             // Change position in stats.
             this.robotData[action.robotID].pos = destination;
+            // Testing the equip command. BUGBUG
+            this.equipItem(this.robotData[action.robotID], "Vorpal Sword");
         }
         else {
             // Take damage if you run into something.
@@ -247,7 +268,7 @@ class Game {
         let targetCoord = action.target;
         let reach = 1.8;
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
-        let tileName = gaia.tiles[tileID].name;
+        let tileName = this.world.tiles[tileID].name;
         console.log(tileName);
         let powerCost = this.robotData[robotID].core.power[action.powerLevel];
         // Is there power for this action?
@@ -289,7 +310,7 @@ class Game {
         let targetCoord = event.action.target;
         let reach = 1.8;
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
-        let tileName = gaia.tiles[tileID].name;
+        let tileName = this.world.tiles[tileID].name;
         // Only act if the object is in reach.    
         if (robotCoord.getDistanceTo(targetCoord) < reach) {
             // Select action based on target.
@@ -311,5 +332,92 @@ class Game {
             this.batteryColor[event.robotID].deactivate();
             this.powerColor[event.robotID].deactivate();
         }
+    }
+    modAttributes(attributes, modifications) {
+        attributes.HPs.current, modifications.HPs.current;
+        attributes.maxHPs.current, modifications.maxHPs.current;
+        attributes.power.current, modifications.power.current;
+        attributes.maxPower.current, modifications.maxPower.current;
+        attributes.damage.current, modifications.damage.current;
+        attributes.defense.current, modifications.defense.current;
+        attributes.moveTime.current, modifications.moveTime.current;
+    }
+    resetAttributes(attributes) {
+        attributes.maxHPs.current = attributes.maxHPs.base;
+        attributes.maxPower.current = attributes.maxPower.base;
+        attributes.damage.current = attributes.damage.base;
+        attributes.defense.current = attributes.defense.base;
+        attributes.moveTime.current = attributes.moveTime.base;
+    }
+    applyEquippedMods(robot) {
+        this.resetAttributes(robot.attributes);
+        // Identify equipped items.
+        // Apply mods from equipped items.
+        for (var i = 0; i < robot.items.length; i++) {
+            if (robot.items[i].isEquipped) {
+                // robot.stats.applyMods(robot.item[i].effects);
+                this.modAttributes(robot.attributes, robot.items[i].effects);
+            }
+        }
+    }
+    /**
+     * Moves the last of the named items on the equipment list
+     * to the top of the equipment list.  It then re-evaluates
+     * which items are equipped based on the slots that the robot
+     * has available.
+     *
+     * @param robot
+     * @param item
+     */
+    equipItem(robot, item) {
+        // Move item to the top of the list.
+        let ID = robot.items.findLastIndex(d => d.name === item);
+        if (ID >= 0) {
+            robot.items.unshift(robot.items.splice(ID, 1)[0]);
+        }
+        // Uniquip all items.
+        for (var i = 0; i < robot.items.length; i++) {
+            robot.items[i].isEquipped = false;
+        }
+        // Add items to slots.
+        for (var i = 0; i < robot.slots.length; i++) {
+            if (robot.slots[i].count > 0) {
+                for (var j = 0; j < robot.slots[i].count; j++) {
+                    let slotName = robot.slots[i].name;
+                    let ID = robot.items.findIndex((d) => d.slot === slotName && !d.isEquipped);
+                    if (ID >= 0)
+                        robot.items[ID].isEquipped = true;
+                }
+            }
+        }
+    }
+    /**
+     * Sets the first inactive named item on the equipment list to active.
+     *
+     * @param item
+     */
+    activateItem(robot, item) {
+    }
+    /**
+     * Sets the first active named item on the equipment list to inactive.
+     *
+     * @param item
+     */
+    inactivateItem(robot, item) {
+    }
+    /**
+     * Removes the last named item from the inventory and re-evaluates which
+     * items are equipped.
+     *
+     * @param item
+     */
+    dropItem(robot, item) {
+    }
+    /**
+     * Adds the specified item to the end of the robot's inventory.
+     *
+     * @param item
+     */
+    carryItem(robot, item) {
     }
 }

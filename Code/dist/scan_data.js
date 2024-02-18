@@ -26,4 +26,7 @@ class ScanData {
             }
         }
     }
+    testMethod() {
+        return 1;
+    }
 }

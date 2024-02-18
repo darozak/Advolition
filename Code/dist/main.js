@@ -1,5 +1,6 @@
 "use strict";
-const game = new Game(gaia);
+// const game = new Game(gaia);
+const game = new Game(new GaiaData());
 // Load robots.
 game.addRobot(new Tobor(), "Alpha");
 // game.addRobot(new Tobor(), "Beta");
