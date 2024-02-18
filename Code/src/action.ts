@@ -18,15 +18,6 @@ class Activate extends Action {
     }
 }
 
-class Equip extends Action {
-
-    constructor(item: string) {
-        super();
-        this.command = "equip";
-        this.item = item;
-    }
-}
-
 class Move extends Action {
 
     constructor(power: number, destination: Vector) {
@@ -38,7 +29,14 @@ class Move extends Action {
     }
 }
 
+class Prioritize extends Action {
 
+    constructor(item: string) {
+        super();
+        this.command = "equip";
+        this.item = item;
+    }
+}
 
 class Scan extends Action {
     constructor(power: number) {

@@ -14,13 +14,6 @@ class Activate extends Action {
         this.target = target;
     }
 }
-class Equip extends Action {
-    constructor(item) {
-        super();
-        this.command = "equip";
-        this.item = item;
-    }
-}
 class Move extends Action {
     constructor(power, destination) {
         super();
@@ -30,6 +23,13 @@ class Move extends Action {
         else
             this.powerLevel = power;
         this.target = destination;
+    }
+}
+class Prioritize extends Action {
+    constructor(item) {
+        super();
+        this.command = "equip";
+        this.item = item;
     }
 }
 class Scan extends Action {

@@ -69,7 +69,7 @@ class Game {
                             this.requestActivate(i, action);
                             break;
                         case "equip":
-                            this.requestEquip(i, action);
+                            this.requestPrioritize(i, action);
                             break;
                         case "move":
                             this.requestMove(i, action);
@@ -92,7 +92,7 @@ class Game {
                         this.resolveActivate(this.events[0]);
                         break;
                     case "equip":
-                        this.resolveEquip(this.events[0]);
+                        this.resolvePrioritize(this.events[0]);
                         break;
                     case "move":
                         this.resolveMove(this.events[0]);
@@ -288,40 +288,6 @@ class Game {
             this.powerColor[event.robotID].deactivate();
         }
     }
-    requestEquip(robotID, action) {
-        // Does item exist in inventory?
-        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
-        if (itemID >= 0) {
-            // Set time delay..
-            let slotName = this.robotData[robotID].items[itemID].slot;
-            let slotID = this.robotData[robotID].slots.findLastIndex(d => d.name === slotName);
-            let delay = this.robotData[robotID].slots[slotID].timeToEquip;
-            // Add action to event que.
-            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
-        }
-    }
-    resolveEquip(event) {
-        // Move item to the top of the list.
-        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
-        if (itemID >= 0) {
-            this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
-        }
-        // Uniquip all items.
-        for (var i = 0; i < this.robotData[event.robotID].items.length; i++) {
-            this.robotData[event.robotID].items[i].isEquipped = false;
-        }
-        // Add items to slots.
-        for (var i = 0; i < this.robotData[event.robotID].slots.length; i++) {
-            if (this.robotData[event.robotID].slots[i].count > 0) {
-                for (var j = 0; j < this.robotData[event.robotID].slots[i].count; j++) {
-                    let slotName = this.robotData[event.robotID].slots[i].name;
-                    let ID = this.robotData[event.robotID].items.findIndex((d) => d.slot === slotName && !d.isEquipped);
-                    if (ID >= 0)
-                        this.robotData[event.robotID].items[ID].isEquipped = true;
-                }
-            }
-        }
-    }
     requestMove(robotID, action) {
         let powerCost = this.robotData[robotID].core.power[action.powerLevel];
         let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
@@ -359,6 +325,40 @@ class Game {
         this.coreColor[action.robotID].deactivate();
         this.batteryColor[action.robotID].deactivate();
         this.powerColor[action.robotID].deactivate();
+    }
+    requestPrioritize(robotID, action) {
+        // Does item exist in inventory?
+        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        if (itemID >= 0) {
+            // Set time delay..
+            let slotName = this.robotData[robotID].items[itemID].slot;
+            let slotID = this.robotData[robotID].slots.findLastIndex(d => d.name === slotName);
+            let delay = this.robotData[robotID].slots[slotID].timeToEquip;
+            // Add action to event que.
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+        }
+    }
+    resolvePrioritize(event) {
+        // Move item to the top of the list.
+        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        if (itemID >= 0) {
+            this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
+        }
+        // Uniquip all items.
+        for (var i = 0; i < this.robotData[event.robotID].items.length; i++) {
+            this.robotData[event.robotID].items[i].isEquipped = false;
+        }
+        // Add items to slots.
+        for (var i = 0; i < this.robotData[event.robotID].slots.length; i++) {
+            if (this.robotData[event.robotID].slots[i].count > 0) {
+                for (var j = 0; j < this.robotData[event.robotID].slots[i].count; j++) {
+                    let slotName = this.robotData[event.robotID].slots[i].name;
+                    let ID = this.robotData[event.robotID].items.findIndex((d) => d.slot === slotName && !d.isEquipped);
+                    if (ID >= 0)
+                        this.robotData[event.robotID].items[ID].isEquipped = true;
+                }
+            }
+        }
     }
     requestScan(botID, call) {
         let powerCost = this.robotData[botID].scanner.power[call.powerLevel];
