@@ -35,6 +35,22 @@ class Game {
         
         this.robotData[robotID].chassis.HPs = 50;
 
+        // Uniquip all items.
+        for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
+            this.robotData[robotID].items[i].isEquipped = false;
+        }
+
+        // Add items to slots.
+        for(var i = 0; i < this.robotData[robotID].slots.length; i ++) {
+            if(this.robotData[robotID].slots[i].count  > 0) {
+                for(var j = 0; j < this.robotData[robotID].slots[i].count; j ++) {
+                    let slotName = this.robotData[robotID].slots[i].name;
+                    let ID = this.robotData[robotID].items.findIndex((d) => d.slot === slotName && !d.isEquipped);
+                    if(ID >= 0) this.robotData[robotID].items[ID].isEquipped = true;
+                }
+            }
+        }
+
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
         this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
         this.chassisColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
@@ -64,15 +80,18 @@ class Game {
 
                     if(action) {
                         switch (action.command) {
+                            case "activate":
+                                this.requestActivate(i, action);
+                                break;
+                            case "equip":
+                                this.requestEquip(i, action);
+                                break;
                             case "move":
                                 this.requestMove(i, action);
                                 break;
                             case "scan":
                                 this.requestScan(i, action);
-                                break;
-                            case "activate":
-                                this.requestActivate(i, action);
-                                break;
+                                break; 
                         }
                     }
                 }
@@ -88,14 +107,17 @@ class Game {
                 // Evaluate any events that should have occurred by now.
                 while(this.events[0].duration <= this.gameTime) {
                     switch (this.events[0].action.command) {
+                        case "activate":
+                            this.resolveActivate(this.events[0]);
+                            break;
+                        case "equip":
+                            this.resolveEquip(this.events[0]);
+                            break;
                         case "move":
                             this.resolveMove(this.events[0]);
                             break;
                         case "scan":
                             this.resolveScan(this.events[0]);
-                            break;
-                        case "activate":
-                            this.resolveActivate(this.events[0]);
                             break;
                     }
 
@@ -263,94 +285,6 @@ class Game {
         }
     }
 
-    requestMove(robotID: number, action: Action) { 
-
-        let powerCost = this.robotData[robotID].core.power[action.powerLevel];
-        let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
-
-        // Is there power for this action?
-        if(this.robotData[robotID].battery.currentPower >= powerCost) {
-
-            // Drain power  
-            this.robotData[robotID].battery.currentPower -= powerCost;
-
-            // Set time delay and adjust for distance across diagonals.
-            let delay = this.robotData[robotID].core.speed[action.powerLevel];
-            delay *= this.robotData[robotID].pos.getDistanceTo(destination);
-
-            // Add action to event que.
-            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));   
-            
-            // Animate display elements
-            this.coreColor[robotID].activate();
-            this.batteryColor[robotID].activate();
-            this.powerColor[robotID].activate();
-        }
-    }
-
-    resolveMove(action: GameEvent) {
-        var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
-        if (this.arena.getTileSpeed(destination) > 0) {
-            
-            // Change position in arena.
-            this.arena.robotMap[this.robotData[action.robotID].pos.x][this.robotData[action.robotID].pos.y] = -1;
-            this.arena.robotMap[destination.x][destination.y] = action.robotID;
-
-            // Change position in stats.
-            this.robotData[action.robotID].pos = destination;
-
-            // Testing the equip command. BUGBUG
-            this.equipItem(this.robotData[action.robotID], "Vorpal Sword");
-            
-        } else {
-            // Take damage if you run into something.
-            this.robotData[action.robotID].chassis.HPs -= 10;
-            this.hpsColor[action.robotID].pulse();
-            this.chassisColor[action.robotID].pulse();
-        }
-
-        // Animate display elements.
-        this.coreColor[action.robotID].deactivate();
-        this.batteryColor[action.robotID].deactivate();
-        this.powerColor[action.robotID].deactivate();
-    }
-
-    requestScan(botID: number, call: Action) {
-
-        let powerCost = this.robotData[botID].scanner.power[call.powerLevel];
-
-        // Is there power for this action?
-        if(this.robotData[botID].battery.currentPower >= powerCost) {
-            
-            // Drain power
-            this.robotData[botID].battery.currentPower -= powerCost;
-
-            // Set scan range and delay.
-            call.range = this.robotData[botID].scanner.range[call.powerLevel];
-            let delay = this.robotData[botID].core.speed[call.powerLevel];
-
-            // Add action to event queue.
-            this.events.push(new GameEvent(botID, call, delay + this.gameTime));
-
-            // Animate display elements.
-            this.scannerColor[botID].activate();
-            this.batteryColor[botID].activate();
-            this.powerColor[botID].activate();
-        }
-    }
-
-    resolveScan(event: GameEvent) {
-
-        // Set rane and perform scan.        
-        let range = this.robotData[event.robotID].scanner.range[event.action.powerLevel];
-        this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
-        
-        // Animate display elements.
-        this.scannerColor[event.robotID].deactivate();
-        this.batteryColor[event.robotID].deactivate();
-        this.powerColor[event.robotID].deactivate();
-    }
-
     requestActivate(robotID: number, action: Action) {
 
         let robotCoord = this.robotData[robotID].pos;
@@ -435,6 +369,135 @@ class Game {
         }
 
     }
+
+    requestEquip(robotID: number, action: Action) {
+
+        // Does item exist in inventory?
+        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        if(itemID >= 0) {
+    
+            // Set time delay..
+            let slotName = this.robotData[robotID].items[itemID].slot;
+            let slotID = this.robotData[robotID].slots.findLastIndex(d => d.name === slotName);
+            let delay = this.robotData[robotID].slots[slotID].timeToEquip;
+
+            // Add action to event que.
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
+        }
+    }
+
+    resolveEquip(event: GameEvent) {
+
+        // Move item to the top of the list.
+        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        if(itemID >= 0) {
+            this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
+        }
+
+        // Uniquip all items.
+        for(var i = 0; i < this.robotData[event.robotID].items.length; i ++) {
+            this.robotData[event.robotID].items[i].isEquipped = false;
+        }
+
+        // Add items to slots.
+        for(var i = 0; i < this.robotData[event.robotID].slots.length; i ++) {
+            if(this.robotData[event.robotID].slots[i].count  > 0) {
+                for(var j = 0; j < this.robotData[event.robotID].slots[i].count; j ++) {
+                    let slotName = this.robotData[event.robotID].slots[i].name;
+                    let ID = this.robotData[event.robotID].items.findIndex((d) => d.slot === slotName && !d.isEquipped);
+                    if(ID >= 0) this.robotData[event.robotID].items[ID].isEquipped = true;
+                }
+            }
+        }
+
+    }
+
+    requestMove(robotID: number, action: Action) { 
+
+        let powerCost = this.robotData[robotID].core.power[action.powerLevel];
+        let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
+
+        // Is there power for this action?
+        if(this.robotData[robotID].battery.currentPower >= powerCost) {
+
+            // Drain power  
+            this.robotData[robotID].battery.currentPower -= powerCost;
+
+            // Set time delay and adjust for distance across diagonals.
+            let delay = this.robotData[robotID].core.speed[action.powerLevel];
+            delay *= this.robotData[robotID].pos.getDistanceTo(destination);
+
+            // Add action to event que.
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));   
+            
+            // Animate display elements
+            this.coreColor[robotID].activate();
+            this.batteryColor[robotID].activate();
+            this.powerColor[robotID].activate();
+        }
+    }
+
+    resolveMove(action: GameEvent) {
+        var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
+        if (this.arena.getTileSpeed(destination) > 0) {
+            
+            // Change position in arena.
+            this.arena.robotMap[this.robotData[action.robotID].pos.x][this.robotData[action.robotID].pos.y] = -1;
+            this.arena.robotMap[destination.x][destination.y] = action.robotID;
+
+            // Change position in stats.
+            this.robotData[action.robotID].pos = destination;
+            
+        } else {
+            // Take damage if you run into something.
+            this.robotData[action.robotID].chassis.HPs -= 10;
+            this.hpsColor[action.robotID].pulse();
+            this.chassisColor[action.robotID].pulse();
+        }
+
+        // Animate display elements.
+        this.coreColor[action.robotID].deactivate();
+        this.batteryColor[action.robotID].deactivate();
+        this.powerColor[action.robotID].deactivate();
+    }
+
+    requestScan(botID: number, call: Action) {
+
+        let powerCost = this.robotData[botID].scanner.power[call.powerLevel];
+
+        // Is there power for this action?
+        if(this.robotData[botID].battery.currentPower >= powerCost) {
+            
+            // Drain power
+            this.robotData[botID].battery.currentPower -= powerCost;
+
+            // Set scan range and delay.
+            call.range = this.robotData[botID].scanner.range[call.powerLevel];
+            let delay = this.robotData[botID].core.speed[call.powerLevel];
+
+            // Add action to event queue.
+            this.events.push(new GameEvent(botID, call, delay + this.gameTime));
+
+            // Animate display elements.
+            this.scannerColor[botID].activate();
+            this.batteryColor[botID].activate();
+            this.powerColor[botID].activate();
+        }
+    }
+
+    resolveScan(event: GameEvent) {
+
+        // Set rane and perform scan.        
+        let range = this.robotData[event.robotID].scanner.range[event.action.powerLevel];
+        this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
+        
+        // Animate display elements.
+        this.scannerColor[event.robotID].deactivate();
+        this.batteryColor[event.robotID].deactivate();
+        this.powerColor[event.robotID].deactivate();
+    }
+
+
 
 
 

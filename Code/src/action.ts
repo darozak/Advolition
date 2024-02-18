@@ -4,8 +4,27 @@ class Action {
     powerLevel: number = 0;
     target: Vector = new Vector(0, 0);
     range: number = 0;
+    item: string = '';
 
     constructor(){}
+}
+
+class Activate extends Action {
+
+    constructor(target: Vector) {
+        super();
+        this.command = "activate";
+        this.target = target;
+    }
+}
+
+class Equip extends Action {
+
+    constructor(item: string) {
+        super();
+        this.command = "equip";
+        this.item = item;
+    }
 }
 
 class Move extends Action {
@@ -19,14 +38,7 @@ class Move extends Action {
     }
 }
 
-class Activate extends Action {
 
-    constructor(target: Vector) {
-        super();
-        this.command = "activate";
-        this.target = target;
-    }
-}
 
 class Scan extends Action {
     constructor(power: number) {
@@ -36,3 +48,4 @@ class Scan extends Action {
         else this.powerLevel = power;
     }
 }
+

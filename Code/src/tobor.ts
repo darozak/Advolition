@@ -23,6 +23,7 @@ class Tobor extends Program {
                     break;
                 case "activate":
                     console.log("Opening door");
+                    this.actionBuffer.push(new Equip('Vorpal Sword'));
                     this.actionBuffer.push(new Activate(target));
                     
                     this.state = "scan";
