@@ -117,11 +117,13 @@ class Game {
         var spriteWidth = 10;
         var mapRadius = 7;
         var mapFrameSize = (mapRadius * 2 + 1) * spriteWidth;
-        var leftMapFrame = 10 + robotID * (mapFrameSize + 10);
+        var attributeDisplayWidth = 200;
+        var robotDisplayWidth = mapFrameSize + attributeDisplayWidth;
+        var leftMapFrame = 10 + robotID * (robotDisplayWidth + 10);
         var topMapFrame = 10;
         var centerTextFrame = mapFrameSize / 2 + leftMapFrame;
         var topTextFrame = topMapFrame + mapFrameSize + 20;
-        var lineSpacing = 20;
+        var lineSpacing = 15;
         var x0 = this.robotData[robotID].pos.x - mapRadius;
         var y0 = this.robotData[robotID].pos.y - mapRadius;
         var x1 = this.robotData[robotID].pos.x + mapRadius;
@@ -161,34 +163,9 @@ class Game {
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         let statRGB = [180, 180, 180];
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
-        topTextFrame += lineSpacing * 2;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
-        topTextFrame += lineSpacing;
-        let hps = this.robotData[robotID].chassis.HPs + '/' + this.robotData[robotID].chassis.maxHPs;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
-        topTextFrame += lineSpacing;
-        let power = this.robotData[robotID].battery.currentPower + '/' + this.robotData[robotID].battery.maxPower;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
-        topTextFrame += lineSpacing * 2;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.robotData[robotID].chassis.name, this.chassisColor[robotID].value());
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Battery', this.robotData[robotID].battery.name, this.batteryColor[robotID].value());
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Core', this.robotData[robotID].core.name, this.coreColor[robotID].value());
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scanner', this.robotData[robotID].scanner.name, this.scannerColor[robotID].value());
-        topTextFrame += lineSpacing * 2;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Slots', [120, 120, 120]);
-        for (var i = 0; i < this.robotData[robotID].slots.length; i++) {
-            topTextFrame += lineSpacing;
-            let slotName = this.robotData[robotID].slots[i].name;
-            let slotCount = this.robotData[robotID].slots[i].count;
-            if (slotCount > 0) {
-                this.paper.showStatus(centerTextFrame, topTextFrame, slotName, slotCount, [180, 180, 180]);
-            }
-        }
-        topTextFrame += lineSpacing * 2;
+        // Display inventory under map.
+        // centerTextFrame = 380;
+        // topTextFrame = 20;
         this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
         for (var i = 0; i < this.robotData[robotID].items.length; i++) {
             var color = [180, 180, 180];
@@ -197,6 +174,61 @@ class Game {
             topTextFrame += lineSpacing;
             this.paper.drawListItem(centerTextFrame, topTextFrame, this.robotData[robotID].items[i].name, color);
         }
+        // Display stats to right of map.
+        centerTextFrame = leftMapFrame + mapFrameSize + 120;
+        topTextFrame = 20;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
+        topTextFrame += lineSpacing;
+        let hps = this.robotData[robotID].chassis.HPs + '/' + this.robotData[robotID].chassis.maxHPs;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
+        topTextFrame += lineSpacing;
+        let power = this.robotData[robotID].battery.currentPower + '/' + this.robotData[robotID].battery.maxPower;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
+        // Display slots
+        topTextFrame += lineSpacing * 0.5;
+        for (var i = 0; i < this.robotData[robotID].slots.length; i++) {
+            topTextFrame += lineSpacing;
+            let slotName = this.robotData[robotID].slots[i].name;
+            let slotCount = this.robotData[robotID].slots[i].count;
+            if (slotCount > 0) {
+                this.paper.showStatus(centerTextFrame, topTextFrame, slotName, slotCount, [180, 180, 180]);
+            }
+        }
+        // topTextFrame += lineSpacing * 2;
+        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.robotData[robotID].chassis.name, this.chassisColor[robotID].value());
+        // topTextFrame += lineSpacing;
+        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Battery', this.robotData[robotID].battery.name, this.batteryColor[robotID].value());
+        // topTextFrame += lineSpacing;
+        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Core', this.robotData[robotID].core.name, this.coreColor[robotID].value());
+        // topTextFrame += lineSpacing;
+        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Scanner', this.robotData[robotID].scanner.name, this.scannerColor[robotID].value());
+        // Display attributes
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].attributes.movePower.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].attributes.moveTime.current, statRGB);
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].attributes.scanPower.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].attributes.scanTime.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].attributes.scanRange.current, statRGB);
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].attributes.offensePower.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].attributes.offenseTime.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].attributes.kineticDamage.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].attributes.thermalDamage.current, statRGB);
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].attributes.defensePower.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].attributes.kineticDefense.current, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].attributes.thermalDefense.current, statRGB);
     }
     decay(decayRate, decayFloor, elapsedTime) {
         if (decayRate > 1)
@@ -391,16 +423,32 @@ class Game {
         attributes.maxHPs.current, modifications.maxHPs.current;
         attributes.power.current, modifications.power.current;
         attributes.maxPower.current, modifications.maxPower.current;
-        attributes.damage.current, modifications.damage.current;
-        attributes.defense.current, modifications.defense.current;
+        attributes.offensePower.current, modifications.offensePower.current;
+        attributes.offenseTime.current, modifications.offenseTime.current;
+        attributes.kineticDamage.current, modifications.kineticDamage.current;
+        attributes.thermalDamage.current, modifications.thermalDamage.current;
+        attributes.defensePower.current, modifications.defensePower.current;
+        attributes.kineticDefense.current, modifications.kineticDefense.current;
+        attributes.thermalDefense.current, modifications.thermalDefense.current;
+        attributes.movePower.current, modifications.movePower.current;
         attributes.moveTime.current, modifications.moveTime.current;
+        attributes.backgroundPower.current, modifications.backgroundPower.current;
     }
     resetAttributes(attributes) {
-        attributes.maxHPs.current = attributes.maxHPs.base;
-        attributes.maxPower.current = attributes.maxPower.base;
-        attributes.damage.current = attributes.damage.base;
-        attributes.defense.current = attributes.defense.base;
-        attributes.moveTime.current = attributes.moveTime.base;
+        attributes.HPs.current, attributes.HPs.base;
+        attributes.maxHPs.current, attributes.maxHPs.base;
+        attributes.power.current, attributes.power.base;
+        attributes.maxPower.current, attributes.maxPower.base;
+        attributes.offensePower.current, attributes.offensePower.base;
+        attributes.offenseTime.current, attributes.offenseTime.base;
+        attributes.kineticDamage.current, attributes.kineticDamage.base;
+        attributes.thermalDamage.current, attributes.thermalDamage.base;
+        attributes.defensePower.current, attributes.defensePower.base;
+        attributes.kineticDefense.current, attributes.kineticDefense.base;
+        attributes.thermalDefense.current, attributes.thermalDefense.base;
+        attributes.movePower.current, attributes.movePower.base;
+        attributes.moveTime.current, attributes.moveTime.base;
+        attributes.backgroundPower.current, attributes.backgroundPower.base;
     }
     applyEquippedMods(robot) {
         this.resetAttributes(robot.attributes);

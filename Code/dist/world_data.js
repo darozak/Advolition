@@ -85,13 +85,13 @@ class GaiaData extends WorldData {
         // Create Items
         var effects;
         effects = new Attributes();
-        effects.damage.current = 1;
+        effects.kineticDamage.current = 1;
         this.items.push(new Item('Vorpal Sword', 'Weapon Slot', Trigger.attacking, 1, effects, 10));
         effects = new Attributes();
-        effects.damage.current = 2;
+        effects.thermalDamage.current = 2;
         this.items.push(new Item('Blaster', 'Weapon Slot', Trigger.attacking, 1, effects, 10));
         effects = new Attributes();
-        effects.damage.current = 2;
+        effects.thermalDefense.current = 2;
         this.items.push(new Item('Shield', 'Shield Slot', Trigger.attacking, 1, effects, 10));
         effects = new Attributes();
         effects.power.current = 10;
@@ -125,9 +125,19 @@ class Attributes {
     maxHPs = new Attribute();
     power = new Attribute();
     maxPower = new Attribute();
-    damage = new Attribute();
-    defense = new Attribute();
+    scanPower = new Attribute();
+    scanTime = new Attribute();
+    scanRange = new Attribute();
+    offensePower = new Attribute();
+    offenseTime = new Attribute();
+    kineticDamage = new Attribute();
+    thermalDamage = new Attribute();
+    defensePower = new Attribute();
+    kineticDefense = new Attribute();
+    thermalDefense = new Attribute();
+    movePower = new Attribute();
     moveTime = new Attribute();
+    backgroundPower = new Attribute();
     constructor() { }
 }
 var Trigger;
