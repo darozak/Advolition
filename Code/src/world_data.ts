@@ -111,24 +111,24 @@ class GaiaData extends WorldData {
 
 
         // Create Items
-        var effects: Attributes;
+        var effects: Stats;
 
-        effects = new Attributes();
-        effects.kineticDamage.current = 1;
-        this.items.push(new Item('Vorpal Sword', 'Weapon Slot', Trigger.attacking, 1, effects, 10));
+        effects = new Stats();
+        effects.kineticDamage = 1;
+        this.items.push(new Item('Vorpal Sword', 'Weapon Slot', effects));
 
-        effects = new Attributes();
-        effects.thermalDamage.current = 2;
-        this.items.push(new Item('Blaster', 'Weapon Slot', Trigger.attacking, 1, effects, 10));
+        effects = new Stats();
+        effects.thermalDamage = 2;
+        this.items.push(new Item('Blaster', 'Weapon Slot', effects));
 
-        effects = new Attributes();
-        effects.thermalDefense.current = 2;
-        this.items.push(new Item('Shield', 'Shield Slot', Trigger.attacking, 1, effects, 10));
+        effects = new Stats();
+        effects.thermalDefense = 2;
+        this.items.push(new Item('Shield', 'Shield Slot', effects));
 
-        effects = new Attributes();
-        effects.power.current = 10;
-        effects.maxPower.current = 10;
-        this.items.push(new Item('Battery', 'Battery Slot', Trigger.attacking, 0, effects, 10));
+        effects = new Stats();
+        effects.power = 10;
+        effects.maxPower = 10;
+        this.items.push(new Item('Battery', 'Battery Slot', effects));
 
         console.log(this.items);
 
@@ -159,36 +159,94 @@ class Attribute {
     }
 }
 
-class Attributes {
-    HPs = new Attribute();
-    maxHPs = new Attribute();
+class Stats {
 
-    power = new Attribute();
-    maxPower = new Attribute();
+    // Non-transient stats
+    HPs = 0;
+    power = 0;
+    
 
-    scanPower = new Attribute();
-    scanTime = new Attribute();
-    scanRange = new Attribute();
+    // Transient stats
+    maxHPs = 0;
+    maxPower = 0;
 
-    offensePower = new Attribute();
-    offenseTime = new Attribute();
-    kineticDamage = new Attribute();
-    thermalDamage = new Attribute();
+    scanPower = 0;
+    scanTime = 0;
+    scanRange = 0;
 
-    defensePower = new Attribute();
-    kineticDefense = new Attribute();
-    thermalDefense = new Attribute();
+    offensePower = 0;
+    offenseTime = 0;
+    kineticDamage = 0;
+    thermalDamage = 0;
 
-    movePower = new Attribute();
-    moveTime = new Attribute();
+    defensePower = 0;
+    kineticDefense = 0;
+    thermalDefense = 0;
 
-    backgroundPower = new Attribute();
+    movePower = 0;
+    moveTime = 0;
+
+    backgroundPower = 0;
 
     constructor() {}
+
+    add(stats: Stats) {
+        this.HPs += stats.HPs;
+        this.maxHPs += stats.maxHPs;
+
+        this.power += stats.power;
+        this.maxPower += stats.maxPower;
+
+        this.scanPower += stats.scanPower;
+        this.scanTime += stats.scanTime;
+        this.scanRange += stats.scanRange;
+
+        this.offensePower += stats.offensePower;
+        this.offenseTime += stats.offenseTime;
+        this.kineticDamage += stats.kineticDamage;
+        this.thermalDamage += stats.thermalDamage;
+
+        this.defensePower += stats.defensePower;
+        this.kineticDefense += stats.kineticDefense;
+        this.thermalDefense += stats.thermalDefense;
+
+        this.movePower += stats.movePower;
+        this.moveTime += stats.moveTime;
+
+        this.backgroundPower += stats.backgroundPower;
+    }
+
+    copy(stats: Stats, copyAll: boolean) {
+
+        if(copyAll) {
+            // Non-transient stats
+            this.HPs = stats.HPs;
+            this.power = stats.power;
+        }
+    
+        // Transient stats
+        this.maxHPs = stats.maxHPs;
+        this.maxPower = stats.maxPower;
+
+        this.scanPower = stats.scanPower;
+        this.scanTime = stats.scanTime;
+        this.scanRange = stats.scanRange;
+
+        this.offensePower = stats.offensePower;
+        this.offenseTime = stats.offenseTime;
+        this.kineticDamage = stats.kineticDamage;
+        this.thermalDamage = stats.thermalDamage;
+
+        this.defensePower = stats.defensePower;
+        this.kineticDefense = stats.kineticDefense;
+        this.thermalDefense = stats.thermalDefense;
+
+        this.movePower = stats.movePower;
+        this.moveTime = stats.moveTime;
+
+        this.backgroundPower = stats.backgroundPower;
+    } 
 }
- 
-enum Trigger {attacking, defending, moving};
-// enum Slot {shield, weapon};
 
 class Slot {
     name: string;
@@ -202,7 +260,8 @@ class Slot {
 }
 
 class Robot {
-    attributes = new Attributes();
+    baseStats = new Stats();
+    adjustedStats = new Stats();
     slots: Slot[] = [];
     items: Item[] = [];
 
@@ -216,14 +275,16 @@ class Humanoid extends Robot {
         this.slots = slots;
         var ID: number; 
 
-        // Set attributes
-        this.attributes.HPs.base = 100;
-        this.attributes.maxHPs.base = 100;
+        // Set base stats
+        this.baseStats.HPs = 100;
+        this.baseStats.maxHPs = 100;
 
-        this.attributes.power.base = 100;
-        this.attributes.maxPower.base = 100;
+        this.baseStats.power = 100;
+        this.baseStats.maxPower = 100;
 
-        this.attributes.moveTime.base = 10;
+        this.baseStats.moveTime = 10;
+        
+        this.adjustedStats.copy(this.baseStats, true);
         
         // Add slots
         ID = this.slots.findLastIndex(d => d.name === "Battery Slot");
@@ -253,22 +314,15 @@ class Humanoid extends Robot {
     }
 }
 
-
 class Item {   
     name: string;
     slot: string;
-    mass: number;
-    powerTrigger: Trigger;
-    powerCost: number;
-    effects: Attributes;
+    effects: Stats;
     isEquipped: boolean = false;
 
-    constructor(name: string, slot: string, trigger: Trigger, powerCost: number, effects: Attributes, mass: number) {
+    constructor(name: string, slot: string, effects: Stats) {
         this.name = name;
         this.slot = slot;
-        this.powerTrigger = trigger;
-        this.powerCost = powerCost;
         this.effects = effects;
-        this.mass = mass;
     }
 }

@@ -1,6 +1,7 @@
 "use strict";
 class RobotData {
-    attributes;
+    baseStats = new Stats();
+    adjustedStats = new Stats();
     slots = [];
     items = [];
     scanTime = 0;
@@ -18,7 +19,8 @@ class RobotData {
         this.name = name;
         let model = world.models[0];
         this.pos = world.entrances[robotID];
-        this.attributes = world.robots[0].attributes;
+        this.baseStats.copy(world.robots[0].baseStats, true);
+        this.adjustedStats.copy(world.robots[0].adjustedStats, true);
         this.slots = world.robots[0].slots;
         this.items = world.robots[0].items;
         // Add model's equipment

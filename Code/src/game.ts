@@ -275,32 +275,32 @@ class Game {
 
         // Display attributes
         topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].attributes.movePower.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].attributes.moveTime.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
 
         topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].attributes.scanPower.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].attributes.scanTime.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].attributes.scanRange.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
 
         topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].attributes.offensePower.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].adjustedStats.offensePower, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].attributes.offenseTime.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].attributes.kineticDamage.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].adjustedStats.kineticDamage, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].attributes.thermalDamage.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
 
         topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].attributes.defensePower.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].adjustedStats.defensePower, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].attributes.kineticDefense.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].attributes.thermalDefense.current, statRGB);
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);
 
         
     } 
@@ -542,58 +542,14 @@ class Game {
         this.powerColor[event.robotID].deactivate();
     }
 
-    modAttributes(attributes: Attributes, modifications: Attributes) {
-        attributes.HPs.current += modifications.HPs.current;
-        attributes.maxHPs.current += modifications.maxHPs.current;
-
-        attributes.power.current += modifications.power.current;
-        attributes.maxPower.current += modifications.maxPower.current;
-
-        attributes.offensePower.current += modifications.offensePower.current;
-        attributes.offenseTime.current += modifications.offenseTime.current;
-        attributes.kineticDamage.current += modifications.kineticDamage.current;
-        attributes.thermalDamage.current += modifications.thermalDamage.current;
-
-        attributes.defensePower.current += modifications.defensePower.current;
-        attributes.kineticDefense.current += modifications.kineticDefense.current;
-        attributes.thermalDefense.current += modifications.thermalDefense.current;
-
-        attributes.movePower.current += modifications.movePower.current;
-        attributes.moveTime.current += modifications.moveTime.current;
-
-        attributes.backgroundPower.current += modifications.backgroundPower.current;
-    }
-
-    resetAttributes(attributes: Attributes) {
-        attributes.HPs.current, attributes.HPs.base;
-        attributes.maxHPs.current, attributes.maxHPs.base;
-
-        attributes.power.current, attributes.power.base;
-        attributes.maxPower.current, attributes.maxPower.base;
-
-        attributes.offensePower.current, attributes.offensePower.base;
-        attributes.offenseTime.current, attributes.offenseTime.base;
-        attributes.kineticDamage.current, attributes.kineticDamage.base;
-        attributes.thermalDamage.current, attributes.thermalDamage.base;
-
-        attributes.defensePower.current, attributes.defensePower.base;
-        attributes.kineticDefense.current, attributes.kineticDefense.base;
-        attributes.thermalDefense.current, attributes.thermalDefense.base;
-
-        attributes.movePower.current, attributes.movePower.base;
-        attributes.moveTime.current, attributes.moveTime.base;
-
-        attributes.backgroundPower.current, attributes.backgroundPower.base;
-    }
-
     applyEquippedMods(robot: RobotData) {
-        this.resetAttributes(robot.attributes);
+        // this.resetAttributes(robot.adjustedStats);
+        robot.adjustedStats.copy(robot.baseStats, false);
 
         // Apply mods from equipped items.
         for(var i = 0; i < robot.items.length; i ++) {
             if(robot.items[i].isEquipped) {
-                // robot.stats.applyMods(robot.item[i].effects);
-                this.modAttributes(robot.attributes, robot.items[i].effects)
+                robot.adjustedStats.add(robot.items[i].effects);
             }
         }
     }

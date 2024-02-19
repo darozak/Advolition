@@ -1,7 +1,9 @@
 
 class RobotData {
 
-    attributes: Attributes;
+    baseStats = new Stats();
+    adjustedStats = new Stats();
+
     slots: Slot[] = [];
     items: Item[] = [];
 
@@ -23,7 +25,9 @@ class RobotData {
         let model = world.models[0];
         this.pos = world.entrances[robotID];
 
-        this.attributes = world.robots[0].attributes;
+        this.baseStats.copy(world.robots[0].baseStats, true);
+        this.adjustedStats.copy(world.robots[0].adjustedStats, true);
+
         this.slots = world.robots[0].slots;
         this.items = world.robots[0].items;
 
