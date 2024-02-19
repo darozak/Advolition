@@ -1,85 +1,184 @@
 "use strict";
-class Equipment {
+class Slot {
     name;
-    mass = 0;
-    power;
-    speed;
-    type;
-    constructor(name, type, mass, power, speed) {
+    count = 0;
+    timeToEquip;
+    constructor(name, timeToEquip) {
         this.name = name;
-        this.type = "equipment";
-        this.mass = mass;
-        this.speed = speed;
-        while (this.speed.length < 3)
-            this.speed.push(0);
-        this.power = power;
-        while (this.power.length < 3)
-            this.power.push(0);
+        this.timeToEquip = timeToEquip;
     }
 }
-class Scanner extends Equipment {
-    range;
-    constructor(name, mass, power, speed, range) {
-        super(name, "scanner", mass, power, speed);
-        this.range = range;
-        while (this.range.length < 3)
-            this.range.push(0);
-    }
-}
-class Shield extends Equipment {
-    resistance;
-    constructor(name, mass, power, speed, resistance) {
-        super(name, "shield", mass, power, speed);
-        this.resistance = resistance;
-        while (this.resistance.length < 3)
-            this.resistance.push(0);
-    }
-}
-class Weapon extends Equipment {
-    damage;
-    range;
-    constructor(name, mass, power, speed, damage, range) {
-        super(name, "weapon", mass, power, speed);
-        this.damage = damage;
-        while (this.damage.length < 3)
-            this.damage.push(0);
-        this.range = range;
-        while (this.range.length < 3)
-            this.range.push(0);
-    }
-}
-class Core extends Equipment {
-    constructor(name, mass, power, speed) {
-        super(name, "core", mass, power, speed);
-    }
-}
-class Battery {
+class Item {
     name;
-    mass = 0;
-    type;
-    currentPower;
-    maxPower;
-    constructor(name, mass, maxPower) {
+    slot;
+    effects;
+    isEquipped = false;
+    constructor(name, slot, effects) {
         this.name = name;
-        this.type = "battery";
-        this.mass = mass;
-        this.maxPower = maxPower;
-        this.currentPower = maxPower;
+        this.slot = slot;
+        this.effects = effects;
     }
 }
-class Chassis {
+class Stats {
+    // Non-transient stats
+    HPs = 0;
+    power = 0;
+    // Transient stats
+    maxHPs = 0;
+    maxPower = 0;
+    scanPower = 0;
+    scanTime = 0;
+    scanRange = 0;
+    offensePower = 0;
+    offenseTime = 0;
+    kineticDamage = 0;
+    thermalDamage = 0;
+    defensePower = 0;
+    kineticDefense = 0;
+    thermalDefense = 0;
+    movePower = 0;
+    moveTime = 0;
+    triggerPower = 0;
+    triggerTime = 0;
+    triggerRange = 0;
+    backgroundPower = 0;
+    constructor() { }
+    add(stats) {
+        this.HPs += stats.HPs;
+        this.maxHPs += stats.maxHPs;
+        this.power += stats.power;
+        this.maxPower += stats.maxPower;
+        this.scanPower += stats.scanPower;
+        this.scanTime += stats.scanTime;
+        this.scanRange += stats.scanRange;
+        this.offensePower += stats.offensePower;
+        this.offenseTime += stats.offenseTime;
+        this.kineticDamage += stats.kineticDamage;
+        this.thermalDamage += stats.thermalDamage;
+        this.defensePower += stats.defensePower;
+        this.kineticDefense += stats.kineticDefense;
+        this.thermalDefense += stats.thermalDefense;
+        this.movePower += stats.movePower;
+        this.moveTime += stats.moveTime;
+        this.triggerPower += stats.triggerPower;
+        this.triggerTime += stats.triggerTime;
+        this.triggerRange += stats.triggerRange;
+        this.backgroundPower += stats.backgroundPower;
+    }
+    copy(stats, copyAll) {
+        if (copyAll) {
+            // Non-transient stats
+            this.HPs = stats.HPs;
+            this.power = stats.power;
+        }
+        // Transient stats
+        this.maxHPs = stats.maxHPs;
+        this.maxPower = stats.maxPower;
+        this.scanPower = stats.scanPower;
+        this.scanTime = stats.scanTime;
+        this.scanRange = stats.scanRange;
+        this.offensePower = stats.offensePower;
+        this.offenseTime = stats.offenseTime;
+        this.kineticDamage = stats.kineticDamage;
+        this.thermalDamage = stats.thermalDamage;
+        this.defensePower = stats.defensePower;
+        this.kineticDefense = stats.kineticDefense;
+        this.thermalDefense = stats.thermalDefense;
+        this.movePower = stats.movePower;
+        this.moveTime = stats.moveTime;
+        this.triggerPower = stats.triggerPower;
+        this.triggerTime = stats.triggerTime;
+        this.triggerRange = stats.triggerRange;
+        this.backgroundPower = stats.backgroundPower;
+    }
+}
+class Robot {
+    baseStats = new Stats();
+    adjustedStats = new Stats();
+    slots = [];
+    items = [];
+    constructor() {
+        // Non-transient stats
+        this.baseStats.HPs = 90;
+        this.baseStats.power = 90;
+        // Transient stats
+        this.baseStats.maxHPs = 90;
+        this.baseStats.maxPower = 90;
+        this.baseStats.scanPower = 1;
+        this.baseStats.scanTime = 10;
+        this.baseStats.scanRange = 5;
+        this.baseStats.offensePower = 0;
+        this.baseStats.offenseTime = 0;
+        this.baseStats.kineticDamage = 0;
+        this.baseStats.thermalDamage = 0;
+        this.baseStats.defensePower = 0;
+        this.baseStats.kineticDefense = 0;
+        this.baseStats.thermalDefense = 0;
+        this.baseStats.movePower = 1;
+        this.baseStats.moveTime = 10;
+        this.baseStats.triggerPower = 1;
+        this.baseStats.triggerTime = 10;
+        this.baseStats.triggerRange = 1;
+        this.baseStats.backgroundPower = 0;
+    }
+}
+class Humanoid extends Robot {
+    constructor(slots, items) {
+        super();
+        this.slots = slots;
+        var ID;
+        this.adjustedStats.copy(this.baseStats, true);
+        // Add slots
+        ID = this.slots.findLastIndex(d => d.name === "Battery Slot");
+        if (ID >= 0)
+            this.slots[ID].count++;
+        ID = slots.findLastIndex(d => d.name === "Weapon Slot");
+        if (ID >= 0)
+            this.slots[ID].count++;
+        ID = slots.findLastIndex(d => d.name === "Weapon Slot");
+        if (ID >= 0)
+            this.slots[ID].count++;
+        // Add items
+        ID = items.findLastIndex(d => d.name === "Battery");
+        if (ID >= 0)
+            this.items.push(structuredClone(items[ID]));
+        ID = items.findLastIndex(d => d.name === "Blaster");
+        if (ID >= 0)
+            this.items.push(structuredClone(items[ID]));
+        ID = items.findLastIndex(d => d.name === "Shield");
+        if (ID >= 0)
+            this.items.push(structuredClone(items[ID]));
+        ID = items.findLastIndex(d => d.name === "Vorpal Sword");
+        if (ID >= 0)
+            this.items.push(structuredClone(items[ID]));
+        ID = items.findLastIndex(d => d.name === "Vorpal Sword");
+        if (ID >= 0)
+            this.items.push(structuredClone(items[ID]));
+    }
+}
+class Tile {
     name;
+    key;
     sprite;
-    mass = 0;
-    type;
-    HPs;
-    maxHPs;
-    constructor(name, sprite, mass, maxHPS) {
+    transparent;
+    speed;
+    constructor(name, key, sprite, transparent, speed) {
         this.name = name;
+        this.key = key;
         this.sprite = sprite;
-        this.type = "chassis";
-        this.mass = mass;
-        this.maxHPs = maxHPS;
-        this.HPs = maxHPS;
+        this.transparent = transparent;
+        this.speed = speed;
+    }
+}
+class WorldData {
+    maxRobotCount = 10;
+    size = new Vector(10, 10);
+    sketch = [];
+    entrances = [];
+    tiles = [];
+    slots = [];
+    items = [];
+    robots = [];
+    constructor() {
     }
 }

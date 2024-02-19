@@ -1,7 +1,7 @@
 class Action {
     
     command: string =  "";
-    powerLevel: number = 0;
+    // powerLevel: number = 0;
     target: Vector = new Vector(0, 0);
     range: number = 0;
     item: string = '';
@@ -20,11 +20,11 @@ class Activate extends Action {
 
 class Move extends Action {
 
-    constructor(power: number, destination: Vector) {
+    constructor(destination: Vector) {
         super();
         this.command = "move"
-        if(power < 0 || power > 2) this.powerLevel = 0; 
-        else this.powerLevel = power;
+        // if(power < 0 || power > 2) this.powerLevel = 0; 
+        // else this.powerLevel = power;
         this.target = destination;
     }
 }
@@ -39,11 +39,11 @@ class Prioritize extends Action {
 }
 
 class Scan extends Action {
-    constructor(power: number) {
+    constructor() {
         super()
         this.command = "scan";
-        if(power < 0 || power > 2) this.powerLevel = 0; 
-        else this.powerLevel = power;
+        // if(power < 0 || power > 2) this.powerLevel = 0; 
+        // else this.powerLevel = power;
     }
 }
 

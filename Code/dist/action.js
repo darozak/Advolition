@@ -1,7 +1,7 @@
 "use strict";
 class Action {
     command = "";
-    powerLevel = 0;
+    // powerLevel: number = 0;
     target = new Vector(0, 0);
     range = 0;
     item = '';
@@ -15,13 +15,11 @@ class Activate extends Action {
     }
 }
 class Move extends Action {
-    constructor(power, destination) {
+    constructor(destination) {
         super();
         this.command = "move";
-        if (power < 0 || power > 2)
-            this.powerLevel = 0;
-        else
-            this.powerLevel = power;
+        // if(power < 0 || power > 2) this.powerLevel = 0; 
+        // else this.powerLevel = power;
         this.target = destination;
     }
 }
@@ -33,12 +31,10 @@ class Prioritize extends Action {
     }
 }
 class Scan extends Action {
-    constructor(power) {
+    constructor() {
         super();
         this.command = "scan";
-        if (power < 0 || power > 2)
-            this.powerLevel = 0;
-        else
-            this.powerLevel = power;
+        // if(power < 0 || power > 2) this.powerLevel = 0; 
+        // else this.powerLevel = power;
     }
 }

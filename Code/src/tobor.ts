@@ -7,7 +7,7 @@ class Tobor extends Program {
         var destination2 = new Vector(6,3);
         var target = new Vector(3, 4);
 
-        // myAction = new Scan(2);
+        // myAction = new Scan();
     
         if(this.actionBuffer.length < 1) {
             
@@ -15,9 +15,9 @@ class Tobor extends Program {
                 case "start": 
                 console.log("I'm back");
                     let myPosition = myData.robots[myID].pos;
-                    this.actionBuffer.push(new Scan(0)); 
-                    this.actionBuffer.push(new Scan(2));
-                    this.actionBuffer.push(new Move(2, destination));  
+                    this.actionBuffer.push(new Scan()); 
+                    this.actionBuffer.push(new Scan());
+                    this.actionBuffer.push(new Move(destination));  
                     if(myPosition.x === destination.x && myPosition.y === destination.y) this.state = "activate";
                     // if(myData.robots[myID].battery.currentPower < 100) this.state = "recharge";
                     break;
@@ -30,20 +30,20 @@ class Tobor extends Program {
                     break;
                 case "move":
                     // console.log("move state");
-                    this.actionBuffer.push(new Move(2, destination)); 
+                    this.actionBuffer.push(new Move(destination)); 
                     this.state = "scan";
                     break;
                 case "scan":
                     console.log("scan state");
-                    this.actionBuffer.push(new Scan(0)); 
-                    this.actionBuffer.push(new Scan(2));
-                    this.actionBuffer.push(new Move(0, destination2));
+                    this.actionBuffer.push(new Scan()); 
+                    this.actionBuffer.push(new Scan());
+                    this.actionBuffer.push(new Move(destination2));
                     // console.log(myData.robots[myID].core.mass);
                     this.state = "scan";
                     break;
                 case "end":
                     console.log("end state");
-                    this.actionBuffer.push(new Move(2, destination));
+                    this.actionBuffer.push(new Move(destination));
                     break;
             }
         }

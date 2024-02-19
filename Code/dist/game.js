@@ -28,7 +28,7 @@ class Game {
         this.robotData.push(new RobotData(this.world, robotID, name));
         this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID;
-        this.robotData[robotID].chassis.HPs = 50;
+        // this.robotData[robotID].chassis.HPs = 50;
         // Uniquip all items.
         for (var i = 0; i < this.robotData[robotID].items.length; i++) {
             this.robotData[robotID].items[i].isEquipped = false;
@@ -58,11 +58,11 @@ class Game {
         this.gameTime++;
         for (var i = 0; i < this.programs.length; i++) {
             // If the robot is still alive and isn't doing anything.
-            if (this.robotData[i].chassis.HPs > 0 && !this.events.some(d => d.robotID == i)) {
+            if (this.robotData[i].adjustedStats.HPs > 0 && !this.events.some(d => d.robotID == i)) {
                 var action = new Action();
                 // Make sure the robot's personal data is up to date in scanData.
                 this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
-                this.scanData[i].robots[i].scanTime = this.gameTime;
+                this.scanData[i].robots[i].lastScan = this.gameTime;
                 // Let the robot run it's code.
                 action = this.programs[i].run(i, structuredClone(this.scanData[i]), action);
                 if (action) {
@@ -146,7 +146,7 @@ class Game {
                     let decayFloor = 0.3;
                     tileAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].scanTime[i][j]);
                     if (robotScanID >= 0) {
-                        robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].scanTime);
+                        robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].lastScan);
                     }
                 }
                 // Draw tile.
@@ -155,19 +155,17 @@ class Game {
                 }
                 // Draw robot.
                 if (robotScanID >= 0) {
-                    this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotScanID].chassis.sprite, new Vector(i - x0, j - y0), robotAlpha, false);
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotScanID].sprite, new Vector(i - x0, j - y0), robotAlpha, false);
                 }
             }
         }
         // Draw self in center of map.
-        this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotID].chassis.sprite, new Vector(mapRadius, mapRadius), 1, true);
+        this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotID].sprite, new Vector(mapRadius, mapRadius), 1, true);
         // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         let statRGB = [180, 180, 180];
         // Display inventory under map.
-        // centerTextFrame = 380;
-        // topTextFrame = 20;
         this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
         for (var i = 0; i < this.robotData[robotID].items.length; i++) {
             var color = [180, 180, 180];
@@ -183,10 +181,10 @@ class Game {
         topTextFrame += lineSpacing * 1.5;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
         topTextFrame += lineSpacing;
-        let hps = this.robotData[robotID].chassis.HPs + '/' + this.robotData[robotID].chassis.maxHPs;
+        let hps = this.robotData[robotID].adjustedStats.HPs + '/' + this.robotData[robotID].adjustedStats.maxHPs;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
         topTextFrame += lineSpacing;
-        let power = this.robotData[robotID].battery.currentPower + '/' + this.robotData[robotID].battery.maxPower;
+        let power = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
         // Display slots
         topTextFrame += lineSpacing * 0.5;
@@ -198,19 +196,17 @@ class Game {
                 this.paper.showStatus(centerTextFrame, topTextFrame, slotName, slotCount, [180, 180, 180]);
             }
         }
-        // topTextFrame += lineSpacing * 2;
-        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Chassis', this.robotData[robotID].chassis.name, this.chassisColor[robotID].value());
-        // topTextFrame += lineSpacing;
-        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Battery', this.robotData[robotID].battery.name, this.batteryColor[robotID].value());
-        // topTextFrame += lineSpacing;
-        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Core', this.robotData[robotID].core.name, this.coreColor[robotID].value());
-        // topTextFrame += lineSpacing;
-        // this.paper.showStatus(centerTextFrame, topTextFrame, 'Scanner', this.robotData[robotID].scanner.name, this.scannerColor[robotID].value());
         // Display attributes
         topTextFrame += lineSpacing * 1.5;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Trigger Power', this.robotData[robotID].adjustedStats.triggerPower, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Trigger Time', this.robotData[robotID].adjustedStats.triggerTime, statRGB);
+        topTextFrame += lineSpacing;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Trigger Range', this.robotData[robotID].adjustedStats.triggerRange, statRGB);
         topTextFrame += lineSpacing * 1.5;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
         topTextFrame += lineSpacing;
@@ -259,11 +255,11 @@ class Game {
         let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
         let tileName = this.world.tiles[tileID].name;
         console.log(tileName);
-        let powerCost = this.robotData[robotID].core.power[action.powerLevel];
+        let powerCost = this.robotData[robotID].adjustedStats.triggerPower;
         // Is there power for this action?
-        if (this.robotData[robotID].battery.currentPower >= powerCost) {
+        if (this.robotData[robotID].adjustedStats.power >= powerCost) {
             // Drain power
-            this.robotData[robotID].battery.currentPower -= powerCost;
+            this.robotData[robotID].adjustedStats.power -= powerCost;
             // Only act if the object is in reach.    
             if (robotCoord.getDistanceTo(targetCoord) < reach) {
                 var delay = 0;
@@ -305,10 +301,10 @@ class Game {
             // Select action based on target.
             switch (tileName) {
                 case "Power Station":
-                    this.robotData[event.robotID].battery.currentPower = this.robotData[event.robotID].battery.maxPower;
+                    this.robotData[event.robotID].adjustedStats.power = this.robotData[event.robotID].adjustedStats.maxPower;
                     break;
                 case "Repair Bay":
-                    this.robotData[event.robotID].chassis.HPs = this.robotData[event.robotID].chassis.maxHPs;
+                    this.robotData[event.robotID].adjustedStats.HPs = this.robotData[event.robotID].adjustedStats.maxHPs;
                     break;
                 case "Closed Door":
                     this.arena.toggleDoor(targetCoord);
@@ -323,14 +319,14 @@ class Game {
         }
     }
     requestMove(robotID, action) {
-        let powerCost = this.robotData[robotID].core.power[action.powerLevel];
+        let powerCost = this.robotData[robotID].adjustedStats.movePower;
         let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
         // Is there power for this action?
-        if (this.robotData[robotID].battery.currentPower >= powerCost) {
+        if (this.robotData[robotID].adjustedStats.power >= powerCost) {
             // Drain power  
-            this.robotData[robotID].battery.currentPower -= powerCost;
+            this.robotData[robotID].adjustedStats.power -= powerCost;
             // Set time delay and adjust for distance across diagonals.
-            let delay = this.robotData[robotID].core.speed[action.powerLevel];
+            let delay = this.robotData[robotID].adjustedStats.moveTime;
             delay *= this.robotData[robotID].pos.getDistanceTo(destination);
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
@@ -351,7 +347,7 @@ class Game {
         }
         else {
             // Take damage if you run into something.
-            this.robotData[action.robotID].chassis.HPs -= 10;
+            this.robotData[action.robotID].adjustedStats.HPs -= 10;
             this.hpsColor[action.robotID].pulse();
             this.chassisColor[action.robotID].pulse();
         }
@@ -397,14 +393,14 @@ class Game {
         this.applyEquippedMods(this.robotData[event.robotID]);
     }
     requestScan(botID, call) {
-        let powerCost = this.robotData[botID].scanner.power[call.powerLevel];
+        let powerCost = this.robotData[botID].adjustedStats.scanPower;
         // Is there power for this action?
-        if (this.robotData[botID].battery.currentPower >= powerCost) {
+        if (this.robotData[botID].adjustedStats.power >= powerCost) {
             // Drain power
-            this.robotData[botID].battery.currentPower -= powerCost;
+            this.robotData[botID].adjustedStats.power -= powerCost;
             // Set scan range and delay.
-            call.range = this.robotData[botID].scanner.range[call.powerLevel];
-            let delay = this.robotData[botID].core.speed[call.powerLevel];
+            call.range = this.robotData[botID].adjustedStats.scanRange;
+            let delay = this.robotData[botID].adjustedStats.scanTime;
             // Add action to event queue.
             this.events.push(new GameEvent(botID, call, delay + this.gameTime));
             // Animate display elements.
@@ -415,7 +411,7 @@ class Game {
     }
     resolveScan(event) {
         // Set rane and perform scan.        
-        let range = this.robotData[event.robotID].scanner.range[event.action.powerLevel];
+        let range = this.robotData[event.robotID].adjustedStats.scanRange;
         this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         // Animate display elements.
         this.scannerColor[event.robotID].deactivate();
@@ -429,37 +425,6 @@ class Game {
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isEquipped) {
                 robot.adjustedStats.add(robot.items[i].effects);
-            }
-        }
-    }
-    /**
-     * Moves the last of the named items on the equipment list
-     * to the top of the equipment list.  It then re-evaluates
-     * which items are equipped based on the slots that the robot
-     * has available.
-     *
-     * @param robot
-     * @param item
-     */
-    equipItem(robot, item) {
-        // Move item to the top of the list.
-        let ID = robot.items.findLastIndex(d => d.name === item);
-        if (ID >= 0) {
-            robot.items.unshift(robot.items.splice(ID, 1)[0]);
-        }
-        // Uniquip all items.
-        for (var i = 0; i < robot.items.length; i++) {
-            robot.items[i].isEquipped = false;
-        }
-        // Add items to slots.
-        for (var i = 0; i < robot.slots.length; i++) {
-            if (robot.slots[i].count > 0) {
-                for (var j = 0; j < robot.slots[i].count; j++) {
-                    let slotName = robot.slots[i].name;
-                    let ID = robot.items.findIndex((d) => d.slot === slotName && !d.isEquipped);
-                    if (ID >= 0)
-                        robot.items[ID].isEquipped = true;
-                }
             }
         }
     }
