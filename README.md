@@ -12,7 +12,7 @@ These are the things that I need to accomplish to consider this a complete game:
 
 - Terrain features:
     - [Done] Power Stations charge robots.
-    - Repair Stations heal robots.
+    - [Repair Stations heal robots.
     - [Done] Doors can be opened and closed.
 - Major equipment classes
     - [Done] Batteries
