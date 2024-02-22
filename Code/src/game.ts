@@ -223,10 +223,12 @@ class Game {
 
         for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
             var color = [180, 180, 180];
+            var text: string;
             if(this.robotData[robotID].items[i].isEquipped) color = [51, 110, 156];
 
             topTextFrame += lineSpacing;
-            this.paper.drawListItem(centerTextFrame, topTextFrame, this.robotData[robotID].items[i].name, color);
+            text = this.robotData[robotID].items[i].name + ' (' + this.robotData[robotID].items[i].slot + ')';
+            this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
         }
 
         // Display stats to right of map.
