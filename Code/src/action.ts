@@ -9,11 +9,11 @@ class Action {
     constructor(){}
 }
 
-class Activate extends Action {
+class Trigger extends Action {
 
     constructor(target: Vector) {
         super();
-        this.command = "activate";
+        this.command = "trigger";
         this.target = target;
     }
 }

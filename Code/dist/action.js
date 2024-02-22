@@ -7,10 +7,10 @@ class Action {
     item = '';
     constructor() { }
 }
-class Activate extends Action {
+class Trigger extends Action {
     constructor(target) {
         super();
-        this.command = "activate";
+        this.command = "trigger";
         this.target = target;
     }
 }

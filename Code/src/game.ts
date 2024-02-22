@@ -83,8 +83,8 @@ class Game {
 
                     if(action) {
                         switch (action.command) {
-                            case "activate":
-                                this.requestActivate(i, action);
+                            case "trigger":
+                                this.requestTrigger(i, action);
                                 break;
                             case "equip":
                                 this.requestPrioritize(i, action);
@@ -110,8 +110,8 @@ class Game {
                 // Evaluate any events that should have occurred by now.
                 while(this.events[0].duration <= this.gameTime) {
                     switch (this.events[0].action.command) {
-                        case "activate":
-                            this.resolveActivate(this.events[0]);
+                        case "trigger":
+                            this.resolveTrigger(this.events[0]);
                             break;
                         case "equip":
                             this.resolvePrioritize(this.events[0]);
@@ -318,7 +318,7 @@ class Game {
         }
     }
 
-    requestActivate(robotID: number, action: Action) {
+    requestTrigger(robotID: number, action: Action) {
 
         let robotCoord = this.robotData[robotID].pos;
         let targetCoord = action.target;
@@ -370,7 +370,7 @@ class Game {
         }
     }
 
-    resolveActivate(event: GameEvent) {
+    resolveTrigger(event: GameEvent) {
         let robotCoord = this.robotData[event.robotID].pos;
         let targetCoord = event.action.target;
         let reach = 1.8;

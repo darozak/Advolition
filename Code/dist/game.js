@@ -67,8 +67,8 @@ class Game {
                 action = this.programs[i].run(i, structuredClone(this.scanData[i]), action);
                 if (action) {
                     switch (action.command) {
-                        case "activate":
-                            this.requestActivate(i, action);
+                        case "trigger":
+                            this.requestTrigger(i, action);
                             break;
                         case "equip":
                             this.requestPrioritize(i, action);
@@ -90,8 +90,8 @@ class Game {
             // Evaluate any events that should have occurred by now.
             while (this.events[0].duration <= this.gameTime) {
                 switch (this.events[0].action.command) {
-                    case "activate":
-                        this.resolveActivate(this.events[0]);
+                    case "trigger":
+                        this.resolveTrigger(this.events[0]);
                         break;
                     case "equip":
                         this.resolvePrioritize(this.events[0]);
@@ -248,7 +248,7 @@ class Game {
             this.arena.robotMap[this.robotData[i].pos.x][this.robotData[i].pos.y] = i;
         }
     }
-    requestActivate(robotID, action) {
+    requestTrigger(robotID, action) {
         let robotCoord = this.robotData[robotID].pos;
         let targetCoord = action.target;
         let reach = 1.8;
@@ -290,7 +290,7 @@ class Game {
             }
         }
     }
-    resolveActivate(event) {
+    resolveTrigger(event) {
         let robotCoord = this.robotData[event.robotID].pos;
         let targetCoord = event.action.target;
         let reach = 1.8;
