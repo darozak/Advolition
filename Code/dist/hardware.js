@@ -12,6 +12,7 @@ class Item {
     name;
     slot;
     effects;
+    isActive = false;
     isEquipped = false;
     constructor(name, slot, effects) {
         this.name = name;

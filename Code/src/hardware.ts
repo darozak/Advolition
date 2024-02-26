@@ -13,6 +13,7 @@ class Item {
     name: string;
     slot: string;
     effects: Stats;
+    isActive: boolean = false;
     isEquipped: boolean = false;
 
     constructor(name: string, slot: string, effects: Stats) {

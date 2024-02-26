@@ -12,7 +12,10 @@ class Tobor extends Program {
                 case "start":
                     console.log("I'm back");
                     let myPosition = myData.robots[myID].pos;
-                    this.actionBuffer.push(new Scan());
+                    this.actionBuffer.push(new Activate('Blaster'));
+                    // this.actionBuffer.push(new Activate('Shield'));
+                    this.actionBuffer.push(new Activate('Battery'));
+                    // this.actionBuffer.push(new Scan()); 
                     this.actionBuffer.push(new Scan());
                     this.actionBuffer.push(new Move(destination));
                     if (myPosition.x === destination.x && myPosition.y === destination.y)
@@ -21,7 +24,8 @@ class Tobor extends Program {
                     break;
                 case "activate":
                     console.log("Opening door");
-                    this.actionBuffer.push(new Prioritize('Vorpal Sword'));
+                    this.actionBuffer.push(new Activate('Vorpal Sword'));
+                    this.actionBuffer.push(new Inactivate('Blaster'));
                     this.actionBuffer.push(new Trigger(target));
                     this.state = "scan";
                     break;

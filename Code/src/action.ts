@@ -1,7 +1,5 @@
-class Action {
-    
+class Action {  
     command: string =  "";
-    // powerLevel: number = 0;
     target: Vector = new Vector(0, 0);
     range: number = 0;
     item: string = '';
@@ -10,7 +8,6 @@ class Action {
 }
 
 class Trigger extends Action {
-
     constructor(target: Vector) {
         super();
         this.command = "trigger";
@@ -19,21 +16,25 @@ class Trigger extends Action {
 }
 
 class Move extends Action {
-
     constructor(destination: Vector) {
         super();
         this.command = "move"
-        // if(power < 0 || power > 2) this.powerLevel = 0; 
-        // else this.powerLevel = power;
         this.target = destination;
     }
 }
 
-class Prioritize extends Action {
-
+class Activate extends Action {
     constructor(item: string) {
         super();
-        this.command = "equip";
+        this.command = "activate";
+        this.item = item;
+    }
+}
+
+class Inactivate extends Action {
+    constructor(item: string) {
+        super();
+        this.command = "inactivate";
         this.item = item;
     }
 }
@@ -42,8 +43,6 @@ class Scan extends Action {
     constructor() {
         super()
         this.command = "scan";
-        // if(power < 0 || power > 2) this.powerLevel = 0; 
-        // else this.powerLevel = power;
     }
 }
 

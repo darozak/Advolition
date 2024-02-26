@@ -32,27 +32,9 @@ class Game {
         this.robotData.push(new RobotData(this.world, robotID, name));
         this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID; 
-        
-        // this.robotData[robotID].chassis.HPs = 50;
 
-        // Uniquip all items.
-        for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
-            this.robotData[robotID].items[i].isEquipped = false;
-        }
-
-        // Add items to slots.
-        for(var i = 0; i < this.robotData[robotID].slots.length; i ++) {
-            if(this.robotData[robotID].slots[i].count  > 0) {
-                for(var j = 0; j < this.robotData[robotID].slots[i].count; j ++) {
-                    let slotName = this.robotData[robotID].slots[i].name;
-                    let ID = this.robotData[robotID].items.findIndex((d) => d.slot === slotName && !d.isEquipped);
-                    if(ID >= 0) this.robotData[robotID].items[ID].isEquipped = true;
-                }
-            }
-        }
-
-        // Recompute attributes based on equipped items.
-        this.applyEquippedMods(this.robotData[robotID]);
+        // Equip items
+        this.equipItems(this.robotData[robotID]);
 
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
         this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
@@ -86,8 +68,11 @@ class Game {
                             case "trigger":
                                 this.requestTrigger(i, action);
                                 break;
-                            case "equip":
-                                this.requestPrioritize(i, action);
+                            case "activate":
+                                this.requestActivate(i, action);
+                                break;
+                            case "inactivate":
+                                this.requestInactivate(i, action);
                                 break;
                             case "move":
                                 this.requestMove(i, action);
@@ -113,8 +98,11 @@ class Game {
                         case "trigger":
                             this.resolveTrigger(this.events[0]);
                             break;
-                        case "equip":
-                            this.resolvePrioritize(this.events[0]);
+                        case "activate":
+                            this.resolveActivate(this.events[0]);
+                            break;
+                        case "inactivate":
+                            this.resolveInactivate(this.events[0]);
                             break;
                         case "move":
                             this.resolveMove(this.events[0]);
@@ -224,7 +212,7 @@ class Game {
         for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
             var color = [180, 180, 180];
             var text: string;
-            if(this.robotData[robotID].items[i].isEquipped) color = [51, 110, 156];
+            if(this.robotData[robotID].items[i].isActive) color = [51, 110, 156];
 
             topTextFrame += lineSpacing;
             text = this.robotData[robotID].items[i].name + ' (' + this.robotData[robotID].items[i].slot + ')';
@@ -293,9 +281,7 @@ class Game {
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
         topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);
-
-        
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);   
     } 
 
     decay(decayRate: number, decayFloor: number, elapsedTime: number) {
@@ -454,7 +440,7 @@ class Game {
         this.powerColor[action.robotID].deactivate();
     }
 
-    requestPrioritize(robotID: number, action: Action) {
+    requestActivate(robotID: number, action: Action) {
 
         // Does item exist in inventory?
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
@@ -470,33 +456,46 @@ class Game {
         }
     }
 
-    resolvePrioritize(event: GameEvent) {
+    resolveActivate(event: GameEvent) {
 
-        // Move item to the top of the list.
+        // Move item to the top of the list and set to active.
         let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
         if(itemID >= 0) {
             this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
+            this.robotData[event.robotID].items[0].isActive = true;
         }
 
-        // Uniquip all items.
-        for(var i = 0; i < this.robotData[event.robotID].items.length; i ++) {
-            this.robotData[event.robotID].items[i].isEquipped = false;
+        // Equip items and apply mods.
+        this.equipItems(this.robotData[event.robotID]);
+    }
+
+    requestInactivate(robotID: number, action: Action) {
+
+        // Does item exist in inventory?
+        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        if(itemID >= 0) {
+    
+            // Set time delay..
+            let slotName = this.robotData[robotID].items[itemID].slot;
+            let slotID = this.robotData[robotID].slots.findLastIndex(d => d.name === slotName);
+            let delay = this.robotData[robotID].slots[slotID].timeToEquip;
+
+            // Add action to event que.
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
+        }
+    }
+
+    resolveInactivate(event: GameEvent) {
+
+        // Move item to the bottom of the list and set to inactive.
+        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        if(itemID >= 0) {
+            this.robotData[event.robotID].items[itemID].isActive = false;
+            this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
         }
 
-        // Add items to slots.
-        for(var i = 0; i < this.robotData[event.robotID].slots.length; i ++) {
-            if(this.robotData[event.robotID].slots[i].count  > 0) {
-                for(var j = 0; j < this.robotData[event.robotID].slots[i].count; j ++) {
-                    let slotName = this.robotData[event.robotID].slots[i].name;
-                    let ID = this.robotData[event.robotID].items.findIndex((d) => d.slot === slotName && !d.isEquipped);
-                    if(ID >= 0) this.robotData[event.robotID].items[ID].isEquipped = true;
-                }
-            }
-        }
-
-        // Recompute attributes based on equipped items.
-        this.applyEquippedMods(this.robotData[event.robotID]);
-
+        // Equipe items and apply mods.
+        this.equipItems(this.robotData[event.robotID]);
     }
 
     requestScan(botID: number, call: Action) {
@@ -535,35 +534,38 @@ class Game {
         this.powerColor[event.robotID].deactivate();
     }
 
-    applyEquippedMods(robot: RobotData) {
-        // this.resetAttributes(robot.adjustedStats);
+    equipItems(robot: RobotData) {
+        // Uniquip all items.
+        for(var i = 0; i < robot.items.length; i ++) {
+            robot.items[i].isEquipped = false;
+        }
+
+        // Add items to slots.
+        for(var i = 0; i < robot.slots.length; i ++) {
+            if(robot.slots[i].count  > 0) {
+                for(var j = 0; j < robot.slots[i].count; j ++) {
+                    let slotName = robot.slots[i].name;
+                    let ID = robot.items.findIndex((d) => d.slot === slotName && !d.isEquipped);
+                    if(ID >= 0) robot.items[ID].isEquipped = true;
+                }
+            }
+        }
+
+        // Inactivate all unequipped items.
+        for(var i = 0; i < robot.items.length; i ++) {
+            if(!robot.items[i].isEquipped) robot.items[i].isActive = false;
+        }
+
+        // Recompute attributes based on active items.
         robot.adjustedStats.copy(robot.baseStats, false);
 
         // Apply mods from equipped items.
         for(var i = 0; i < robot.items.length; i ++) {
-            if(robot.items[i].isEquipped) {
+            if(robot.items[i].isActive) {
                 robot.adjustedStats.add(robot.items[i].effects);
             }
         }
-    }
 
-    /**
-     * Sets the first inactive named item on the equipment list to active.
-     *  
-     * @param item 
-     */
-    activateItem(robot: RobotData, item: string) {
-        
-    }
-
-
-    /**
-     * Sets the first active named item on the equipment list to inactive.
-     * 
-     * @param item 
-     */
-    inactivateItem(robot: RobotData, item: string) {
-        
     }
 
     /**
