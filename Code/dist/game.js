@@ -54,6 +54,9 @@ class Game {
                         case "trigger":
                             this.requestTrigger(i, action);
                             break;
+                        case "drop":
+                            this.requestDrop(i, action);
+                            break;
                         case "activate":
                             this.requestActivate(i, action);
                             break;
@@ -79,6 +82,9 @@ class Game {
                 switch (this.events[0].action.command) {
                     case "trigger":
                         this.resolveTrigger(this.events[0]);
+                        break;
+                    case "drop":
+                        this.resolveDrop(this.events[0]);
                         break;
                     case "activate":
                         this.resolveActivate(this.events[0]);
@@ -124,12 +130,14 @@ class Game {
         for (var i = x0; i < x1; i++) {
             for (var j = y0; j < y1; j++) {
                 var tileScanID = -1;
+                var itemScanCount = 0;
                 var robotScanID = -1;
                 var tileAlpha = 0;
                 var robotAlpha = 0;
                 // Grab tile and robot IDs if the plotted region doesn't fall outside of the arena map.
                 if (i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
                     tileScanID = this.scanData[robotID].tileMap[i][j];
+                    itemScanCount = this.scanData[robotID].itemMap[i][j].length;
                     robotScanID = this.scanData[robotID].robotMap[i][j];
                     // Scan will fade as data ages.
                     let decayRate = 0.02;
@@ -142,6 +150,10 @@ class Game {
                 // Draw tile.
                 if (tileScanID >= 0) {
                     this.paper.drawTile(leftMapFrame, topMapFrame, this.world.tiles[tileScanID].sprite, new Vector(i - x0, j - y0), tileAlpha, false);
+                }
+                // Draw items.
+                if (itemScanCount > 0) {
+                    this.paper.drawTile(leftMapFrame, topMapFrame, this.world.itemSprite, new Vector(i - x0, j - y0), tileAlpha, false);
                 }
                 // Draw robot.
                 if (robotScanID >= 0) {
@@ -391,6 +403,31 @@ class Game {
         }
         // Equipe items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
+    }
+    requestDrop(robotID, action) {
+        // Does item exist in inventory?
+        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        if (itemID >= 0) {
+            // Set time delay..
+            let slotName = this.robotData[robotID].items[itemID].slot;
+            let slotID = this.world.slots.findLastIndex(d => d.name === slotName);
+            let delay = this.world.slots[slotID].timeToEquip;
+            // Add action to event que.
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+            console.log("Dropping item");
+        }
+    }
+    resolveDrop(event) {
+        // Move item to the corresponding location on the map.
+        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        let location = this.robotData[event.robotID].pos;
+        if (itemID >= 0) {
+            this.robotData[event.robotID].items[itemID].isActive = false;
+            this.arena.itemMap[location.x][location.y].push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
+        }
+        // Equip items and apply mods.
+        this.equipItems(this.robotData[event.robotID]);
+        console.log("Dropped item");
     }
     requestScan(botID, call) {
         let powerCost = this.robotData[botID].adjustedStats.scanPower;

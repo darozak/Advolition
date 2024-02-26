@@ -8,7 +8,7 @@ class Slot {
         this.timeToEquip = timeToEquip;
     }
 }
-
+ 
 class Item {   
     name: string;
     slot: string;
@@ -217,10 +217,10 @@ class Tile {
     }
 }
 
-
 class WorldData {
     maxRobotCount: number = 10;
     size: Vector = new Vector(10, 10);
+    itemSprite = new Vector(18, 27);
     sketch: string[] = [];
     entrances: Vector[] = [];
     tiles: Tile[] = [];

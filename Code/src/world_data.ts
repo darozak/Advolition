@@ -35,6 +35,7 @@ class GaiaData extends WorldData {
         // Define Slots
         this.slots.push(new Slot("Battery Slot", 10));
         this.slots.push(new Slot("Weapon Slot", 10));
+        this.slots.push(new Slot("Shield Slot", 10));
 
 
         // Create Items

@@ -7,6 +7,7 @@ class Arena {
     mask: boolean[][] = [];
     scans: number[][] = [];
     tileMap: number[][] = [];
+    itemMap: Item[][][] = [];
     robotMap: number[][] = [];
     robots: RobotData[] = [];
 
@@ -20,11 +21,13 @@ class Arena {
             this.mask[i] = [];
             this.scans[i] = [];
             this.tileMap[i] = [];
+            this.itemMap[i] = [];
             this.robotMap[i] = [];
             for(var j = 0; j < this.world.size.y; j ++) {
                 this.mask[i][j] = false;
                 this.scans[i][j] = -1;
                 this.tileMap[i][j] = -1;
+                this.itemMap[i][j] = [];
                 this.robotMap[i][j] = -1;
             }
         }
@@ -55,8 +58,8 @@ class Arena {
             for(var j = 0; j < this.world.size.y; j++) {
                 if(visible[i][j] > 0) {
                     scan.scanTime[i][j] = scanTime;
-                    // scan.visible[i][j] = visible[i][j];
                     scan.tileMap[i][j] = this.tileMap[i][j];
+                    scan.itemMap[i][j] = this.itemMap[i][j];
                     scan.robotMap[i][j] = this.robotMap[i][j];
                     if(this.robotMap[i][j] >= 0) {
                         scan.robots[this.robotMap[i][j]] = structuredClone(this.robots[this.robotMap[i][j]]);

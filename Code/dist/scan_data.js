@@ -1,9 +1,9 @@
 "use strict";
 class ScanData {
-    // visible: number[][] = [];
     scanTime = [];
     tileMap = [];
     tiles = [];
+    itemMap = [];
     robotMap = [];
     robots = [];
     constructor(world, robot) {
@@ -16,17 +16,16 @@ class ScanData {
         for (var i = 0; i < world.size.x; i++) {
             // this.visible[i] = [];
             this.tileMap[i] = [];
+            this.itemMap[i] = [];
             this.robotMap[i] = [];
             this.scanTime[i] = [];
             for (var j = 0; j < world.size.y; j++) {
                 // this.visible[i][j] = -1;
                 this.tileMap[i][j] = -1;
+                this.itemMap[i][j] = [];
                 this.robotMap[i][j] = -1;
                 this.scanTime[i][j] = 0;
             }
         }
-    }
-    testMethod() {
-        return 1;
     }
 }

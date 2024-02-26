@@ -15,6 +15,7 @@ class Tobor extends Program {
                     this.actionBuffer.push(new Activate('Blaster'));
                     // this.actionBuffer.push(new Activate('Shield'));
                     this.actionBuffer.push(new Activate('Battery'));
+                    this.actionBuffer.push(new Drop('Shield'));
                     // this.actionBuffer.push(new Scan()); 
                     this.actionBuffer.push(new Scan());
                     this.actionBuffer.push(new Move(destination));

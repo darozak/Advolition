@@ -174,6 +174,7 @@ class Tile {
 class WorldData {
     maxRobotCount = 10;
     size = new Vector(10, 10);
+    itemSprite = new Vector(18, 27);
     sketch = [];
     entrances = [];
     tiles = [];

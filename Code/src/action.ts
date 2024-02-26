@@ -23,6 +23,22 @@ class Move extends Action {
     }
 }
 
+class Take extends Action {
+    constructor(item: string) {
+        super();
+        this.command = "take";
+        this.item = item;
+    }
+}
+
+class Drop extends Action {
+    constructor(item: string) {
+        super();
+        this.command = "drop";
+        this.item = item;
+    }
+}
+
 class Activate extends Action {
     constructor(item: string) {
         super();

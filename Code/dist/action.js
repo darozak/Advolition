@@ -20,6 +20,20 @@ class Move extends Action {
         this.target = destination;
     }
 }
+class Take extends Action {
+    constructor(item) {
+        super();
+        this.command = "take";
+        this.item = item;
+    }
+}
+class Drop extends Action {
+    constructor(item) {
+        super();
+        this.command = "drop";
+        this.item = item;
+    }
+}
 class Activate extends Action {
     constructor(item) {
         super();
