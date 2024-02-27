@@ -184,6 +184,19 @@ class Game {
             text = this.robotData[robotID].items[i].name + ' (' + this.robotData[robotID].items[i].slot + ')';
             this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
         }
+        // Display dropped items.
+        let loc = this.robotData[robotID].pos;
+        if (this.arena.itemMap[loc.x][loc.y].length > 0) {
+            topTextFrame += lineSpacing * 2;
+            this.paper.drawListItem(centerTextFrame, topTextFrame, 'Dropped Items', [120, 120, 120]);
+            for (var i = 0; i < this.arena.itemMap[loc.x][loc.y].length; i++) {
+                var color = [180, 180, 180];
+                var text;
+                topTextFrame += lineSpacing;
+                text = this.arena.itemMap[loc.x][loc.y][i].name + ' (' + this.arena.itemMap[loc.x][loc.y][i].slot + ')';
+                this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
+            }
+        }
         // Display stats to right of map.
         centerTextFrame = leftMapFrame + mapFrameSize + 120;
         topTextFrame = 20;
