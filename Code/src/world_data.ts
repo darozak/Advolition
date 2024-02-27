@@ -7,9 +7,9 @@ class GaiaData extends WorldData {
         // Sketch Map
         this.sketch = [
             "##########",
-            "#.*......#",
             "#........#",
-            "#...&...##",
+            "#........#",
+            "#.......##",
             "###+######",
             "#........#",
             "#........#",
@@ -27,10 +27,7 @@ class GaiaData extends WorldData {
         // Create Tiles
         this.tiles.push(new Tile("Floor", ".", new Vector(16,31), true, 1.0));
         this.tiles.push(new Tile("Wall", "#", new Vector(10,10), false, 0.0));
-        this.tiles.push(new Tile("Open Door", "/", new Vector(13,3), true, 1.0));
-        this.tiles.push(new Tile("Closed Door", "+", new Vector(12,3), false, 0.0));
-        this.tiles.push(new Tile("Power Station", "*", new Vector(18,21), true, 0.0));
-        this.tiles.push(new Tile("Repair Bay", "&", new Vector(17,20), true, 0.0));
+        this.tiles.push(new Tile("Door", "+", new Vector(12,3), false, 0.0));
 
         // Define Slots
         this.slots.push(new Slot("Battery Slot", 10));

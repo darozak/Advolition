@@ -6,13 +6,13 @@ class Action {
     item = '';
     constructor() { }
 }
-class Trigger extends Action {
-    constructor(target) {
-        super();
-        this.command = "trigger";
-        this.target = target;
-    }
-}
+// class Trigger extends Action {
+//     constructor(target: Vector) {
+//         super();
+//         this.command = "trigger";
+//         this.target = target;
+//     }
+// }
 class Move extends Action {
     constructor(destination) {
         super();

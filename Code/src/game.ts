@@ -65,9 +65,6 @@ class Game {
 
                     if(action) {
                         switch (action.command) {
-                            case "trigger":
-                                this.requestTrigger(i, action);
-                                break;
                             case "drop":
                                 this.requestDrop(i, action);
                                 break;
@@ -101,9 +98,6 @@ class Game {
                 // Evaluate any events that should have occurred by now.
                 while(this.events[0].duration <= this.gameTime) {
                     switch (this.events[0].action.command) {
-                        case "trigger":
-                            this.resolveTrigger(this.events[0]);
-                            break;
                         case "drop":
                             this.resolveDrop(this.events[0]);
                             break;
@@ -311,13 +305,6 @@ class Game {
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
 
         topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Trigger Power', this.robotData[robotID].adjustedStats.triggerPower, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Trigger Time', this.robotData[robotID].adjustedStats.triggerTime, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Trigger Range', this.robotData[robotID].adjustedStats.triggerRange, statRGB);
-
-        topTextFrame += lineSpacing * 1.5;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
         topTextFrame += lineSpacing;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
@@ -361,91 +348,6 @@ class Game {
         for(var i = 0; i < this.robotData.length; i++) {
             this.arena.robotMap[this.robotData[i].pos.x][this.robotData[i].pos.y] = i;
         }
-    }
-
-    requestTrigger(robotID: number, action: Action) {
-
-        let robotCoord = this.robotData[robotID].pos;
-        let targetCoord = action.target;
-        let reach = 1.8;
-        let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
-        let tileName = this.world.tiles[tileID].name; 
-        console.log(tileName);
-
-        let powerCost = this.robotData[robotID].adjustedStats.triggerPower;
-
-        // Is there power for this action?
-        if(this.robotData[robotID].adjustedStats.power >= powerCost) {
-
-            // Drain power
-            this.robotData[robotID].adjustedStats.power -= powerCost;
-
-            // Only act if the object is in reach.    
-            if(robotCoord.getDistanceTo(targetCoord) < reach) {
-
-                var delay = 0;
-
-                // Select action based on target.
-                switch(tileName) {
-                    case "Power Station":
-                        // Set time delay.
-                        delay  = 1;
-                        break;
-                    case "Repair Bay":
-                        // Set time delay.
-                        delay  = 1;
-                        break;
-                    case "Closed Door":
-                        // Set time delay.
-                        delay  = 1;
-                        break;
-                    case "Open Door":
-                        // Set time delay.
-                        delay  = 1;
-                        break;
-                }
-
-                // Add action to event que.
-                this.events.push(new GameEvent(robotID, action, delay + this.gameTime));   
-                        
-                // Animate display elements
-                this.batteryColor[robotID].activate();
-                this.powerColor[robotID].activate();  
-            }
-        }
-    }
-
-    resolveTrigger(event: GameEvent) {
-        let robotCoord = this.robotData[event.robotID].pos;
-        let targetCoord = event.action.target;
-        let reach = 1.8;
-        let tileID = this.arena.tileMap[targetCoord.x][targetCoord.y];
-        let tileName = this.world.tiles[tileID].name;
-        
-        // Only act if the object is in reach.    
-        if(robotCoord.getDistanceTo(targetCoord) < reach) {
-
-            // Select action based on target.
-            switch(tileName) {
-                case "Power Station":
-                    this.robotData[event.robotID].adjustedStats.power = this.robotData[event.robotID].adjustedStats.maxPower;
-                    break;
-                case "Repair Bay":
-                    this.robotData[event.robotID].adjustedStats.HPs = this.robotData[event.robotID].adjustedStats.maxHPs;
-                    break;
-                case "Closed Door":
-                    this.arena.toggleDoor(targetCoord);
-                    break;
-                case "Open Door":
-                    this.arena.toggleDoor(targetCoord);
-                    break;
-            }
-            
-            // Animate display elements
-            this.batteryColor[event.robotID].deactivate();
-            this.powerColor[event.robotID].deactivate();
-        }
-
     }
 
     requestMove(robotID: number, action: Action) { 

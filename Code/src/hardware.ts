@@ -51,10 +51,6 @@ class Stats {
     moveTime = 0;
     permissiveTerrain: string[] = [];
 
-    triggerPower = 0;
-    triggerTime = 0;
-    triggerRange = 0;
-
     backgroundPower = 0;
 
     constructor() {}
@@ -84,10 +80,6 @@ class Stats {
         for(var i = 0; i < stats.permissiveTerrain.length; i ++) {
             this.permissiveTerrain.push(stats.permissiveTerrain[i]);
         }
-
-        this.triggerPower += stats.triggerPower;
-        this.triggerTime += stats.triggerTime;
-        this.triggerRange += stats.triggerRange;
 
         this.backgroundPower += stats.backgroundPower;
     }
@@ -120,10 +112,6 @@ class Stats {
         this.movePower = stats.movePower;
         this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
-
-        this.triggerPower = stats.triggerPower;
-        this.triggerTime = stats.triggerTime;
-        this.triggerRange = stats.triggerRange;
 
         this.backgroundPower = stats.backgroundPower;
     } 
@@ -164,10 +152,6 @@ class Robot {
         'Floor',
         'Closed Door'
     ]
-
-    this.baseStats.triggerPower = 1;
-    this.baseStats.triggerTime = 10;
-    this.baseStats.triggerRange = 1;
 
     this.baseStats.backgroundPower = 0;
     }
