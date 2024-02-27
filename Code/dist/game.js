@@ -197,6 +197,16 @@ class Game {
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
         }
+        // Display permissive terrain.
+        topTextFrame += lineSpacing * 2;
+        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Permissive Terrain', [120, 120, 120]);
+        for (var i = 0; i < this.robotData[robotID].baseStats.permissiveTerrain.length; i++) {
+            var color = [180, 180, 180];
+            var text;
+            topTextFrame += lineSpacing;
+            text = this.robotData[robotID].baseStats.permissiveTerrain[i];
+            this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
+        }
         // Display stats to right of map.
         centerTextFrame = leftMapFrame + mapFrameSize + 120;
         topTextFrame = 20;
@@ -361,7 +371,11 @@ class Game {
     }
     resolveMove(action) {
         var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
-        if (this.arena.getTileSpeed(destination) > 0) {
+        var tileID = this.arena.tileMap[destination.x][destination.y];
+        var tileName = this.world.tiles[tileID].name;
+        let permissiveTerrainIndex = this.robotData[action.robotID].baseStats.permissiveTerrain.findLastIndex(d => d === tileName);
+        // Can the robot move into this tile?
+        if (permissiveTerrainIndex >= 0) {
             // Change position in arena.
             this.arena.robotMap[this.robotData[action.robotID].pos.x][this.robotData[action.robotID].pos.y] = -1;
             this.arena.robotMap[destination.x][destination.y] = action.robotID;

@@ -39,6 +39,7 @@ class Stats {
     thermalDefense = 0;
     movePower = 0;
     moveTime = 0;
+    permissiveTerrain = [];
     triggerPower = 0;
     triggerTime = 0;
     triggerRange = 0;
@@ -61,6 +62,9 @@ class Stats {
         this.thermalDefense += stats.thermalDefense;
         this.movePower += stats.movePower;
         this.moveTime += stats.moveTime;
+        for (var i = 0; i < stats.permissiveTerrain.length; i++) {
+            this.permissiveTerrain.push(stats.permissiveTerrain[i]);
+        }
         this.triggerPower += stats.triggerPower;
         this.triggerTime += stats.triggerTime;
         this.triggerRange += stats.triggerRange;
@@ -87,6 +91,7 @@ class Stats {
         this.thermalDefense = stats.thermalDefense;
         this.movePower = stats.movePower;
         this.moveTime = stats.moveTime;
+        this.permissiveTerrain = stats.permissiveTerrain;
         this.triggerPower = stats.triggerPower;
         this.triggerTime = stats.triggerTime;
         this.triggerRange = stats.triggerRange;
@@ -117,6 +122,10 @@ class Robot {
         this.baseStats.thermalDefense = 0;
         this.baseStats.movePower = 1;
         this.baseStats.moveTime = 10;
+        this.baseStats.permissiveTerrain = [
+            'Floor',
+            'Closed Door'
+        ];
         this.baseStats.triggerPower = 1;
         this.baseStats.triggerTime = 10;
         this.baseStats.triggerRange = 1;
