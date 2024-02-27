@@ -54,6 +54,7 @@ These are some things I can do to improve the gameplay experience after first de
 ## Game Sketch
 These are general ideas that I have brainstormed for gameplay.
 - Players program robots to explore a dungeon, kill monsters, and collect loot.
+- Going down a level increases complexity and challenge.
 - Robots are programmed in JavaScript.
 - The game uses a random seed to generate the maze and all it's contents.  This seed can be used to repeatedly play the same dungeon or compete with others to explore the same dungeon in a tournament.
 - Robots can collect gold, power, and equipment along the way which will contribute to their overall score.
