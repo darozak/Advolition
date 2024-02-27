@@ -23,9 +23,9 @@ These are the things that I need to accomplish to consider this a complete game:
     - Digital keys - Allow the robot to trigger different terrain features.
 - Equipment management
     - Place equipment throughout the dungeon that robots can pick up.
-    - Figure out how to manage multiple iteams in one tile.
-    - Allow robots to identify equiment in a scan.
-    - Have a basic inventory management system that allows robots to take, equip, and drop equipment.
+    - [Done] Figure out how to manage multiple iteams in one tile.
+    - [Done] Allow robots to identify equiment in a scan.
+    - [Done] Have a basic inventory management system that allows robots to take, equip, and drop equipment.
     - When killed NPRs will drop equipment.
 - Combat mechanism
     - Add attack option.
