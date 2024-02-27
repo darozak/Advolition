@@ -21,6 +21,7 @@ class Tobor extends Program {
                     this.actionBuffer.push(new Drop('Shield'));
                     // this.actionBuffer.push(new Scan()); 
                     this.actionBuffer.push(new Scan());
+                    this.actionBuffer.push(new Take('Shield'));
                     this.actionBuffer.push(new Move(destination));  
                     if(myPosition.x === destination.x && myPosition.y === destination.y) this.state = "activate";
                     // if(myData.robots[myID].battery.currentPower < 100) this.state = "recharge";

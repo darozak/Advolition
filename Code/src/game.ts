@@ -71,6 +71,9 @@ class Game {
                             case "drop":
                                 this.requestDrop(i, action);
                                 break;
+                            case "take":
+                                this.requestTake(i, action);
+                                break;
                             case "activate":
                                 this.requestActivate(i, action);
                                 break;
@@ -103,6 +106,9 @@ class Game {
                             break;
                         case "drop":
                             this.resolveDrop(this.events[0]);
+                            break;
+                        case "take":
+                            this.resolveTake(this.events[0]);
                             break;
                         case "activate":
                             this.resolveActivate(this.events[0]);
@@ -530,7 +536,6 @@ class Game {
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
-            console.log("Dropping item");
         }
     }
 
@@ -546,7 +551,37 @@ class Game {
 
         // Equip items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
-        console.log("Dropped item");
+    }
+
+    requestTake(robotID: number, action: Action) {
+
+        // Does item exist in tile?
+        let location = this.robotData[robotID].pos;
+        let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
+        if(itemID >= 0) {
+    
+            // Set time delay..
+            let slotName = this.arena.itemMap[location.x][location.y][itemID].slot;
+            let slotID = this.world.slots.findLastIndex(d => d.name === slotName);
+            let delay = this.world.slots[slotID].timeToEquip;
+
+            // Add action to event que.
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
+        }
+    }
+
+    resolveTake(event: GameEvent) {
+
+        // Move item to inventory.
+        let location = this.robotData[event.robotID].pos;
+        let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === event.action.item);
+       
+        if(itemID >= 0) {
+            this.robotData[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);          
+        }
+
+        // Equip items and apply mods.
+        this.equipItems(this.robotData[event.robotID]);
     }
 
     requestScan(botID: number, call: Action) {
@@ -618,25 +653,4 @@ class Game {
         }
 
     }
-
-    /**
-     * Removes the last named item from the inventory and re-evaluates which
-     * items are equipped.
-     * 
-     * @param item 
-     */
-    dropItem(robot: RobotData, item: string) {
-        
-    }
-
-
-    /**
-     * Adds the specified item to the end of the robot's inventory.
-     * 
-     * @param item 
-     */
-    carryItem(robot: RobotData, item: Item) {
-
-    }
-
 }
