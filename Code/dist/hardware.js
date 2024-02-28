@@ -10,8 +10,7 @@ class Item {
     }
 }
 class Stats {
-    // Non-transient stats
-    // Transient stats
+    value = 0;
     HPs = 0;
     maxHPs = 0;
     power = 0;
@@ -34,6 +33,7 @@ class Stats {
     backgroundPower = 0;
     constructor() { }
     add(stats) {
+        this.value += stats.value;
         this.HPs += stats.HPs;
         this.maxHPs += stats.maxHPs;
         this.maxCarry += stats.maxCarry;
@@ -57,13 +57,10 @@ class Stats {
         }
         this.backgroundPower += stats.backgroundPower;
     }
-    copy(stats, copyAll) {
-        if (copyAll) {
-            // Non-transient stats
-            this.HPs = stats.HPs;
-        }
-        // Transient stats
+    copy(stats) {
+        this.value = stats.value;
         this.maxHPs = stats.maxHPs;
+        this.HPs = stats.HPs;
         this.maxPower = stats.maxPower;
         this.power = stats.power;
         this.maxCarry = stats.maxCarry;
@@ -89,8 +86,6 @@ class Robot {
     adjustedStats = new Stats();
     items = [];
     constructor() {
-        // Non-transient stats
-        // Transient stats
         this.baseStats.maxCarry = 4;
         this.baseStats.maxEquip = 3;
         this.baseStats.HPs = 0;
@@ -120,7 +115,7 @@ class Humanoid extends Robot {
     constructor(items) {
         super();
         var ID;
-        this.adjustedStats.copy(this.baseStats, true);
+        this.adjustedStats.copy(this.baseStats);
         // Add items
         ID = items.findLastIndex(d => d.name === "Battery");
         if (ID >= 0)

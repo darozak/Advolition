@@ -416,7 +416,7 @@ class Game {
                 robot.items[i].isActive = false;
         }
         // Recompute attributes based on active items.
-        robot.adjustedStats.copy(robot.baseStats, false);
+        robot.adjustedStats.copy(robot.baseStats);
         // Apply mods from equipped items.
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isActive) {
