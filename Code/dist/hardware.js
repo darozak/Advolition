@@ -11,10 +11,10 @@ class Item {
 }
 class Stats {
     // Non-transient stats
-    HPs = 0;
-    power = 0;
     // Transient stats
+    HPs = 0;
     maxHPs = 0;
+    power = 0;
     maxPower = 0;
     maxCarry = 0;
     maxEquip = 0;
@@ -61,11 +61,11 @@ class Stats {
         if (copyAll) {
             // Non-transient stats
             this.HPs = stats.HPs;
-            this.power = stats.power;
         }
         // Transient stats
         this.maxHPs = stats.maxHPs;
         this.maxPower = stats.maxPower;
+        this.power = stats.power;
         this.maxCarry = stats.maxCarry;
         this.maxEquip = stats.maxEquip;
         this.scanPower = stats.scanPower;
@@ -90,13 +90,13 @@ class Robot {
     items = [];
     constructor() {
         // Non-transient stats
-        this.baseStats.HPs = 90;
-        this.baseStats.power = 90;
+        // Transient stats
         this.baseStats.maxCarry = 4;
         this.baseStats.maxEquip = 3;
-        // Transient stats
-        this.baseStats.maxHPs = 90;
-        this.baseStats.maxPower = 90;
+        this.baseStats.HPs = 0;
+        this.baseStats.maxHPs = 0;
+        this.baseStats.power = 0;
+        this.baseStats.maxPower = 0;
         this.baseStats.scanPower = 1;
         this.baseStats.scanTime = 10;
         this.baseStats.scanRange = 5;

@@ -14,12 +14,14 @@ class Item {
 class Stats {
 
     // Non-transient stats
-    HPs = 0;
-    power = 0;
+    
+    
     
 
     // Transient stats
+    HPs = 0;
     maxHPs = 0;
+    power = 0;
     maxPower = 0;
 
     maxCarry = 0;
@@ -83,12 +85,13 @@ class Stats {
         if(copyAll) {
             // Non-transient stats
             this.HPs = stats.HPs;
-            this.power = stats.power;
+            
         }
     
         // Transient stats
         this.maxHPs = stats.maxHPs;
         this.maxPower = stats.maxPower;
+        this.power = stats.power;
 
         this.maxCarry = stats.maxCarry;
         this.maxEquip = stats.maxEquip;
@@ -121,38 +124,42 @@ class Robot {
 
     constructor() {
 
-    // Non-transient stats
-    this.baseStats.HPs = 90;
-    this.baseStats.power = 90;
+        // Non-transient stats
+        
+        
+        
+        // Transient stats
+        
 
-    this.baseStats.maxCarry = 4;
-    this.baseStats.maxEquip = 3;
+        this.baseStats.maxCarry = 4;
+        this.baseStats.maxEquip = 3;
+
+        this.baseStats.HPs = 0;
+        this.baseStats.maxHPs = 0;
+        this.baseStats.power = 0;
+        this.baseStats.maxPower = 0;
     
-    // Transient stats
-    this.baseStats.maxHPs = 90;
-    this.baseStats.maxPower = 90;
+        this.baseStats.scanPower = 1;
+        this.baseStats.scanTime = 10;
+        this.baseStats.scanRange = 5;
 
-    this.baseStats.scanPower = 1;
-    this.baseStats.scanTime = 10;
-    this.baseStats.scanRange = 5;
+        this.baseStats.offensePower = 0;
+        this.baseStats.offenseTime = 0;
+        this.baseStats.kineticDamage = 0;
+        this.baseStats.thermalDamage = 0;
 
-    this.baseStats.offensePower = 0;
-    this.baseStats.offenseTime = 0;
-    this.baseStats.kineticDamage = 0;
-    this.baseStats.thermalDamage = 0;
+        this.baseStats.defensePower = 0;
+        this.baseStats.kineticDefense = 0;
+        this.baseStats.thermalDefense = 0;
 
-    this.baseStats.defensePower = 0;
-    this.baseStats.kineticDefense = 0;
-    this.baseStats.thermalDefense = 0;
+        this.baseStats.movePower = 1;
+        this.baseStats.moveTime = 10;
+        this.baseStats.permissiveTerrain = [
+            'Floor',
+            'Door'
+        ]
 
-    this.baseStats.movePower = 1;
-    this.baseStats.moveTime = 10;
-    this.baseStats.permissiveTerrain = [
-        'Floor',
-        'Door'
-    ]
-
-    this.baseStats.backgroundPower = 0;
+        this.baseStats.backgroundPower = 0;
     }
 }
 

@@ -42,7 +42,7 @@ class Game {
         this.gameTime++;
         for (var i = 0; i < this.programs.length; i++) {
             // If the robot is still alive and isn't doing anything.
-            if (this.robotData[i].adjustedStats.HPs > 0 && !this.events.some(d => d.robotID == i)) {
+            if (!this.events.some(d => d.robotID == i)) {
                 var action = new Action();
                 // Make sure the robot's personal data is up to date in scanData.
                 this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
@@ -263,10 +263,7 @@ class Game {
         let powerCost = this.robotData[robotID].adjustedStats.movePower;
         let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
         // Is there power for this action?
-        if (this.robotData[robotID].adjustedStats.power >= powerCost) {
-            // Drain power  
-            this.robotData[robotID].adjustedStats.power -= powerCost;
-            // Set time delay and adjust for distance across diagonals.
+        if (this.drainPower(this.robotData[robotID], powerCost)) {
             let delay = this.robotData[robotID].adjustedStats.moveTime;
             delay *= this.robotData[robotID].pos.getDistanceTo(destination);
             // Add action to event que.
@@ -426,5 +423,47 @@ class Game {
                 robot.adjustedStats.add(robot.items[i].effects);
             }
         }
+    }
+    takeDamage(robot, amount) {
+        for (var i = 0; i < robot.items.length; i++) {
+            if (amount <= robot.items[i].effects.HPs) {
+                robot.items[i].effects.HPs -= amount;
+                amount = 0;
+            }
+            else {
+                amount -= robot.items[i].effects.HPs;
+                robot.items[i].effects.HPs = 0;
+            }
+        }
+        if (amount > 0) {
+            // Robot has taken excess damage and is dead.
+        }
+    }
+    drainPower(robot, amount) {
+        for (var i = 0; i < robot.items.length; i++) {
+            if (amount <= robot.items[i].effects.power) {
+                robot.items[i].effects.power -= amount;
+                amount = 0;
+            }
+            else {
+                amount -= robot.items[i].effects.power;
+                robot.items[i].effects.power = 0;
+            }
+        }
+        // Return true if robot has enough power to complete the action.
+        return (amount == 0);
+    }
+    addPower(robot, amount) {
+        for (var i = 0; i < robot.items.length; i++) {
+            if (amount + robot.items[i].effects.power <= robot.items[i].effects.maxPower) {
+                robot.items[i].effects.power += amount;
+                amount = 0;
+            }
+            else {
+                amount -= robot.items[i].effects.maxPower - robot.items[i].effects.power;
+                robot.items[i].effects.power = robot.items[i].effects.maxPower;
+            }
+        }
+        return (amount == 0);
     }
 }
