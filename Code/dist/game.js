@@ -194,11 +194,11 @@ class Game {
         // Display permissive terrain.
         topTextFrame += lineSpacing * 2;
         this.paper.drawListItem(centerTextFrame, topTextFrame, 'Permissive Terrain', [120, 120, 120]);
-        for (var i = 0; i < this.robotData[robotID].baseStats.permissiveTerrain.length; i++) {
+        for (var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i++) {
             var color = [180, 180, 180];
             var text;
             topTextFrame += lineSpacing;
-            text = this.robotData[robotID].baseStats.permissiveTerrain[i];
+            text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
             this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
         }
         // Display stats to right of map.
@@ -281,7 +281,7 @@ class Game {
         var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
         var tileID = this.arena.tileMap[destination.x][destination.y];
         var tileName = this.world.tiles[tileID].name;
-        let permissiveTerrainIndex = this.robotData[action.robotID].baseStats.permissiveTerrain.findLastIndex(d => d === tileName);
+        let permissiveTerrainIndex = this.robotData[action.robotID].adjustedStats.permissiveTerrain.findLastIndex(d => d === tileName);
         // Can the robot move into this tile?
         if (permissiveTerrainIndex >= 0) {
             // Change position in arena.
@@ -360,13 +360,16 @@ class Game {
         this.equipItems(this.robotData[event.robotID]);
     }
     requestTake(robotID, action) {
-        // Does item exist in tile?
-        let location = this.robotData[robotID].pos;
-        let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
-        if (itemID >= 0) {
-            let delay = 1;
-            // Add action to event que.
-            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+        // Does the robot have enough room in its inventory?
+        if (this.robotData[robotID].adjustedStats.maxCarry > this.robotData[robotID].items.length) {
+            // Does item exist in tile?
+            let location = this.robotData[robotID].pos;
+            let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
+            if (itemID >= 0) {
+                let delay = 1;
+                // Add action to event que.
+                this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+            }
         }
     }
     resolveTake(event) {
@@ -408,7 +411,7 @@ class Game {
     equipItems(robot) {
         // Equip allowable number of items.
         for (var i = 0; i < robot.items.length; i++) {
-            robot.items[i].isEquipped = (i <= robot.baseStats.maxEquip);
+            robot.items[i].isEquipped = (i <= robot.adjustedStats.maxEquip);
         }
         // Inactivate all unequipped items.
         for (var i = 0; i < robot.items.length; i++) {

@@ -221,7 +221,6 @@ class Game {
         // Draw a frame around the map.
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);  
         
-
         // Display text
         let statRGB = [180, 180, 180];
 
@@ -261,12 +260,12 @@ class Game {
 
         this.paper.drawListItem(centerTextFrame, topTextFrame, 'Permissive Terrain', [120, 120, 120]);
 
-        for(var i = 0; i < this.robotData[robotID].baseStats.permissiveTerrain.length; i ++) {
+        for(var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i ++) {
             var color = [180, 180, 180];
             var text: string;
 
             topTextFrame += lineSpacing;
-            text = this.robotData[robotID].baseStats.permissiveTerrain[i];
+            text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
             this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
         }
 
@@ -369,7 +368,7 @@ class Game {
         var tileID = this.arena.tileMap[destination.x][destination.y];
         var tileName = this.world.tiles[tileID].name;
 
-        let permissiveTerrainIndex = this.robotData[action.robotID].baseStats.permissiveTerrain.findLastIndex(d => d === tileName);
+        let permissiveTerrainIndex = this.robotData[action.robotID].adjustedStats.permissiveTerrain.findLastIndex(d => d === tileName);
 
 
         // Can the robot move into this tile?
@@ -476,15 +475,19 @@ class Game {
 
     requestTake(robotID: number, action: Action) {
 
-        // Does item exist in tile?
-        let location = this.robotData[robotID].pos;
-        let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
-        if(itemID >= 0) {
+        // Does the robot have enough room in its inventory?
+        if(this.robotData[robotID].adjustedStats.maxCarry > this.robotData[robotID].items.length) {
+            
+            // Does item exist in tile?
+            let location = this.robotData[robotID].pos;
+            let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
+            if(itemID >= 0) {
 
-            let delay = 1;
+                let delay = 1;
 
-            // Add action to event que.
-            this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
+                // Add action to event que.
+                this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
+            }
         }
     }
 
@@ -541,7 +544,7 @@ class Game {
     equipItems(robot: RobotData) {
         // Equip allowable number of items.
         for(var i = 0; i < robot.items.length; i ++) {
-            robot.items[i].isEquipped = (i <= robot.baseStats.maxEquip);
+            robot.items[i].isEquipped = (i <= robot.adjustedStats.maxEquip);
         }
 
         // Inactivate all unequipped items.

@@ -92,7 +92,7 @@ class Robot {
         // Non-transient stats
         this.baseStats.HPs = 90;
         this.baseStats.power = 90;
-        this.baseStats.maxCarry = 10;
+        this.baseStats.maxCarry = 4;
         this.baseStats.maxEquip = 3;
         // Transient stats
         this.baseStats.maxHPs = 90;
