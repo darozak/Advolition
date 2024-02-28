@@ -2,7 +2,6 @@
 class RobotData {
     baseStats = new Stats();
     adjustedStats = new Stats();
-    slots = [];
     items = [];
     lastScan = 0;
     robotID;
@@ -15,7 +14,6 @@ class RobotData {
         this.pos = world.entrances[robotID];
         this.baseStats.copy(world.robots[0].baseStats, true);
         this.adjustedStats.copy(world.robots[0].adjustedStats, true);
-        this.slots = world.robots[0].slots;
         this.items = world.robots[0].items;
     }
 }

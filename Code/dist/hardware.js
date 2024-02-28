@@ -1,22 +1,11 @@
 "use strict";
-class Slot {
-    name;
-    count = 0;
-    timeToEquip;
-    constructor(name, timeToEquip) {
-        this.name = name;
-        this.timeToEquip = timeToEquip;
-    }
-}
 class Item {
     name;
-    slot;
     effects;
     isActive = false;
     isEquipped = false;
-    constructor(name, slot, effects) {
+    constructor(name, effects) {
         this.name = name;
-        this.slot = slot;
         this.effects = effects;
     }
 }
@@ -27,6 +16,8 @@ class Stats {
     // Transient stats
     maxHPs = 0;
     maxPower = 0;
+    maxCarry = 0;
+    maxEquip = 0;
     scanPower = 0;
     scanTime = 0;
     scanRange = 0;
@@ -45,6 +36,8 @@ class Stats {
     add(stats) {
         this.HPs += stats.HPs;
         this.maxHPs += stats.maxHPs;
+        this.maxCarry += stats.maxCarry;
+        this.maxEquip += stats.maxEquip;
         this.power += stats.power;
         this.maxPower += stats.maxPower;
         this.scanPower += stats.scanPower;
@@ -73,6 +66,8 @@ class Stats {
         // Transient stats
         this.maxHPs = stats.maxHPs;
         this.maxPower = stats.maxPower;
+        this.maxCarry = stats.maxCarry;
+        this.maxEquip = stats.maxEquip;
         this.scanPower = stats.scanPower;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
@@ -92,12 +87,13 @@ class Stats {
 class Robot {
     baseStats = new Stats();
     adjustedStats = new Stats();
-    slots = [];
     items = [];
     constructor() {
         // Non-transient stats
         this.baseStats.HPs = 90;
         this.baseStats.power = 90;
+        this.baseStats.maxCarry = 10;
+        this.baseStats.maxEquip = 3;
         // Transient stats
         this.baseStats.maxHPs = 90;
         this.baseStats.maxPower = 90;
@@ -115,27 +111,16 @@ class Robot {
         this.baseStats.moveTime = 10;
         this.baseStats.permissiveTerrain = [
             'Floor',
-            'Closed Door'
+            'Door'
         ];
         this.baseStats.backgroundPower = 0;
     }
 }
 class Humanoid extends Robot {
-    constructor(slots, items) {
+    constructor(items) {
         super();
-        this.slots = slots;
         var ID;
         this.adjustedStats.copy(this.baseStats, true);
-        // Add slots
-        ID = this.slots.findLastIndex(d => d.name === "Battery Slot");
-        if (ID >= 0)
-            this.slots[ID].count++;
-        ID = slots.findLastIndex(d => d.name === "Weapon Slot");
-        if (ID >= 0)
-            this.slots[ID].count++;
-        ID = slots.findLastIndex(d => d.name === "Weapon Slot");
-        if (ID >= 0)
-            this.slots[ID].count++;
         // Add items
         ID = items.findLastIndex(d => d.name === "Battery");
         if (ID >= 0)
@@ -175,7 +160,7 @@ class WorldData {
     sketch = [];
     entrances = [];
     tiles = [];
-    slots = [];
+    // slots: Slot[] = [];
     items = [];
     robots = [];
     constructor() {

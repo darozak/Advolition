@@ -29,37 +29,31 @@ class GaiaData extends WorldData {
         this.tiles.push(new Tile("Wall", "#", new Vector(10,10), false, 0.0));
         this.tiles.push(new Tile("Door", "+", new Vector(12,3), false, 0.0));
 
-        // Define Slots
-        this.slots.push(new Slot("Battery Slot", 10));
-        this.slots.push(new Slot("Weapon Slot", 10));
-        this.slots.push(new Slot("Shield Slot", 10));
-
-
         // Create Items
         var effects: Stats;
 
         effects = new Stats();
         effects.kineticDamage = 1;
-        this.items.push(new Item('Vorpal Sword', 'Weapon Slot', effects));
+        this.items.push(new Item('Vorpal Sword', effects));
 
         effects = new Stats();
         effects.thermalDamage = 2;
-        this.items.push(new Item('Blaster', 'Weapon Slot', effects));
+        this.items.push(new Item('Blaster', effects));
 
         effects = new Stats();
         effects.thermalDefense = 2;
-        this.items.push(new Item('Shield', 'Shield Slot', effects));
+        this.items.push(new Item('Shield', effects));
 
         effects = new Stats();
         effects.power = 10;
         effects.maxPower = 10;
-        this.items.push(new Item('Battery', 'Battery Slot', effects));
+        this.items.push(new Item('Battery', effects));
 
         console.log(this.items);
 
 
         // Create New Robot Models
-        this.robots[0] = new Humanoid(this.slots, this.items);
+        this.robots[0] = new Humanoid(this.items);
         console.log(this.robots[0]);
     }
 }

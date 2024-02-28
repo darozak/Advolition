@@ -1,24 +1,12 @@
-class Slot {
-    name: string;
-    count: number = 0;
-    timeToEquip: number;
-
-    constructor(name: string, timeToEquip: number) {
-        this.name = name;
-        this.timeToEquip = timeToEquip;
-    }
-}
  
 class Item {   
     name: string;
-    slot: string;
     effects: Stats;
     isActive: boolean = false;
     isEquipped: boolean = false;
 
-    constructor(name: string, slot: string, effects: Stats) {
+    constructor(name: string, effects: Stats) {
         this.name = name;
-        this.slot = slot;
         this.effects = effects;
     }
 }
@@ -33,6 +21,9 @@ class Stats {
     // Transient stats
     maxHPs = 0;
     maxPower = 0;
+
+    maxCarry = 0;
+    maxEquip = 0;
 
     scanPower = 0;
     scanTime = 0;
@@ -58,6 +49,9 @@ class Stats {
     add(stats: Stats) {
         this.HPs += stats.HPs;
         this.maxHPs += stats.maxHPs;
+
+        this.maxCarry += stats.maxCarry;
+        this.maxEquip += stats.maxEquip;
 
         this.power += stats.power;
         this.maxPower += stats.maxPower;
@@ -96,6 +90,9 @@ class Stats {
         this.maxHPs = stats.maxHPs;
         this.maxPower = stats.maxPower;
 
+        this.maxCarry = stats.maxCarry;
+        this.maxEquip = stats.maxEquip;
+
         this.scanPower = stats.scanPower;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
@@ -120,7 +117,6 @@ class Stats {
 class Robot {
     baseStats = new Stats();
     adjustedStats = new Stats();
-    slots: Slot[] = [];
     items: Item[] = [];
 
     constructor() {
@@ -128,6 +124,9 @@ class Robot {
     // Non-transient stats
     this.baseStats.HPs = 90;
     this.baseStats.power = 90;
+
+    this.baseStats.maxCarry = 10;
+    this.baseStats.maxEquip = 3;
     
     // Transient stats
     this.baseStats.maxHPs = 90;
@@ -150,7 +149,7 @@ class Robot {
     this.baseStats.moveTime = 10;
     this.baseStats.permissiveTerrain = [
         'Floor',
-        'Closed Door'
+        'Door'
     ]
 
     this.baseStats.backgroundPower = 0;
@@ -159,22 +158,11 @@ class Robot {
 
 class Humanoid extends Robot {
 
-    constructor(slots: Slot[], items: Item[]) {
+    constructor(items: Item[]) {
         super();
-        this.slots = slots;
         var ID: number; 
         
         this.adjustedStats.copy(this.baseStats, true);
-        
-        // Add slots
-        ID = this.slots.findLastIndex(d => d.name === "Battery Slot");
-        if(ID >= 0) this.slots[ID].count ++;
-
-        ID = slots.findLastIndex(d => d.name === "Weapon Slot");
-        if(ID >= 0) this.slots[ID].count ++;
-
-        ID = slots.findLastIndex(d => d.name === "Weapon Slot");
-        if(ID >= 0) this.slots[ID].count ++;
 
         // Add items
         ID = items.findLastIndex(d => d.name === "Battery");
@@ -217,7 +205,7 @@ class WorldData {
     sketch: string[] = [];
     entrances: Vector[] = [];
     tiles: Tile[] = [];
-    slots: Slot[] = [];
+    // slots: Slot[] = [];
     items: Item[] = [];
     robots: Robot[] = [];
 

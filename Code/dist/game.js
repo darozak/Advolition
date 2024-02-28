@@ -175,7 +175,7 @@ class Game {
             if (this.robotData[robotID].items[i].isActive)
                 color = [51, 110, 156];
             topTextFrame += lineSpacing;
-            text = this.robotData[robotID].items[i].name + ' (' + this.robotData[robotID].items[i].slot + ')';
+            text = this.robotData[robotID].items[i].name;
             this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
         }
         // Display dropped items.
@@ -187,7 +187,7 @@ class Game {
                 var color = [180, 180, 180];
                 var text;
                 topTextFrame += lineSpacing;
-                text = this.arena.itemMap[loc.x][loc.y][i].name + ' (' + this.arena.itemMap[loc.x][loc.y][i].slot + ')';
+                text = this.arena.itemMap[loc.x][loc.y][i].name;
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
         }
@@ -213,16 +213,6 @@ class Game {
         topTextFrame += lineSpacing;
         let power = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
-        // Display slots
-        topTextFrame += lineSpacing * 0.5;
-        for (var i = 0; i < this.robotData[robotID].slots.length; i++) {
-            topTextFrame += lineSpacing;
-            let slotName = this.robotData[robotID].slots[i].name;
-            let slotCount = this.robotData[robotID].slots[i].count;
-            if (slotCount > 0) {
-                this.paper.showStatus(centerTextFrame, topTextFrame, slotName, slotCount, [180, 180, 180]);
-            }
-        }
         // Display attributes
         topTextFrame += lineSpacing * 1.5;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
@@ -315,10 +305,7 @@ class Game {
         // Does item exist in inventory?
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if (itemID >= 0) {
-            // Set time delay..
-            let slotName = this.robotData[robotID].items[itemID].slot;
-            let slotID = this.robotData[robotID].slots.findLastIndex(d => d.name === slotName);
-            let delay = this.robotData[robotID].slots[slotID].timeToEquip;
+            let delay = 10;
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
@@ -337,10 +324,7 @@ class Game {
         // Does item exist in inventory?
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if (itemID >= 0) {
-            // Set time delay..
-            let slotName = this.robotData[robotID].items[itemID].slot;
-            let slotID = this.robotData[robotID].slots.findLastIndex(d => d.name === slotName);
-            let delay = this.robotData[robotID].slots[slotID].timeToEquip;
+            let delay = 1;
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
@@ -359,10 +343,7 @@ class Game {
         // Does item exist in inventory?
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if (itemID >= 0) {
-            // Set time delay..
-            let slotName = this.robotData[robotID].items[itemID].slot;
-            let slotID = this.world.slots.findLastIndex(d => d.name === slotName);
-            let delay = this.world.slots[slotID].timeToEquip;
+            let delay = 1;
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
@@ -383,10 +364,7 @@ class Game {
         let location = this.robotData[robotID].pos;
         let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
         if (itemID >= 0) {
-            // Set time delay..
-            let slotName = this.arena.itemMap[location.x][location.y][itemID].slot;
-            let slotID = this.world.slots.findLastIndex(d => d.name === slotName);
-            let delay = this.world.slots[slotID].timeToEquip;
+            let delay = 1;
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
@@ -428,20 +406,9 @@ class Game {
         this.powerColor[event.robotID].deactivate();
     }
     equipItems(robot) {
-        // Uniquip all items.
+        // Equip allowable number of items.
         for (var i = 0; i < robot.items.length; i++) {
-            robot.items[i].isEquipped = false;
-        }
-        // Add items to slots.
-        for (var i = 0; i < robot.slots.length; i++) {
-            if (robot.slots[i].count > 0) {
-                for (var j = 0; j < robot.slots[i].count; j++) {
-                    let slotName = robot.slots[i].name;
-                    let ID = robot.items.findIndex((d) => d.slot === slotName && !d.isEquipped);
-                    if (ID >= 0)
-                        robot.items[ID].isEquipped = true;
-                }
-            }
+            robot.items[i].isEquipped = (i <= robot.baseStats.maxEquip);
         }
         // Inactivate all unequipped items.
         for (var i = 0; i < robot.items.length; i++) {

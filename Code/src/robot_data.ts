@@ -4,7 +4,6 @@ class RobotData {
     baseStats = new Stats();
     adjustedStats = new Stats();
 
-    slots: Slot[] = [];
     items: Item[] = [];
 
     lastScan: number = 0;
@@ -21,7 +20,6 @@ class RobotData {
         this.baseStats.copy(world.robots[0].baseStats, true);
         this.adjustedStats.copy(world.robots[0].adjustedStats, true);
 
-        this.slots = world.robots[0].slots;
         this.items = world.robots[0].items;
     }
 }
