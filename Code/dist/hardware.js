@@ -2,6 +2,7 @@
 class Item {
     name;
     effects;
+    timeToActivate = 10;
     isActive = false;
     isEquipped = false;
     constructor(name, effects) {

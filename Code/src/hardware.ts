@@ -2,6 +2,7 @@
 class Item {   
     name: string;
     effects: Stats;
+    timeToActivate: number = 10;
     isActive: boolean = false;
     isEquipped: boolean = false;
 

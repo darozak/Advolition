@@ -10,33 +10,29 @@ Here are my goals for making this game:
 ## Development Tasks
 These are the things that I need to accomplish to consider this a complete game:
 
-- Terrain features:
-    - [Done] Power Stations charge robots.
-    - [Done] Repair Stations heal robots.
-    - [Done] Doors can be opened and closed.
 - Major equipment classes
     - [Done] Batteries
     - [Done] Scanners
     - [Done] Shields
     - [Done] Cores
     - [Done] Weapons
-    - Digital keys - Allow the robot to trigger different terrain features.
-- Equipment management
-    - Place equipment throughout the dungeon that robots can pick up.
+    - Ammunition
+    - Armor
+    - Power generators
+    - Digital keys
+- [Done] Equipment management
     - [Done] Figure out how to manage multiple iteams in one tile.
     - [Done] Allow robots to identify equiment in a scan.
     - [Done] Have a basic inventory management system that allows robots to take, equip, and drop equipment.
-    - When killed NPRs will drop equipment.
 - Combat mechanism
     - Add attack option.
     - Allow kills.
     - Dead robots drop equipment.
 - Generate and populate dungeons using random seeds.
-    - Scatter more advanced equipment throughout the dungeon.  
-    - Have at least three different versions of each class.
+    - Scatter more equipment throughout the dungeon.  
     - Pupulate dungeon with at least three different types of NPRs.
 - Score robots based on their performance in the dungeon.
-    - Collecting treasures.
+    - [Done] Collecting treasures.
     - Killing NPRs.
     - Returning quickly.
 - Starting the game

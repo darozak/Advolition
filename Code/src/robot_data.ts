@@ -17,8 +17,8 @@ class RobotData {
         this.name = name;
         this.pos = world.entrances[robotID];
 
-        this.baseStats.copy(world.robots[0].baseStats, true);
-        this.adjustedStats.copy(world.robots[0].adjustedStats, true);
+        this.baseStats.copy(world.robots[0].baseStats);
+        this.adjustedStats.copy(world.robots[0].adjustedStats);
 
         this.items = world.robots[0].items;
     }

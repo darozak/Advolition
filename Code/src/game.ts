@@ -275,6 +275,12 @@ class Game {
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
 
         topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
+
+        topTextFrame += lineSpacing * 1.5;
+        this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.robotData[robotID].adjustedStats.value, statRGB);
+
+        topTextFrame += lineSpacing * 1.5;
         this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
 
         topTextFrame += lineSpacing;
@@ -337,6 +343,59 @@ class Game {
         }
     }
 
+    requestAttack(robotID: number, action: Action) {
+        let powerCost = this.robotData[robotID].adjustedStats.offensePower;
+        
+        if(this.drainPower(this.robotData[robotID], powerCost)) {
+
+            let delay = this.robotData[robotID].adjustedStats.offenseTime;
+            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+        }
+    }
+
+    resolveAttach(action: GameEvent) {
+
+        // Map path to target.
+        let path = this.robotData[action.robotID].pos.getPathTo(action.action.target);
+        let targetID = -1;
+
+        // Follow path until it hits something.
+        for(var i = 0; i < path.length; i ++) {
+            let tileID = this.arena.tileMap[path[i].x][path[i].y];
+            let robotID = this.arena.robotMap[path[i].x][path[i].y];
+
+            // Abort attack if blocked by tile.
+            if(!this.world.tiles[tileID].transparent) break;
+
+            // Redirect attack if blocked by robot.
+            if(robotID >= 0) {
+                targetID = robotID;
+                break;
+            }
+        }
+
+        // Inflict damage on robot if there is one in path.
+        if(targetID >= 0) {
+            let damage = 0;
+            let attackerStats = this.robotData[action.robotID].adjustedStats;
+            let defenderStats = this.robotData[targetID].adjustedStats;
+
+            // Apply shields if target has enough power to defend itself.
+            if(this.drainPower(this.robotData[targetID], defenderStats.defensePower)) {
+                if(attackerStats.kineticDamage > defenderStats.kineticDefense)
+                    damage += attackerStats.kineticDamage - defenderStats.kineticDefense;
+                if(attackerStats.thermalDamage > defenderStats.thermalDefense)
+                    damage += attackerStats.thermalDamage - defenderStats.thermalDefense;
+            } else {
+                damage += attackerStats.kineticDamage + attackerStats.thermalDamage;
+            }
+
+            // Apply damage to target robot.
+            this.takeDamage(this.robotData[targetID], damage);
+        }
+
+    }
+
     requestMove(robotID: number, action: Action) { 
 
         let powerCost = this.robotData[robotID].adjustedStats.movePower;
@@ -395,7 +454,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
     
-            let delay = 10;
+            let delay = this.robotData[robotID].items[itemID].timeToActivate;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -421,7 +480,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            let delay = 1;
+            let delay = this.robotData[robotID].items[itemID].timeToActivate;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -447,7 +506,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            let delay = 1;
+            let delay = this.robotData[robotID].items[itemID].timeToActivate;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -478,7 +537,7 @@ class Game {
             let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
             if(itemID >= 0) {
 
-                let delay = 1;
+                let delay = this.robotData[robotID].items[itemID].timeToActivate;
 
                 // Add action to event que.
                 this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -500,27 +559,24 @@ class Game {
         this.equipItems(this.robotData[event.robotID]);
     }
 
-    requestScan(botID: number, call: Action) {
+    requestScan(robotID: number, call: Action) {
 
-        let powerCost = this.robotData[botID].adjustedStats.scanPower;
+        let powerCost = this.robotData[robotID].adjustedStats.scanPower;
 
         // Is there power for this action?
-        if(this.robotData[botID].adjustedStats.power >= powerCost) {
-            
-            // Drain power
-            this.robotData[botID].adjustedStats.power -= powerCost;
+        if(this.drainPower(this.robotData[robotID], powerCost)) {
 
             // Set scan range and delay.
-            call.range = this.robotData[botID].adjustedStats.scanRange;
-            let delay = this.robotData[botID].adjustedStats.scanTime;
+            call.range = this.robotData[robotID].adjustedStats.scanRange;
+            let delay = this.robotData[robotID].adjustedStats.scanTime;
 
             // Add action to event queue.
-            this.events.push(new GameEvent(botID, call, delay + this.gameTime));
+            this.events.push(new GameEvent(robotID, call, delay + this.gameTime));
 
             // Animate display elements.
-            this.scannerColor[botID].activate();
-            this.batteryColor[botID].activate();
-            this.powerColor[botID].activate();
+            this.scannerColor[robotID].activate();
+            this.batteryColor[robotID].activate();
+            this.powerColor[robotID].activate();
         }
     }
 
@@ -548,7 +604,7 @@ class Game {
         }
 
         // Recompute attributes based on active items.
-        robot.adjustedStats.copy(robot.baseStats);
+        robot.adjustedStats.copy(robot.baseStats); 
 
         // Apply mods from equipped items.
         for(var i = 0; i < robot.items.length; i ++) {

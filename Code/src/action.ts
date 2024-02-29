@@ -7,6 +7,14 @@ class Action {
     constructor(){}
 }
 
+class Attack extends Action {
+    constructor(target: Vector) {
+        super();
+        this.command = "attack";
+        this.target = target;
+    }
+}
+
 class Move extends Action {
     constructor(destination: Vector) {
         super();
