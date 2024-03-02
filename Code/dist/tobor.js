@@ -1,51 +1,42 @@
 "use strict";
 class Tobor extends Program {
-    state = "start";
+    state = "equip";
     actionBuffer = [];
+    target = new Vector(3, 6);
     run(myID, myData, myAction) {
-        var destination = new Vector(3, 3);
+        var destination = new Vector(1, 4);
         var destination2 = new Vector(6, 3);
-        var target = new Vector(3, 4);
-        // myAction = new Scan();
         if (this.actionBuffer.length < 1) {
             switch (this.state) {
-                case "start":
-                    console.log("I'm back");
-                    let myPosition = myData.robots[myID].pos;
-                    this.actionBuffer.push(new Activate('Blaster'));
-                    this.actionBuffer.push(new Activate('Shield'));
+                case 'equip':
+                    this.actionBuffer.push(new Activate('Scanner'));
                     this.actionBuffer.push(new Activate('Battery'));
-                    this.actionBuffer.push(new Drop('Shield'));
-                    // this.actionBuffer.push(new Scan()); 
+                    this.actionBuffer.push(new Activate('Blaster'));
+                    this.state = 'start';
+                    break;
+                case "start":
+                    let myPosition = myData.robots[myID].pos;
                     this.actionBuffer.push(new Scan());
-                    this.actionBuffer.push(new Take('Shield'));
                     this.actionBuffer.push(new Move(destination));
                     if (myPosition.x === destination.x && myPosition.y === destination.y)
-                        this.state = "activate";
-                    // if(myData.robots[myID].battery.currentPower < 100) this.state = "recharge";
+                        this.state = "attack";
                     break;
-                case "activate":
-                    console.log("Opening door");
-                    this.actionBuffer.push(new Activate('Vorpal Sword'));
-                    this.actionBuffer.push(new Inactivate('Blaster'));
-                    this.state = "scan";
+                case "attack":
+                    this.actionBuffer.push(new Attack(this.target));
+                    this.actionBuffer.push(new Attack(this.target));
+                    this.actionBuffer.push(new Attack(this.target));
+                    this.state = "end";
                     break;
                 case "move":
-                    // console.log("move state");
                     this.actionBuffer.push(new Move(destination));
                     this.state = "scan";
                     break;
                 case "scan":
-                    console.log("scan state");
-                    this.actionBuffer.push(new Scan());
                     this.actionBuffer.push(new Scan());
                     this.actionBuffer.push(new Move(destination2));
-                    // console.log(myData.robots[myID].core.mass);
                     this.state = "scan";
                     break;
                 case "end":
-                    console.log("end state");
-                    this.actionBuffer.push(new Move(destination));
                     break;
             }
         }

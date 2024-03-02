@@ -64,6 +64,9 @@ class Game {
 
                     if(action) {
                         switch (action.command) {
+                            case "attack":
+                                this.requestAttack(i, action);
+                                break;
                             case "drop":
                                 this.requestDrop(i, action);
                                 break;
@@ -97,6 +100,9 @@ class Game {
                 // Evaluate any events that should have occurred by now.
                 while(this.events[0].duration <= this.gameTime) {
                     switch (this.events[0].action.command) {
+                        case "attack":
+                            this.resolveAttach(this.events[0]);
+                            break;
                         case "drop":
                             this.resolveDrop(this.events[0]);
                             break;
@@ -347,7 +353,6 @@ class Game {
         let powerCost = this.robotData[robotID].adjustedStats.offensePower;
         
         if(this.drainPower(this.robotData[robotID], powerCost)) {
-
             let delay = this.robotData[robotID].adjustedStats.offenseTime;
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
@@ -385,7 +390,7 @@ class Game {
                 if(attackerStats.kineticDamage > defenderStats.kineticDefense)
                     damage += attackerStats.kineticDamage - defenderStats.kineticDefense;
                 if(attackerStats.thermalDamage > defenderStats.thermalDefense)
-                    damage += attackerStats.thermalDamage - defenderStats.thermalDefense;
+                    damage += (attackerStats.thermalDamage - defenderStats.thermalDefense);
             } else {
                 damage += attackerStats.kineticDamage + attackerStats.thermalDamage;
             }
@@ -617,12 +622,16 @@ class Game {
 
     takeDamage(robot: RobotData, amount: number){
         for(var i = 0; i < robot.items.length; i ++) {
-            if(amount <= robot.items[i].effects.HPs) {
-                robot.items[i].effects.HPs -= amount;
-                amount = 0;
-            } else {
-                amount -= robot.items[i].effects.HPs;
-                robot.items[i].effects.HPs = 0;
+            if(robot.items[i].isActive) {
+                if(amount <= robot.items[i].effects.HPs) {
+                    robot.items[i].effects.HPs -= amount;
+                    robot.adjustedStats.HPs -= amount;
+                    amount = 0;
+                } else {
+                    amount -= robot.items[i].effects.HPs;
+                    robot.adjustedStats.HPs -= robot.items[i].effects.HPs;
+                    robot.items[i].effects.HPs = 0;
+                }
             }
         }
 
@@ -633,12 +642,22 @@ class Game {
 
     drainPower(robot: RobotData, amount: number){
         for(var i = 0; i < robot.items.length; i ++) {
-            if(amount <= robot.items[i].effects.power) {
-                robot.items[i].effects.power -= amount;
-                amount = 0;
-            } else {
-                amount -= robot.items[i].effects.power;
-                robot.items[i].effects.power = 0;
+
+            // Only take power from active items.
+            if(robot.items[i].isActive) {
+
+                // Drain required power from item if there is enough.
+                if(amount <= robot.items[i].effects.power) {
+                    robot.items[i].effects.power -= amount;
+                    robot.adjustedStats.power -= amount;
+                    amount = 0;
+
+                // Otherwise drain what is available from that item.
+                } else {
+                    amount -= robot.items[i].effects.power;
+                    robot.adjustedStats.power -= robot.items[i].effects.power;
+                    robot.items[i].effects.power = 0;
+                }
             }
         }
 

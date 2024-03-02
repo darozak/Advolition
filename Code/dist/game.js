@@ -51,6 +51,9 @@ class Game {
                 action = this.programs[i].run(i, structuredClone(this.scanData[i]), action);
                 if (action) {
                     switch (action.command) {
+                        case "attack":
+                            this.requestAttack(i, action);
+                            break;
                         case "drop":
                             this.requestDrop(i, action);
                             break;
@@ -80,6 +83,9 @@ class Game {
             // Evaluate any events that should have occurred by now.
             while (this.events[0].duration <= this.gameTime) {
                 switch (this.events[0].action.command) {
+                    case "attack":
+                        this.resolveAttach(this.events[0]);
+                        break;
                     case "drop":
                         this.resolveDrop(this.events[0]);
                         break;
@@ -297,7 +303,7 @@ class Game {
                 if (attackerStats.kineticDamage > defenderStats.kineticDefense)
                     damage += attackerStats.kineticDamage - defenderStats.kineticDefense;
                 if (attackerStats.thermalDamage > defenderStats.thermalDefense)
-                    damage += attackerStats.thermalDamage - defenderStats.thermalDefense;
+                    damage += (attackerStats.thermalDamage - defenderStats.thermalDefense);
             }
             else {
                 damage += attackerStats.kineticDamage + attackerStats.thermalDamage;
@@ -471,13 +477,17 @@ class Game {
     }
     takeDamage(robot, amount) {
         for (var i = 0; i < robot.items.length; i++) {
-            if (amount <= robot.items[i].effects.HPs) {
-                robot.items[i].effects.HPs -= amount;
-                amount = 0;
-            }
-            else {
-                amount -= robot.items[i].effects.HPs;
-                robot.items[i].effects.HPs = 0;
+            if (robot.items[i].isActive) {
+                if (amount <= robot.items[i].effects.HPs) {
+                    robot.items[i].effects.HPs -= amount;
+                    robot.adjustedStats.HPs -= amount;
+                    amount = 0;
+                }
+                else {
+                    amount -= robot.items[i].effects.HPs;
+                    robot.adjustedStats.HPs -= robot.items[i].effects.HPs;
+                    robot.items[i].effects.HPs = 0;
+                }
             }
         }
         if (amount > 0) {
@@ -486,13 +496,20 @@ class Game {
     }
     drainPower(robot, amount) {
         for (var i = 0; i < robot.items.length; i++) {
-            if (amount <= robot.items[i].effects.power) {
-                robot.items[i].effects.power -= amount;
-                amount = 0;
-            }
-            else {
-                amount -= robot.items[i].effects.power;
-                robot.items[i].effects.power = 0;
+            // Only take power from active items.
+            if (robot.items[i].isActive) {
+                // Drain required power from item if there is enough.
+                if (amount <= robot.items[i].effects.power) {
+                    robot.items[i].effects.power -= amount;
+                    robot.adjustedStats.power -= amount;
+                    amount = 0;
+                    // Otherwise drain what is available from that item.
+                }
+                else {
+                    amount -= robot.items[i].effects.power;
+                    robot.adjustedStats.power -= robot.items[i].effects.power;
+                    robot.items[i].effects.power = 0;
+                }
             }
         }
         // Return true if robot has enough power to complete the action.

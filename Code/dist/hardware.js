@@ -89,21 +89,7 @@ class Robot {
     constructor() {
         this.baseStats.maxCarry = 4;
         this.baseStats.maxEquip = 3;
-        this.baseStats.HPs = 0;
-        this.baseStats.maxHPs = 0;
-        this.baseStats.power = 0;
-        this.baseStats.maxPower = 0;
-        this.baseStats.scanPower = 1;
-        this.baseStats.scanTime = 10;
-        this.baseStats.scanRange = 5;
-        this.baseStats.offensePower = 0;
-        this.baseStats.offenseTime = 0;
-        this.baseStats.kineticDamage = 0;
-        this.baseStats.thermalDamage = 0;
-        this.baseStats.defensePower = 0;
-        this.baseStats.kineticDefense = 0;
-        this.baseStats.thermalDefense = 0;
-        this.baseStats.movePower = 1;
+        this.baseStats.movePower = 3;
         this.baseStats.moveTime = 10;
         this.baseStats.permissiveTerrain = [
             'Floor',
@@ -127,10 +113,10 @@ class Humanoid extends Robot {
         ID = items.findLastIndex(d => d.name === "Shield");
         if (ID >= 0)
             this.items.push(structuredClone(items[ID]));
-        ID = items.findLastIndex(d => d.name === "Vorpal Sword");
+        ID = items.findLastIndex(d => d.name === "Scanner");
         if (ID >= 0)
             this.items.push(structuredClone(items[ID]));
-        ID = items.findLastIndex(d => d.name === "Vorpal Sword");
+        ID = items.findLastIndex(d => d.name === "Armor");
         if (ID >= 0)
             this.items.push(structuredClone(items[ID]));
     }
