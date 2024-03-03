@@ -132,7 +132,7 @@ class Robot {
 class Humanoid extends Robot {
 
     constructor(items: Item[]) {
-        super();
+        super(); 
         var ID: number; 
         
         this.adjustedStats.copy(this.baseStats);

@@ -47,3 +47,4 @@ class Tobor extends Program {
         return myAction;
     }
 }
+new Tobor();

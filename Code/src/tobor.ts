@@ -53,3 +53,5 @@ class Tobor extends Program {
     }
     
 }
+
+new Tobor();

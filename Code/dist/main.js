@@ -1,6 +1,22 @@
 "use strict";
 var intervalID = 0;
 /**
+ * This function loads a local file into the the robotCode HTML element for
+ * use by the runGame() function.
+ */
+function loadFile() {
+    const robotCode = document.querySelector(".robotCode");
+    const fileSelector = document.querySelector("input[type=file]");
+    const [file] = [fileSelector.files];
+    const reader = new FileReader();
+    reader.addEventListener("load", () => {
+        robotCode.innerText = reader.result;
+    }, false);
+    if (file) {
+        reader.readAsText(file[0]);
+    }
+}
+/**
  * This function is called from from the HTML button to start the game
  * after the robot code has been loaded into the HTML text area.
  */
@@ -9,17 +25,17 @@ function runGame() {
     if (intervalID > 0)
         clearInterval(intervalID);
     // Link to the HTML text area that contains the robot code.
-    const input = document.getElementById("myTextarea");
+    const robotCode = document.querySelector(".robotCode");
     // Import the text area content into a string.
-    if (input) {
-        const inputValue = input.value;
+    if (robotCode) {
+        const inputValue = robotCode.innerText;
     }
     // Evaluate the string to create a new program object.
-    var test = eval(input.value);
+    var importedCode = eval(robotCode.innerText);
     const game = new Game(new GaiaData());
     // Load robots, inlcuding the program object that was created from the HTML text area.
-    game.addRobot(new Tobor(), "Alpha");
-    game.addRobot(test, "Target");
+    game.addRobot(importedCode, "Alpha");
+    game.addRobot(new Target(), "Target");
     // game.addRobot(new Tobor(), "Delta");
     // game.addRobot(new Tobor(), "Gamma");
     // Game animation loop. The interval sets that animation frame rate in ms.
