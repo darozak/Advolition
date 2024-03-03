@@ -24,6 +24,8 @@ class Game {
         this.arena = new Arena(this.world, this.robotData);
         this.arena.generate();
         this.paper = new Paper();
+
+        
     } 
 
     addRobot(robot: Program, name: string) {

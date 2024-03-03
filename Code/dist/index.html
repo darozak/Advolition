@@ -6,9 +6,36 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <button  onclick="runGame()">Run</button> 
   <div style="display:none;">
     <img id="source" src="tiles.png"/>
   </div>
+  <textarea id="myTextarea" rows="20" cols="10">
+    class Target extends Program {
+      state = 'start';
+      actionBuffer = [];
+      run(myID, myData, myAction) {
+          // Do nothing.
+          if (this.actionBuffer.length < 1) {
+              switch (this.state) {
+                  case 'start':
+                      this.actionBuffer.push(new Activate('Armor'));
+                      this.actionBuffer.push(new Activate('Shield'));
+                      this.state = 'stop';
+                      break;
+              }
+          }
+          if (this.actionBuffer.length > 0) {
+              myAction = this.actionBuffer[0];
+              this.actionBuffer.shift();
+          }
+          return myAction;
+      }
+  }
+
+  new Target();
+
+  </textarea>
 
   <canvas id="canvas1"></canvas>
 
@@ -29,7 +56,6 @@
   <script src="animations.js"></script>
   <script src="game.js"></script>
   <script src="main.js"></script>
-
 </body>
 
 </html>

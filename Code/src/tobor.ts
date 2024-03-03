@@ -6,7 +6,7 @@ class Tobor extends Program {
     run(myID: number, myData: ScanData, myAction: Action) {
         var destination = new Vector(1,4);
         var destination2 = new Vector(6,3);
-    
+        
         if(this.actionBuffer.length < 1) {
             
             switch (this.state) {
