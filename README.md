@@ -17,7 +17,7 @@ These are the things that I need to accomplish to consider this a complete game:
     - [Done] Cores
     - [Done] Weapons
     - Ammunition
-    - Armor
+    - [Done] Armor
     - Power generators
     - Digital keys
 - [Done] Equipment management
@@ -25,8 +25,8 @@ These are the things that I need to accomplish to consider this a complete game:
     - [Done] Allow robots to identify equiment in a scan.
     - [Done] Have a basic inventory management system that allows robots to take, equip, and drop equipment.
 - Combat mechanism
-    - Add attack option.
-    - Allow kills.
+    - [Done] Add attack option.
+    - Remove dead robots from game and event log.
     - Dead robots drop equipment.
 - Generate and populate dungeons using random seeds.
     - Scatter more equipment throughout the dungeon.  
@@ -36,7 +36,7 @@ These are the things that I need to accomplish to consider this a complete game:
     - Killing NPRs.
     - Returning quickly.
 - Starting the game
-    - Allow players to load and run a JS file from their own computer.
+    - [Done] Allow players to load and run a JS file from their own computer.
     - Allow players to select a playthrough rate
     - Have a lighning mode in which robots are rapidly run through a dungeon multiple times to generate an average score.
     - Include start and stop screens.
