@@ -3,6 +3,8 @@
 ## Game Objectives
 Here are my goals for making this game:
 - An open source game that is free to play.
+- A perpetually maintained platform such as GitHub.
+- A digitally produced book that describes how to use the game to teach coding.
 - A fun way to learn JavaScript
 - A tournament mode to rate and rank robot performance.
   - Lighning rounds to generate average score over multiple entries.
