@@ -16,6 +16,10 @@ class Game {
     scannerColor: RampedArray[] = [];
     batteryColor: RampedArray[] = [];
 
+    eventLog = document.getElementById("myTextarea") as HTMLTextAreaElement;
+    
+
+
 
     constructor(world: WorldData) {
         this.gameTime = 0;
@@ -103,7 +107,7 @@ class Game {
                 while(this.events[0].duration <= this.gameTime) {
                     switch (this.events[0].action.command) {
                         case "attack":
-                            this.resolveAttach(this.events[0]);
+                            this.resolveAttack(this.events[0]);
                             break;
                         case "drop":
                             this.resolveDrop(this.events[0]);
@@ -156,7 +160,7 @@ class Game {
         var x1 = this.robotData[robotID].pos.x + mapRadius;
         var y1 = this.robotData[robotID].pos.y + mapRadius;
         
-
+        
         // Cycle through all the tiles in the scan display box.
         for(var i = x0; i < x1; i++) {
             for(var j = y0; j < y1; j++) {
@@ -360,7 +364,7 @@ class Game {
         }
     }
 
-    resolveAttach(action: GameEvent) {
+    resolveAttack(action: GameEvent) {
 
         // Map path to target.
         let path = this.robotData[action.robotID].pos.getPathTo(action.action.target);
@@ -399,6 +403,9 @@ class Game {
 
             // Apply damage to target robot.
             this.takeDamage(this.robotData[targetID], damage);
+
+            // Write to event log.
+            this.updateLog(action.robotID, `attacks ${this.robotData[targetID].name}.`);
         }
 
     }
@@ -441,12 +448,19 @@ class Game {
 
             // Change position in stats.
             this.robotData[action.robotID].pos = destination;
+
+            // Write to event log.
+            this.updateLog(action.robotID, `moves to ${destination.print()}.`);
+
             
         } else {
             // Take damage if you run into something.
             this.robotData[action.robotID].adjustedStats.HPs -= 10;
             this.hpsColor[action.robotID].pulse();
             this.chassisColor[action.robotID].pulse();
+
+            // Wtite to event log.
+            this.updateLog(action.robotID, ` collides with an obstical!`);
         }
 
         // Animate display elements.
@@ -475,6 +489,9 @@ class Game {
         if(itemID >= 0) {
             this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
             this.robotData[event.robotID].items[0].isActive = true;
+
+            // Write to event log.
+            this.updateLog(event.robotID, `activates its ${event.action.item}.`);
         }
 
         // Equip items and apply mods.
@@ -501,6 +518,9 @@ class Game {
         if(itemID >= 0) {
             this.robotData[event.robotID].items[itemID].isActive = false;
             this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
+        
+            // Write to event log.
+            this.updateLog(event.robotID, `inactivates its ${event.action.item}.`);
         }
 
         // Equipe items and apply mods.
@@ -528,6 +548,9 @@ class Game {
         if(itemID >= 0) {
             this.robotData[event.robotID].items[itemID].isActive = false;
             this.arena.itemMap[location.x][location.y].push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
+            
+            // Write to event log.
+            this.updateLog(event.robotID, `drops its ${event.action.item}.`);
         }
 
         // Equip items and apply mods.
@@ -560,6 +583,9 @@ class Game {
        
         if(itemID >= 0) {
             this.robotData[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);          
+            
+            // Write to event log.
+            this.updateLog(event.robotID, `takes the ${event.action.item}.`);
         }
 
         // Equip items and apply mods.
@@ -593,6 +619,9 @@ class Game {
         let range = this.robotData[event.robotID].adjustedStats.scanRange;
         this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         
+        // Write to event log.
+        this.updateLog(event.robotID, "scans the area.");
+
         // Animate display elements.
         this.scannerColor[event.robotID].deactivate();
         this.batteryColor[event.robotID].deactivate();
@@ -679,5 +708,10 @@ class Game {
             }
         }
         return (amount == 0);
+    }
+
+    updateLog(robotID: number, phrase: string) {
+        let name = this.robotData[robotID].name;
+        this.eventLog.value = `${this.gameTime}: ${name} ${phrase}\n` + this.eventLog.value;
     }
 }

@@ -20,5 +20,4 @@ class Target extends Program {
         return myAction;
     }
 }
-
 new Target();

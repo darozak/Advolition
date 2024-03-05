@@ -6,12 +6,14 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  
   <b>Robot Code: </b>
   <input type="file" onchange="loadFile()" />
   <button  onclick="runGame()">Run</button> 
   <button  onclick="stopGame()">Stop</button> 
-
-  <p style="font-size: 0px"  class="robotCode"></p>
+  
+  <p style="font-size: 0px"  class="robotCode"></p> <br>
+  <textarea id="myTextarea" rows="20" cols="10">Test</textarea>
 
   <div style="display:none;">
     <img id="source" src="tiles.png"/>

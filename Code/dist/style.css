@@ -2,12 +2,12 @@
     position: absolute;
     top: 100 px;
     left: 100 px;
-    /* height: 600;
-    width: 800; */
+    height: 600;
+    width: 75%;
 }
 
 #myTextarea { 
-    width: 100%; 
+    width: 25%; 
     height: 200px; 
     resize: none; 
     overflow: auto; 
