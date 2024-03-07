@@ -7,12 +7,31 @@ class Paper {
     renderTileSize = 10;
     image;
     ctx;
+    lineSpacing = 14;
     constructor() {
         this.canvas = document.getElementById('canvas1');
         this.image = document.getElementById('source');
         this.CANVAS_HEIGHT = this.canvas.height = 600;
         this.CANVAS_WIDTH = this.canvas.width = 1200;
         this.ctx = this.canvas.getContext('2d');
+    }
+    printLog(robot, centerFrame, topFrame) {
+        this.ctx.font = '12px Arial';
+        // Print header
+        this.ctx.fillStyle = this.rgbStringFromArray([120, 120, 120]);
+        this.ctx.textAlign = 'right';
+        this.ctx.fillText("Time", centerFrame - 10, topFrame);
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText("Action", centerFrame + 10, topFrame);
+        topFrame += this.lineSpacing;
+        this.ctx.fillStyle = this.rgbStringFromArray([180, 180, 180]);
+        for (var i = 0; i < robot.logTime.length; i++) {
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(`${robot.logTime[i]}`, centerFrame - 10, topFrame);
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(robot.logEntry[i], centerFrame + 10, topFrame);
+            topFrame += this.lineSpacing;
+        }
     }
     drawTile(leftFrame, topFrame, spriteCoord, gridCoord, alpha, frame) {
         const sx = this.spriteTileSize * spriteCoord.x;

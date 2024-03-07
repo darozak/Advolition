@@ -12,6 +12,10 @@ class RobotData {
     pos: Vector;
     sprite = new Vector(23,35);
 
+    logTime: number[] = [];
+    logEntry: string[] = [];
+    maxLogLength = 10;
+
     constructor(world: WorldData, robotID: number, name: string) {
         this.robotID = robotID;
         this.name = name;

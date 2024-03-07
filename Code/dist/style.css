@@ -5,10 +5,3 @@
     height: 600;
     width: 75%;
 }
-
-#myTextarea { 
-    width: 25%; 
-    height: 200px; 
-    resize: none; 
-    overflow: auto; 
-  } 

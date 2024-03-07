@@ -7,6 +7,9 @@ class Paper {
     image: CanvasImageSource;
     ctx: CanvasRenderingContext2D;
 
+    
+    lineSpacing = 14;
+
     constructor() {
         this.canvas = document.getElementById('canvas1') as HTMLCanvasElement;       
         this.image = document.getElementById('source') as HTMLCanvasElement;
@@ -15,7 +18,33 @@ class Paper {
         this.ctx = this.canvas.getContext('2d') as unknown as CanvasRenderingContext2D;
     }
 
-    
+    printLog(robot: RobotData, centerFrame: number, topFrame: number) {
+        this.ctx.font = '12px Arial';   
+
+        // Print header
+        this.ctx.fillStyle = this.rgbStringFromArray([120, 120, 120]);
+
+        this.ctx.textAlign = 'right'; 
+        this.ctx.fillText("Time", centerFrame - 10, topFrame);
+
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText("Action", centerFrame + 10, topFrame);
+
+        topFrame += this.lineSpacing;
+        
+        this.ctx.fillStyle = this.rgbStringFromArray([180, 180, 180]);
+        for(var i = 0; i < robot.logTime.length; i ++) {
+            
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(`${robot.logTime[i]}`, centerFrame - 10, topFrame);
+
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(robot.logEntry[i], centerFrame + 10, topFrame);
+
+            topFrame += this.lineSpacing;
+        }
+    }
+
     drawTile(leftFrame: number, topFrame: number, spriteCoord: Vector, gridCoord: Vector, alpha: number, frame: boolean) {
         const sx = this.spriteTileSize * spriteCoord.x;
         const sy = this.spriteTileSize * spriteCoord.y;

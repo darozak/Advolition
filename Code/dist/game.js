@@ -174,7 +174,18 @@ class Game {
         this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
         // Display text
         let statRGB = [180, 180, 180];
+        // Display permissive terrain under map.
+        topTextFrame;
+        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Passable Terrain', [120, 120, 120]);
+        for (var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i++) {
+            var color = [180, 180, 180];
+            var text;
+            topTextFrame += lineSpacing;
+            text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
+            this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
+        }
         // Display inventory under map.
+        topTextFrame += lineSpacing * 1.5;
         this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
         for (var i = 0; i < this.robotData[robotID].items.length; i++) {
             var color = [180, 180, 180];
@@ -198,16 +209,9 @@ class Game {
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
         }
-        // Display permissive terrain.
-        topTextFrame += lineSpacing * 2;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Permissive Terrain', [120, 120, 120]);
-        for (var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i++) {
-            var color = [180, 180, 180];
-            var text;
-            topTextFrame += lineSpacing;
-            text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
-            this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
-        }
+        // Print log.
+        topTextFrame += lineSpacing * 4;
+        this.paper.printLog(this.robotData[robotID], leftMapFrame + 40, topTextFrame);
         // Display stats to right of map.
         centerTextFrame = leftMapFrame + mapFrameSize + 120;
         topTextFrame = 20;
@@ -312,7 +316,7 @@ class Game {
             // Apply damage to target robot.
             this.takeDamage(this.robotData[targetID], damage);
             // Write to event log.
-            this.updateLog(action.robotID, `attacks ${this.robotData[targetID].name}.`);
+            this.appendToLog(this.robotData[action.robotID], this.gameTime, `attacks ${this.robotData[targetID].name}`);
         }
     }
     requestMove(robotID, action) {
@@ -343,7 +347,7 @@ class Game {
             // Change position in stats.
             this.robotData[action.robotID].pos = destination;
             // Write to event log.
-            this.updateLog(action.robotID, `moves to ${destination.print()}.`);
+            this.appendToLog(this.robotData[action.robotID], this.gameTime, `moves to ${destination.print()}`);
         }
         else {
             // Take damage if you run into something.
@@ -351,7 +355,7 @@ class Game {
             this.hpsColor[action.robotID].pulse();
             this.chassisColor[action.robotID].pulse();
             // Wtite to event log.
-            this.updateLog(action.robotID, ` collides with an obstical!`);
+            this.appendToLog(this.robotData[action.robotID], this.gameTime, `collides with obstical`);
         }
         // Animate display elements.
         this.coreColor[action.robotID].deactivate();
@@ -374,7 +378,7 @@ class Game {
             this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
             this.robotData[event.robotID].items[0].isActive = true;
             // Write to event log.
-            this.updateLog(event.robotID, `activates its ${event.action.item}.`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `activates its ${event.action.item}`);
         }
         // Equip items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
@@ -395,7 +399,7 @@ class Game {
             this.robotData[event.robotID].items[itemID].isActive = false;
             this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
             // Write to event log.
-            this.updateLog(event.robotID, `inactivates its ${event.action.item}.`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `inactivates its ${event.action.item}`);
         }
         // Equipe items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
@@ -417,7 +421,7 @@ class Game {
             this.robotData[event.robotID].items[itemID].isActive = false;
             this.arena.itemMap[location.x][location.y].push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
             // Write to event log.
-            this.updateLog(event.robotID, `drops its ${event.action.item}.`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `drops its ${event.action.item}`);
         }
         // Equip items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
@@ -442,7 +446,7 @@ class Game {
         if (itemID >= 0) {
             this.robotData[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);
             // Write to event log.
-            this.updateLog(event.robotID, `takes the ${event.action.item}.`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `takes the ${event.action.item}`);
         }
         // Equip items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
@@ -467,7 +471,7 @@ class Game {
         let range = this.robotData[event.robotID].adjustedStats.scanRange;
         this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         // Write to event log.
-        this.updateLog(event.robotID, "scans the area.");
+        this.appendToLog(this.robotData[event.robotID], this.gameTime, "scans the area");
         // Animate display elements.
         this.scannerColor[event.robotID].deactivate();
         this.batteryColor[event.robotID].deactivate();
@@ -545,8 +549,12 @@ class Game {
         }
         return (amount == 0);
     }
-    updateLog(robotID, phrase) {
-        let name = this.robotData[robotID].name;
-        this.eventLog.value = `${this.gameTime}: ${name} ${phrase}\n` + this.eventLog.value;
+    appendToLog(robot, time, entry) {
+        robot.logTime.push(time);
+        robot.logEntry.push(entry);
+        if (robot.logTime.length > robot.maxLogLength) {
+            robot.logTime.shift();
+            robot.logEntry.shift();
+        }
     }
 }
