@@ -8,6 +8,7 @@ Here are my goals for making this game:
 - A fun way to learn JavaScript
 - A tournament mode to rate and rank robot performance.
   - Lighning rounds to generate average score over multiple entries.
+- Players compete against one another or default robots to win.
 
 ## Development Tasks
 These are the things that I need to accomplish to consider this a complete game:
@@ -43,7 +44,9 @@ These are the things that I need to accomplish to consider this a complete game:
     - Have a lighning mode in which robots are rapidly run through a dungeon multiple times to generate an average score.
     - Include start and stop screens.
 - Documentation
-    - Create easy to access instructions and demo robots.
+    - Create easy to access instructions and demo robots. Publish on Amazon.
+
+
 
 ## Follow-on Tasks
 These are some things I can do to improve the gameplay experience after first developing a simple version of the game.
