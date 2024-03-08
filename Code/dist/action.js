@@ -4,6 +4,7 @@ class Action {
     target = new Vector(0, 0);
     range = 0;
     item = '';
+    message = '';
     constructor() { }
 }
 class Attack extends Action {
@@ -52,5 +53,12 @@ class Scan extends Action {
     constructor() {
         super();
         this.command = "scan";
+    }
+}
+class Say extends Action {
+    constructor(message) {
+        super();
+        this.command = "say";
+        this.message = message;
     }
 }

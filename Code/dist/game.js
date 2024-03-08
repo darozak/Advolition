@@ -70,6 +70,9 @@ class Game {
                         case "move":
                             this.requestMove(i, action);
                             break;
+                        case "say":
+                            this.requestSay(i, action);
+                            break;
                         case "scan":
                             this.requestScan(i, action);
                             break;
@@ -102,6 +105,8 @@ class Game {
                     case "move":
                         this.resolveMove(this.events[0]);
                         break;
+                    case "say":
+                        this.resolveSay(this.events[0]);
                     case "scan":
                         this.resolveScan(this.events[0]);
                         break;
@@ -476,6 +481,14 @@ class Game {
         this.scannerColor[event.robotID].deactivate();
         this.batteryColor[event.robotID].deactivate();
         this.powerColor[event.robotID].deactivate();
+    }
+    requestSay(robotID, call) {
+        // Add action to event queue.
+        this.events.push(new GameEvent(robotID, call, 2 + this.gameTime));
+    }
+    resolveSay(event) {
+        // Write to event log.
+        this.appendToLog(this.robotData[event.robotID], this.gameTime, 'says: ' + event.action.message);
     }
     equipItems(robot) {
         // Equip allowable number of items.
