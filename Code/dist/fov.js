@@ -1,4 +1,8 @@
 "use strict";
+/**
+ * This code imported from routines described in the ROguelike Toolkit in JavaScript repository
+ * (https://github.com/ondras/rot.js) and adapted slightly to meet the needs of this application.
+ */
 ;
 const DIRS = {
     4: [[0, -1], [1, 0], [0, 1], [-1, 0]],

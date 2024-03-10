@@ -1,5 +1,8 @@
 "use strict";
-// import FOV, { VisibilityCallback } from "./fov.js";
+/**
+ * This code imported from routines described in the ROguelike Toolkit in JavaScript repository
+ * (https://github.com/ondras/rot.js) and adapted slightly to meet the needs of this application.
+ */
 /**
  * @class Precise shadowcasting algorithm
  * @augments ROT.FOV

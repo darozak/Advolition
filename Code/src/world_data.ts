@@ -4,26 +4,6 @@ class GaiaData extends WorldData {
     constructor() {
         super();
 
-        // Sketch Map
-        this.sketch = [
-            "##########",
-            "#........#",
-            "#........#",
-            "#........#",
-            "###+######",
-            "#........#",
-            "#........#",
-            "#........#",
-            "#........#",
-            "##########"
-        ]
-
-        // Define Entrances
-        this.entrances.push(new Vector(1,1));
-        this.entrances.push(new Vector(2,5));
-        this.entrances.push(new Vector(8,1));
-        this.entrances.push(new Vector(1,8));
-
         // Create Tiles
         this.tiles.push(new Tile("Floor", ".", new Vector(16,31), true, 1.0));
         this.tiles.push(new Tile("Wall", "#", new Vector(10,10), false, 0.0));

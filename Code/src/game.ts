@@ -1,3 +1,5 @@
+// import { Arena } from "./arena";
+
 class Game {
     gameTime: number;
     world: WorldData;
@@ -23,7 +25,7 @@ class Game {
         this.world = world;
 
         this.arena = new Arena(this.world, this.robotData);
-        this.arena.generate();
+        this.arena.generateMap();
         this.paper = new Paper();   
     } 
 
@@ -34,6 +36,8 @@ class Game {
         this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID; 
 
+        // Locate robot
+        this.robotData[robotID].pos = this.arena.placeRobot();
         // Equip items
         this.equipItems(this.robotData[robotID]);
 

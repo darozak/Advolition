@@ -1,4 +1,5 @@
 "use strict";
+// import { Arena } from "./arena";
 class Game {
     gameTime;
     world;
@@ -20,7 +21,7 @@ class Game {
         this.gameTime = 0;
         this.world = world;
         this.arena = new Arena(this.world, this.robotData);
-        this.arena.generate();
+        this.arena.generateMap();
         this.paper = new Paper();
     }
     addRobot(robot, name, isDisplayed) {
@@ -29,6 +30,8 @@ class Game {
         this.robotData.push(new RobotData(this.world, robotID, name, isDisplayed));
         this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID;
+        // Locate robot
+        this.robotData[robotID].pos = this.arena.placeRobot();
         // Equip items
         this.equipItems(this.robotData[robotID]);
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));

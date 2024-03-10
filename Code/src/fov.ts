@@ -1,6 +1,11 @@
+/**
+ * This code imported from routines described in the ROguelike Toolkit in JavaScript repository
+ * (https://github.com/ondras/rot.js) and adapted slightly to meet the needs of this application.
+ */
+
 interface VisibilityCallback { (x: number, y: number, r: number, visibility: number): void };
  
-interface Options {
+interface FovOptions {
 	topology: 4 | 6 | 8
 }
 
@@ -11,14 +16,14 @@ const DIRS = {
 };
 
 abstract class FOV {
-	_options: Options;
+	_options: FovOptions;
 
 	/**
 	 * @class Abstract FOV algorithm
 	 * @param {object} [options]
 	 * @param {int} [options.topology=8] 4/6/8
 	 */
-	constructor( options: Partial<Options> = {}) {
+	constructor( options: Partial<FovOptions> = {}) {
 		this._options = Object.assign({topology: 8}, options);
 	}
 

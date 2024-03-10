@@ -7,7 +7,7 @@ class RobotData {
     robotID;
     name;
     isDisplayed;
-    pos;
+    pos = new Vector(0, 0);
     sprite = new Vector(23, 35);
     logTime = [];
     logEntry = [];
@@ -16,7 +16,6 @@ class RobotData {
         this.robotID = robotID;
         this.name = name;
         this.isDisplayed = isDisplayed;
-        this.pos = world.entrances[robotID];
         this.baseStats.copy(world.robots[0].baseStats);
         this.adjustedStats.copy(world.robots[0].adjustedStats);
         this.items = structuredClone(world.robots[0].items);
