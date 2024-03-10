@@ -11,10 +11,10 @@ class Paper {
     lineSpacing = 14;
 
     constructor() {
-        this.canvas = document.getElementById('canvas1') as HTMLCanvasElement;       
-        this.image = document.getElementById('source') as HTMLCanvasElement;
+        this.canvas = document.getElementById('canvas') as HTMLCanvasElement;       
+        this.image = document.getElementById('sprites') as HTMLCanvasElement;
         this.CANVAS_HEIGHT = this.canvas.height = 600;
-        this.CANVAS_WIDTH = this.canvas.width = 1200;
+        this.CANVAS_WIDTH = this.canvas.width = 1500;
         this.ctx = this.canvas.getContext('2d') as unknown as CanvasRenderingContext2D;
     }
 

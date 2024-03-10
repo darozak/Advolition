@@ -9,6 +9,7 @@ class RobotData {
     lastScan: number = 0;
     robotID: number;
     name: string;
+    isDisplayed: boolean;
     pos: Vector;
     sprite = new Vector(23,35);
 
@@ -16,9 +17,10 @@ class RobotData {
     logEntry: string[] = [];
     maxLogLength = 10;
 
-    constructor(world: WorldData, robotID: number, name: string) {
+    constructor(world: WorldData, robotID: number, name: string, isDisplayed: boolean) {
         this.robotID = robotID;
         this.name = name;
+        this.isDisplayed = isDisplayed;
         this.pos = world.entrances[robotID];
 
         this.baseStats.copy(world.robots[0].baseStats);

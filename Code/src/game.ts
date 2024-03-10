@@ -18,24 +18,19 @@ class Game {
 
     eventLog = document.getElementById("myTextarea") as HTMLTextAreaElement;
     
-
-
-
     constructor(world: WorldData) {
         this.gameTime = 0;
         this.world = world;
 
         this.arena = new Arena(this.world, this.robotData);
         this.arena.generate();
-        this.paper = new Paper();
-
-        
+        this.paper = new Paper();   
     } 
 
-    addRobot(robot: Program, name: string) {
+    addRobot(robot: Program, name: string, isDisplayed: boolean) {
         this.programs.push(robot);
         let robotID = this.programs.length-1;
-        this.robotData.push(new RobotData(this.world, robotID, name));
+        this.robotData.push(new RobotData(this.world, robotID, name, isDisplayed));
         this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID; 
 
@@ -149,198 +144,206 @@ class Game {
     }
     
     displayRobotStats(robotID: number) {
-        var spriteWidth = 10;
-        var mapRadius = 7;
-        var mapFrameSize = (mapRadius * 2 + 1) * spriteWidth;
-        var attributeDisplayWidth = 200;
-        var robotDisplayWidth = mapFrameSize + attributeDisplayWidth;
-        var leftMapFrame = 10 + robotID * (robotDisplayWidth + 10); 
-        var topMapFrame = 10;
-        var centerTextFrame = mapFrameSize / 2 + leftMapFrame;
-        var topTextFrame = topMapFrame + mapFrameSize + 20;
-        var lineSpacing = 15;
-        
-        var x0 = this.robotData[robotID].pos.x - mapRadius;
-        var y0 = this.robotData[robotID].pos.y - mapRadius;
-        var x1 = this.robotData[robotID].pos.x + mapRadius;
-        var y1 = this.robotData[robotID].pos.y + mapRadius;
-        
-        
-        // Cycle through all the tiles in the scan display box.
-        for(var i = x0; i < x1; i++) {
-            for(var j = y0; j < y1; j++) {
-                var tileScanID = -1;
-                var itemScanCount = 0;
-                var robotScanID = -1;
-                var tileAlpha = 0;
-                var robotAlpha = 0;
 
-                // Grab tile and robot IDs if the plotted region doesn't fall outside of the arena map.
-                if(i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
-                    tileScanID = this.scanData[robotID].tileMap[i][j];
-                    itemScanCount = this.scanData[robotID].itemMap[i][j].length;
-                    robotScanID = this.scanData[robotID].robotMap[i][j];
+        if(this.robotData[robotID].isDisplayed) {
+            var spriteWidth = 10;
+            var mapRadius = 7;
+            var mapFrameSize = (mapRadius * 2 + 1) * spriteWidth;
+            var attributeDisplayWidth = 200;
+            var robotDisplayWidth = mapFrameSize + attributeDisplayWidth;
 
-                    // Scan will fade as data ages.
-                    let decayRate = 0.02;
-                    let decayFloor = 0.3;
-                    tileAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].scanTime[i][j]);
+            var leftMapFrame = 10 - (robotDisplayWidth + 10); 
+            for(var i = 0; i <= robotID; i ++) {
+                if(this.robotData[i].isDisplayed) leftMapFrame += (robotDisplayWidth + 10);
+            }
+
+            var topMapFrame = 50;
+            var centerTextFrame = mapFrameSize / 2 + leftMapFrame;
+            var topTextFrame = topMapFrame + mapFrameSize + 20;
+            var lineSpacing = 15;
+            
+            var x0 = this.robotData[robotID].pos.x - mapRadius;
+            var y0 = this.robotData[robotID].pos.y - mapRadius;
+            var x1 = this.robotData[robotID].pos.x + mapRadius;
+            var y1 = this.robotData[robotID].pos.y + mapRadius;
+            
+            
+            // Cycle through all the tiles in the scan display box.
+            for(var i = x0; i < x1; i++) {
+                for(var j = y0; j < y1; j++) {
+                    var tileScanID = -1;
+                    var itemScanCount = 0;
+                    var robotScanID = -1;
+                    var tileAlpha = 0;
+                    var robotAlpha = 0;
+
+                    // Grab tile and robot IDs if the plotted region doesn't fall outside of the arena map.
+                    if(i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
+                        tileScanID = this.scanData[robotID].tileMap[i][j];
+                        itemScanCount = this.scanData[robotID].itemMap[i][j].length;
+                        robotScanID = this.scanData[robotID].robotMap[i][j];
+
+                        // Scan will fade as data ages.
+                        let decayRate = 0.02;
+                        let decayFloor = 0.3;
+                        tileAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].scanTime[i][j]);
+                        if(robotScanID >= 0) {
+                            robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].lastScan);
+                        }
+                    }
+
+                    // Draw tile.
+                    if(tileScanID >= 0) {
+                        this.paper.drawTile(
+                            leftMapFrame,
+                            topMapFrame,
+                            this.world.tiles[tileScanID].sprite,
+                            new Vector(i-x0, j-y0),
+                            tileAlpha,
+                            false);
+                    }
+
+                    // Draw items.
+                    if(itemScanCount > 0) {
+                        this.paper.drawTile(
+                            leftMapFrame,
+                            topMapFrame,
+                            this.world.itemSprite,
+                            new Vector(i-x0, j-y0),
+                            tileAlpha,
+                            false);
+                    }
+
+                    // Draw robot.
                     if(robotScanID >= 0) {
-                        robotAlpha = this.decay(decayRate, decayFloor, this.gameTime - this.scanData[robotID].robots[robotScanID].lastScan);
+                        this.paper.drawTile(
+                            leftMapFrame,
+                            topMapFrame,
+                            this.robotData[robotScanID].sprite,
+                            new Vector(i-x0, j-y0),
+                            robotAlpha,
+                            false);
                     }
                 }
-
-                // Draw tile.
-                if(tileScanID >= 0) {
-                    this.paper.drawTile(
-                        leftMapFrame,
-                        topMapFrame,
-                        this.world.tiles[tileScanID].sprite,
-                        new Vector(i-x0, j-y0),
-                        tileAlpha,
-                        false);
-                }
-
-                // Draw items.
-                if(itemScanCount > 0) {
-                    this.paper.drawTile(
-                        leftMapFrame,
-                        topMapFrame,
-                        this.world.itemSprite,
-                        new Vector(i-x0, j-y0),
-                        tileAlpha,
-                        false);
-                }
-
-                // Draw robot.
-                if(robotScanID >= 0) {
-                    this.paper.drawTile(
-                        leftMapFrame,
-                        topMapFrame,
-                        this.robotData[robotScanID].sprite,
-                        new Vector(i-x0, j-y0),
-                        robotAlpha,
-                        false);
-                }
             }
-        }
-      
-        // Draw self in center of map.
-        this.paper.drawTile(
-            leftMapFrame, 
-            topMapFrame,
-            this.robotData[robotID].sprite, 
-            new Vector(mapRadius, mapRadius), 
-            1,
-            true);
-
-        // Draw a frame around the map.
-        this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);  
         
-        // Display text
-        let statRGB = [180, 180, 180];
+            // Draw self in center of map.
+            this.paper.drawTile(
+                leftMapFrame, 
+                topMapFrame,
+                this.robotData[robotID].sprite, 
+                new Vector(mapRadius, mapRadius), 
+                1,
+                true);
 
-        // Display permissive terrain under map.
-        topTextFrame;
+            // Draw a frame around the map.
+            this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);  
+            
+            // Display text
+            let statRGB = [180, 180, 180];
 
-        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Passable Terrain', [120, 120, 120]);
+            // Display permissive terrain under map.
+            topTextFrame;
 
-        for(var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i ++) {
-            var color = [180, 180, 180];
-            var text: string;
+            this.paper.drawListItem(centerTextFrame, topTextFrame, 'Passable Terrain', [120, 120, 120]);
 
-            topTextFrame += lineSpacing;
-            text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
-            this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
-        }
-
-        // Display inventory under map.
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
-
-        for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
-            var color = [180, 180, 180];
-            var text: string;
-            if(this.robotData[robotID].items[i].isActive) color = [51, 110, 156];
-
-            topTextFrame += lineSpacing;
-            text = this.robotData[robotID].items[i].name;
-            this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
-        }
-
-        // Display dropped items.
-        let loc = this.robotData[robotID].pos;
-
-        if(this.arena.itemMap[loc.x][loc.y].length>0) {
-            topTextFrame += lineSpacing * 2;
-            this.paper.drawListItem(centerTextFrame, topTextFrame, 'Dropped Items', [120, 120, 120]);          
-
-            for(var i = 0; i < this.arena.itemMap[loc.x][loc.y].length; i ++) {
+            for(var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i ++) {
                 var color = [180, 180, 180];
                 var text: string;
 
                 topTextFrame += lineSpacing;
-                text = this.arena.itemMap[loc.x][loc.y][i].name;
+                text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
-        }
 
-        // Print log.
-        topTextFrame += lineSpacing * 4;
-        this.paper.printLog(this.robotData[robotID], leftMapFrame + 40, topTextFrame);
+            // Display inventory under map.
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
 
-        // Display stats to right of map.
-        centerTextFrame = leftMapFrame + mapFrameSize + 120;
-        topTextFrame = 20;
+            for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
+                var color = [180, 180, 180];
+                var text: string;
+                if(this.robotData[robotID].items[i].isActive) color = [51, 110, 156];
 
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
+                topTextFrame += lineSpacing;
+                text = this.robotData[robotID].items[i].name;
+                this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
+            }
 
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
+            // Display dropped items.
+            let loc = this.robotData[robotID].pos;
 
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.robotData[robotID].adjustedStats.value, statRGB);
+            if(this.arena.itemMap[loc.x][loc.y].length>0) {
+                topTextFrame += lineSpacing * 2;
+                this.paper.drawListItem(centerTextFrame, topTextFrame, 'Dropped Items', [120, 120, 120]);          
 
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
+                for(var i = 0; i < this.arena.itemMap[loc.x][loc.y].length; i ++) {
+                    var color = [180, 180, 180];
+                    var text: string;
 
-        topTextFrame += lineSpacing;
-        let hps: string = this.robotData[robotID].adjustedStats.HPs + '/' + this.robotData[robotID].adjustedStats.maxHPs;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
+                    topTextFrame += lineSpacing;
+                    text = this.arena.itemMap[loc.x][loc.y][i].name;
+                    this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
+                }
+            }
 
-        topTextFrame += lineSpacing; 
-        let power: string = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
+            // Print log.
+            topTextFrame += lineSpacing * 4;
+            this.paper.printLog(this.robotData[robotID], leftMapFrame + 40, topTextFrame);
 
-        // Display attributes
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
+            // Display stats to right of map.
+            centerTextFrame = leftMapFrame + mapFrameSize + 120;
+            topTextFrame = topMapFrame;
 
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
 
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].adjustedStats.offensePower, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].adjustedStats.kineticDamage, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
 
-        topTextFrame += lineSpacing * 1.5;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].adjustedStats.defensePower, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
-        topTextFrame += lineSpacing;
-        this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);   
-    } 
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.robotData[robotID].adjustedStats.value, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
+
+            topTextFrame += lineSpacing;
+            let hps: string = this.robotData[robotID].adjustedStats.HPs + '/' + this.robotData[robotID].adjustedStats.maxHPs;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
+
+            topTextFrame += lineSpacing; 
+            let power: string = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
+
+            // Display attributes
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].adjustedStats.offensePower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].adjustedStats.kineticDamage, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].adjustedStats.defensePower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);   
+        } 
+    }
 
     decay(decayRate: number, decayFloor: number, elapsedTime: number) {
         if(decayRate > 1) decayRate = 1;

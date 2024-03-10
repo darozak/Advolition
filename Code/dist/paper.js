@@ -9,10 +9,10 @@ class Paper {
     ctx;
     lineSpacing = 14;
     constructor() {
-        this.canvas = document.getElementById('canvas1');
-        this.image = document.getElementById('source');
+        this.canvas = document.getElementById('canvas');
+        this.image = document.getElementById('sprites');
         this.CANVAS_HEIGHT = this.canvas.height = 600;
-        this.CANVAS_WIDTH = this.canvas.width = 1200;
+        this.CANVAS_WIDTH = this.canvas.width = 1500;
         this.ctx = this.canvas.getContext('2d');
     }
     printLog(robot, centerFrame, topFrame) {
