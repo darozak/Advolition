@@ -59,6 +59,26 @@ class Arena {
                 this.tileMap[i][j] = tileID;
             }
         }
+        // Place items
+        let totalItems = 10;
+        for (var i = 0; i < totalItems; i++) {
+            let x = 0;
+            let y = 0;
+            let keepLooking = true;
+            // Find a random floor tile to place the item.
+            while (keepLooking) {
+                x = rng.getUniformInt(0, this.world.size.x - 1);
+                y = rng.getUniformInt(0, this.world.size.y - 1);
+                let tileID = this.tileMap[x][y];
+                if (tileID >= 0) {
+                    keepLooking = this.world.tiles[tileID].key != '.';
+                    console.log(tileID);
+                }
+            }
+            // Place a random item at this location.
+            let item = (rng.getUniformInt(0, this.world.items.length - 1));
+            this.itemMap[x][y].push(structuredClone(this.world.items[i]));
+        }
     }
     placeRobot() {
         var x = 0;
