@@ -153,25 +153,85 @@ class Game {
             var spriteWidth = 10;
             var mapRadius = 7;
             var mapFrameSize = (mapRadius * 2 + 1) * spriteWidth;
-            var attributeDisplayWidth = 200;
+            var attributeDisplayWidth = 190;
             var robotDisplayWidth = mapFrameSize + attributeDisplayWidth;
 
-            var leftMapFrame = 10 - (robotDisplayWidth + 10); 
+            var leftDisplayFrame = 10 - (robotDisplayWidth + 10); 
             for(var i = 0; i <= robotID; i ++) {
-                if(this.robotData[i].isDisplayed) leftMapFrame += (robotDisplayWidth + 10);
+                if(this.robotData[i].isDisplayed) leftDisplayFrame += (robotDisplayWidth + 10);
             }
 
-            var topMapFrame = 50;
-            var centerTextFrame = mapFrameSize / 2 + leftMapFrame;
-            var topTextFrame = topMapFrame + mapFrameSize + 20;
+            var topDisplayFrame = 35;
             var lineSpacing = 15;
             
             var x0 = this.robotData[robotID].pos.x - mapRadius;
             var y0 = this.robotData[robotID].pos.y - mapRadius;
             var x1 = this.robotData[robotID].pos.x + mapRadius;
             var y1 = this.robotData[robotID].pos.y + mapRadius;
+         
+            // Display text
+            let statRGB = [180, 180, 180];
+
+            // Display stats to left of map.
+            let centerTextFrame = leftDisplayFrame + 120;
+            let topTextFrame = topDisplayFrame + 10;
+
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.robotData[robotID].adjustedStats.value, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
+
+            topTextFrame += lineSpacing;
+            let hps: string = this.robotData[robotID].adjustedStats.HPs + '/' + this.robotData[robotID].adjustedStats.maxHPs;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
+
+            topTextFrame += lineSpacing; 
+            let power: string = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
+
+            // Display attributes
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].adjustedStats.offensePower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].adjustedStats.kineticDamage, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
+
+            topTextFrame += lineSpacing * 1.5;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].adjustedStats.defensePower, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);   
+        
+            // Print log.
+            topTextFrame += lineSpacing * 2;
+            this.paper.printLog(this.robotData[robotID], leftDisplayFrame + 40, topTextFrame);
             
-            
+            // Display scan view
+            let leftMapFrame = leftDisplayFrame + attributeDisplayWidth;
+            let topMapFrame = topDisplayFrame;
+
             // Cycle through all the tiles in the scan display box.
             for(var i = x0; i < x1; i++) {
                 for(var j = y0; j < y1; j++) {
@@ -241,13 +301,11 @@ class Game {
                 true);
 
             // Draw a frame around the map.
-            this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);  
-            
-            // Display text
-            let statRGB = [180, 180, 180];
+            this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);        
 
             // Display permissive terrain under map.
-            topTextFrame;
+            topTextFrame = topDisplayFrame + mapFrameSize + 20;
+            centerTextFrame = mapFrameSize / 2 + leftMapFrame;
 
             this.paper.drawListItem(centerTextFrame, topTextFrame, 'Passable Terrain', [120, 120, 120]);
 
@@ -274,12 +332,12 @@ class Game {
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
 
-            // Display dropped items.
+            // Display items on ground under robot.
             let loc = this.robotData[robotID].pos;
 
             if(this.arena.itemMap[loc.x][loc.y].length>0) {
                 topTextFrame += lineSpacing * 2;
-                this.paper.drawListItem(centerTextFrame, topTextFrame, 'Dropped Items', [120, 120, 120]);          
+                this.paper.drawListItem(centerTextFrame, topTextFrame, 'On Ground', [120, 120, 120]);          
 
                 for(var i = 0; i < this.arena.itemMap[loc.x][loc.y].length; i ++) {
                     var color = [180, 180, 180];
@@ -289,64 +347,8 @@ class Game {
                     text = this.arena.itemMap[loc.x][loc.y][i].name;
                     this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
                 }
-            }
-
-            // Print log.
-            topTextFrame += lineSpacing * 4;
-            this.paper.printLog(this.robotData[robotID], leftMapFrame + 40, topTextFrame);
-
-            // Display stats to right of map.
-            centerTextFrame = leftMapFrame + mapFrameSize + 120;
-            topTextFrame = topMapFrame;
-
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
-
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
-
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.robotData[robotID].adjustedStats.value, statRGB);
-
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
-
-            topTextFrame += lineSpacing;
-            let hps: string = this.robotData[robotID].adjustedStats.HPs + '/' + this.robotData[robotID].adjustedStats.maxHPs;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
-
-            topTextFrame += lineSpacing; 
-            let power: string = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
-
-            // Display attributes
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
-
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
-
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].adjustedStats.offensePower, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].adjustedStats.kineticDamage, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
-
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].adjustedStats.defensePower, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);   
-        } 
+            }           
+         } 
     }
 
     decay(decayRate: number, decayFloor: number, elapsedTime: number) {
