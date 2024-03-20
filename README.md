@@ -32,8 +32,8 @@ These are the things that I need to accomplish to consider this a complete game:
     - Remove dead robots from game and event log.
     - Dead robots drop equipment.
 - Generate and populate dungeons using random seeds.
-    - Scatter equipment throughout the dungeon.  
-    - Place robots in random lications.
+    - [Done] Scatter equipment throughout the dungeon.  
+    - [Done] Place robots in random lications.
 - Score robots based on their performance in the dungeon.
     - [Done] Collecting treasures.
     - Killing NPRs.
