@@ -1,14 +1,16 @@
 # Advolition
 
+You can play the most recent version of the game here: https://darozak.github.io/Advolition/
+
 ## Game Objectives
 Here are my goals for making this game:
-- An open source game that is free to play.
-- A perpetually maintained platform such as GitHub.
+- [Done] An open source game that is free to play.
+- [Done] A perpetually maintained platform such as GitHub.
 - A digitally produced book that describes how to use the game to teach coding.
 - A fun way to learn JavaScript
 - A tournament mode to rate and rank robot performance.
   - Lighning rounds to generate average score over multiple entries.
-- Players compete against one another or default robots to win.
+- [Done] Players compete against one another or default robots to win.
 
 ## Development Tasks
 These are the things that I need to accomplish to consider this a complete game:
@@ -45,8 +47,6 @@ These are the things that I need to accomplish to consider this a complete game:
     - Include start and stop screens.
 - Documentation
     - Create easy to access instructions and demo robots. Publish on Amazon.
-
-
 
 ## Follow-on Tasks
 These are some things I can do to improve the gameplay experience after first developing a simple version of the game.
