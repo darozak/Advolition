@@ -49,6 +49,14 @@ input[type=file]::file-selector-button {
     cursor: pointer;
   }
 
+a {
+  color: #196bc1;;
+}
+
+a:hover {
+  color: #196ac1a2;
+}
+
 #canvas {
     position: absolute;
     top: 100 px;
