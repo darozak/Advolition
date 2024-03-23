@@ -330,7 +330,7 @@ class Game {
                 topTextFrame += lineSpacing;
                 text = this.robotData[robotID].items[i].name;
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
-            }
+            } 
 
             // Display items on ground under robot.
             let loc = this.robotData[robotID].pos;
