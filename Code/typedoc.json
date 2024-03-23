@@ -1,7 +1,0 @@
-{
-    "$schema": "https://typedoc.org/schema.json",
-    "name": "Advolition",
-    "entryPointStrategy": "expand",
-    "entryPoints": ["./src"],
-    "out": "docs"
-}
