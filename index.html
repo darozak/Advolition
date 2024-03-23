@@ -11,7 +11,22 @@
   <body>
     <main>
         <h1>Welcome to Advolition</h1> 
-        <a href="game.html" >Start Geme</a>
+        <a href="game.html" >Start Game</a>
+        <p>Advolition is a Roughlike game in which 1-4 players program robots to explore a dungeon and collect items that contribute to their power and wealth.</p>
+        <p>The robots are programmed in Javascript.</p>
+
+        <h1>Programming your robot</h1>
+        <p>Each robot is programmed by creating a js file that describes a new JavaScript class.  The new class also needs to extend the Program class and contain a run function that accepts three variables: myID, myData, and myAction and returns myAction.  Finally, it's necessary to create a new unknamed object from your class at the end of the script.</p>
+
+        <p>The following is an example of a minimal robot script.</p>
+        <pre>
+            class MyProgram extends Program {
+                run(myID, myData, myAction) {             
+                    return myAction;
+                }          
+            }            
+            new MyProgram();
+        </pre>
     </main>
   </body>
 </html>
