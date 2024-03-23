@@ -1,48 +1,17 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="Code/dist/style.css">
-</head>
-<body>
-  
-  <b>Robot 1: </b>
-  <input type="file" onchange="loadFile(0)"/>
-  <b>Robot 3: </b>
-  <input type="file" onchange="loadFile(2)"/> 
-  <button  id="run" onclick="runGame()">Run</button>  <br>
-
-  <b>Robot 2: </b>
-  <input type="file" onchange="loadFile(1)"/>
-  <b>Robot 4: 
-  <input type="file" onchange="loadFile(3)"/>
-  <button id="stop" onclick="stopGame()">Stop</button> </br>
-  
-  <div style="display:none;">
-    <img id="sprites" src="Code/dist/tiles.png"/>
-  </div>
-
-  <canvas id="canvas"></canvas>
-
-  <script src="Code/dist/rng.js"></script>
-  <script src="Code/dist/generator.js"></script>
-  <script src="Code/dist/paper.js"></script>
-  <script src="Code/dist/vector.js"></script>
-  <script src="Code/dist/hardware.js"></script>
-  <script src="Code/dist/world_data.js"></script>
-  <script src="Code/dist/scan_data.js"></script>
-  <script src="Code/dist/action.js"></script>
-  <script src="Code/dist/arena.js"></script> 
-  <script src="Code/dist/game_event.js"></script>
-  <script src="Code/dist/robot_data.js"></script>
-  <script src="Code/dist/fov.js"></script>
-  <script src="Code/dist/preciseshadowcasting.js"></script>
-  <script src="Code/dist/program.js"></script>
-  <script src="Code/dist/target.js"></script>
-  <script src="Code/dist/animations.js"></script>
-  <script src="Code/dist/game.js"></script>
-  <script src="Code/dist/main.js"></script>
-</body>
-
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Advolition</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- <link rel="icon" href="./favicon.ico" type="image/x-icon"> -->
+  </head>
+  <body>
+    <main>
+        <h1>Welcome to Advolition</h1> 
+        <a href="game.html" >Start Geme</a>
+    </main>
+  </body>
 </html>
