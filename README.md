@@ -31,15 +31,13 @@ These are the things that I need to accomplish to consider this a complete game:
     - [Done] Have a basic inventory management system that allows robots to take, equip, and drop equipment.
 - Combat mechanism
     - [Done] Add attack option.
-    - Remove dead robots from game and event log.
-    - Dead robots drop equipment.
+    - [Done] Remove dead robots from game and event log.
+    - [Done] Dead robots drop equipment.
 - Generate and populate dungeons using random seeds.
     - [Done] Scatter equipment throughout the dungeon.  
     - [Done] Place robots in random lications.
 - Score robots based on their performance in the dungeon.
     - [Done] Collecting treasures.
-    - Killing NPRs.
-    - Returning quickly.
 - Starting the game
     - [Done] Allow players to load and run a JS file from their own computer.
     - Allow players to select a playthrough rate
