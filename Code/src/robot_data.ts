@@ -8,6 +8,7 @@ class RobotData {
 
     lastScan: number = 0;
     robotID: number;
+    isAlive: boolean = true;
     name: string;
     isDisplayed: boolean;
     pos = new Vector(0, 0);

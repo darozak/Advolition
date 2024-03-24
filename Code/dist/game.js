@@ -46,7 +46,7 @@ class Game {
         this.gameTime++;
         for (var i = 0; i < this.programs.length; i++) {
             // If the robot is still alive and isn't doing anything.
-            if (!this.events.some(d => d.robotID == i)) {
+            if (this.robotData[i].isAlive && !this.events.some(d => d.robotID == i)) {
                 var action = new Action();
                 // Make sure the robot's personal data is up to date in scanData.
                 this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
@@ -146,6 +146,7 @@ class Game {
             var y1 = this.robotData[robotID].pos.y + mapRadius;
             // Display text
             let statRGB = [180, 180, 180];
+            let red = [255, 0, 0];
             // Display stats to left of map.
             let centerTextFrame = leftDisplayFrame + 120;
             let topTextFrame = topDisplayFrame + 10;
@@ -229,7 +230,14 @@ class Game {
                 }
             }
             // Draw self in center of map.
-            this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotID].sprite, new Vector(mapRadius, mapRadius), 1, true);
+            if (this.robotData[robotID].isAlive) {
+                this.paper.drawTile(leftMapFrame, topMapFrame, this.robotData[robotID].sprite, new Vector(mapRadius, mapRadius), 1, true);
+            }
+            else {
+                topTextFrame = topMapFrame + 20;
+                centerTextFrame = mapFrameSize / 2 + leftMapFrame;
+                this.paper.drawListItem(centerTextFrame, topTextFrame, 'DEAD', red);
+            }
             // Draw a frame around the map.
             this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);
             // Display permissive terrain under map.
@@ -285,9 +293,11 @@ class Game {
                 this.arena.robotMap[i][j] = -1;
             }
         }
-        // Add robots
+        // Add live robots
         for (var i = 0; i < this.robotData.length; i++) {
-            this.arena.robotMap[this.robotData[i].pos.x][this.robotData[i].pos.y] = i;
+            if (this.robotData[i].isAlive) {
+                this.arena.robotMap[this.robotData[i].pos.x][this.robotData[i].pos.y] = i;
+            }
         }
     }
     requestAttack(robotID, action) {
@@ -367,11 +377,11 @@ class Game {
         }
         else {
             // Take damage if you run into something.
-            this.robotData[action.robotID].adjustedStats.HPs -= 10;
-            this.hpsColor[action.robotID].pulse();
-            this.chassisColor[action.robotID].pulse();
             // Wtite to event log.
             this.appendToLog(this.robotData[action.robotID], this.gameTime, `collides with obstical`);
+            this.takeDamage(this.robotData[action.robotID], 10);
+            this.hpsColor[action.robotID].pulse();
+            this.chassisColor[action.robotID].pulse();
         }
         // Animate display elements.
         this.coreColor[action.robotID].deactivate();
@@ -430,17 +440,10 @@ class Game {
         }
     }
     resolveDrop(event) {
-        // Move item to the corresponding location on the map.
-        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
-        let location = this.robotData[event.robotID].pos;
-        if (itemID >= 0) {
-            this.robotData[event.robotID].items[itemID].isActive = false;
-            this.arena.itemMap[location.x][location.y].push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
-            // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `drops its ${event.action.item}`);
-        }
-        // Equip items and apply mods.
-        this.equipItems(this.robotData[event.robotID]);
+        let robot = this.robotData[event.robotID];
+        let itemID = robot.items.findLastIndex(d => d.name === event.action.item);
+        if (itemID >= 0)
+            this.dropItem(robot, itemID);
     }
     requestTake(robotID, action) {
         // Does the robot have enough room in its inventory?
@@ -520,23 +523,41 @@ class Game {
             }
         }
     }
-    takeDamage(robot, amount) {
+    dropItem(robot, itemID) {
+        if (robot.items.length > itemID) {
+            let location = robot.pos;
+            this.appendToLog(robot, this.gameTime, `drops its ${robot.items[itemID].name}`);
+            robot.items[itemID].isActive = false;
+            this.arena.itemMap[location.x][location.y].push(robot.items.splice(itemID, 1)[0]);
+            this.equipItems(robot);
+        }
+    }
+    takeDamage(robot, damage) {
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isActive) {
-                if (amount <= robot.items[i].effects.HPs) {
-                    robot.items[i].effects.HPs -= amount;
-                    robot.adjustedStats.HPs -= amount;
-                    amount = 0;
+                if (damage <= robot.items[i].effects.HPs) {
+                    // Item absorbes all remaining damage.
+                    robot.items[i].effects.HPs -= damage;
+                    robot.adjustedStats.HPs -= damage;
+                    damage = 0;
                 }
                 else {
-                    amount -= robot.items[i].effects.HPs;
+                    // Item only absorbes some of the remaining damage.
+                    damage -= robot.items[i].effects.HPs;
                     robot.adjustedStats.HPs -= robot.items[i].effects.HPs;
                     robot.items[i].effects.HPs = 0;
                 }
             }
         }
-        if (amount > 0) {
+        if (damage > 0) {
             // Robot has taken excess damage and is dead.
+            robot.isAlive = false;
+            // Drop items
+            // for(var i = 0; i < robot.items.length; i ++) this.dropItem(robot, i);
+            while (robot.items.length > 0)
+                this.dropItem(robot, 0);
+            // Write to event log.
+            this.appendToLog(robot, this.gameTime, `dies :(`);
         }
     }
     drainPower(robot, amount) {

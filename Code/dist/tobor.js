@@ -11,7 +11,7 @@ class Tobor extends Program {
                 case 'equip':
                     this.actionBuffer.push(new Activate('Scanner'));
                     this.actionBuffer.push(new Activate('Battery'));
-                    this.actionBuffer.push(new Activate('Blaster'));
+                    this.actionBuffer.push(new Activate('Armor'));
                     this.state = 'start';
                     break;
                 case "start":

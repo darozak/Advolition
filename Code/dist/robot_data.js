@@ -5,6 +5,7 @@ class RobotData {
     items = [];
     lastScan = 0;
     robotID;
+    isAlive = true;
     name;
     isDisplayed;
     pos = new Vector(0, 0);

@@ -20,8 +20,8 @@ class GaiaData extends WorldData {
         effects.thermalDefense = 1;
         this.items.push(new Item('Shield', effects));
         effects = new Stats();
-        effects.HPs = 20;
-        effects.maxHPs = 20;
+        effects.HPs = 60;
+        effects.maxHPs = 60;
         this.items.push(new Item('Armor', effects));
         effects = new Stats();
         effects.power = 50;
