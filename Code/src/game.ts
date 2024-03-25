@@ -20,8 +20,8 @@ class Game {
 
     eventLog = document.getElementById("myTextarea") as HTMLTextAreaElement;
     
-    constructor(world: WorldData) {
-        this.gameTime = 0;
+    constructor(world: WorldData, duration: number) {
+        this.gameTime = duration;
         this.world = world;
 
         this.arena = new Arena(this.world, this.robotData);
@@ -50,100 +50,106 @@ class Game {
     }
 
     run() { 
-        // Increment game time
-        this.gameTime ++; 
         
-        for(var i = 0; i < this.programs.length; i++) {
 
-            // If the robot is still alive and isn't doing anything.
-            if(this.robotData[i].isAlive && !this.events.some(d =>d.robotID == i)){
-                var action: Action = new Action();
+        if(this.gameTime > 0) {
 
-                // Make sure the robot's personal data is up to date in scanData.
-                this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
-                
-                this.scanData[i].robots[i].lastScan = this.gameTime;
+            // Decrement game time
+            this.gameTime --; 
+            
+            for(var i = 0; i < this.programs.length; i++) {
 
-                // Let the robot run it's code.
-                action = this.programs[i].run(structuredClone(this.scanData[i]));
+                // If the robot is still alive and isn't doing anything.
+                if(this.robotData[i].isAlive && !this.events.some(d =>d.robotID == i)){
+                    var action: Action = new Action();
 
-                    if(action) {
-                        switch (action.command) {
-                            case "attack":
-                                this.requestAttack(i, action);
-                                break;
-                            case "drop":
-                                this.requestDrop(i, action);
-                                break;
-                            case "take":
-                                this.requestTake(i, action);
-                                break;
-                            case "activate":
-                                this.requestActivate(i, action);
-                                break;
-                            case "inactivate":
-                                this.requestInactivate(i, action);
-                                break;
-                            case "move":
-                                this.requestMove(i, action);
-                                break;
-                            case "say":
-                                this.requestSay(i, action);
-                                break;
-                            case "scan":
-                                this.requestScan(i, action);
-                                break; 
+                    // Make sure the robot's personal data is up to date in scanData.
+                    this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
+                    
+                    this.scanData[i].robots[i].lastScan = this.gameTime;
+
+                    // Let the robot run it's code.
+                    action = this.programs[i].run(structuredClone(this.scanData[i]));
+
+                        if(action) {
+                            switch (action.command) {
+                                case "attack":
+                                    this.requestAttack(i, action);
+                                    break;
+                                case "drop":
+                                    this.requestDrop(i, action);
+                                    break;
+                                case "take":
+                                    this.requestTake(i, action);
+                                    break;
+                                case "activate":
+                                    this.requestActivate(i, action);
+                                    break;
+                                case "inactivate":
+                                    this.requestInactivate(i, action);
+                                    break;
+                                case "move":
+                                    this.requestMove(i, action);
+                                    break;
+                                case "say":
+                                    this.requestSay(i, action);
+                                    break;
+                                case "scan":
+                                    this.requestScan(i, action);
+                                    break; 
+                            }
                         }
                     }
                 }
-            }
-                
+                    
 
-            // Then resolve and remove any actions that are occuring now.
-            if(this.events.length > 0) {
+                // Then resolve and remove any actions that are occuring now.
+                if(this.events.length > 0) {
 
-                // Sort the events in chronological order.
-                this.events.sort((a,b) => a.duration - b.duration);
+                    // Sort the events in reverse chronological order.
+                    // this.events.sort((a,b) => a.duration - b.duration);
+                    this.events.sort((a,b) => b.duration - a.duration);
 
-                // Evaluate any events that should have occurred by now.
-                while(this.events[0].duration <= this.gameTime) {
-                    switch (this.events[0].action.command) {
-                        case "attack":
-                            this.resolveAttack(this.events[0]);
-                            break;
-                        case "drop":
-                            this.resolveDrop(this.events[0]);
-                            break;
-                        case "take":
-                            this.resolveTake(this.events[0]);
-                            break;
-                        case "activate":
-                            this.resolveActivate(this.events[0]);
-                            break;
-                        case "inactivate":
-                            this.resolveInactivate(this.events[0]);
-                            break;
-                        case "move":
-                            this.resolveMove(this.events[0]);
-                            break;
-                        case "say":
-                            this.resolveSay(this.events[0]);
-                        case "scan":
-                            this.resolveScan(this.events[0]);
-                            break;
+                    // Evaluate any events that should have occurred by now.
+                    while(this.events[0].duration >= this.gameTime) {
+                        switch (this.events[0].action.command) {
+                            case "attack":
+                                this.resolveAttack(this.events[0]);
+                                break;
+                            case "drop":
+                                this.resolveDrop(this.events[0]);
+                                break;
+                            case "take":
+                                this.resolveTake(this.events[0]);
+                                break;
+                            case "activate":
+                                this.resolveActivate(this.events[0]);
+                                break;
+                            case "inactivate":
+                                this.resolveInactivate(this.events[0]);
+                                break;
+                            case "move":
+                                this.resolveMove(this.events[0]);
+                                break;
+                            case "say":
+                                this.resolveSay(this.events[0]);
+                            case "scan":
+                                this.resolveScan(this.events[0]);
+                                break;
+                        }
+
+                        // Remove the processed event break if this was the last event.
+                        this.events.shift();
+                        if(this.events.length == 0) break;
                     }
+                } 
+            
 
-                    // Remove the processed event break if this was the last event.
-                    this.events.shift();
-                    if(this.events.length == 0) break;
-                }
-            } 
-        
-
-            // Every frame, redraw the game window.
-            this.paper.erasePaper();
-            for(var i = 0; i < this.robotData.length; i++) {
-                this.displayRobotStats(i);
+                // Every frame, redraw the game window.
+                this.paper.erasePaper();
+                for(var i = 0; i < this.robotData.length; i++) {
+                    this.displayRobotStats(i);
+            }
         }
     }
     
@@ -389,7 +395,7 @@ class Game {
         let powerCost = this.robotData[robotID].adjustedStats.offensePower;
         
         if(this.drainPower(this.robotData[robotID], powerCost)) {
-            let delay = this.robotData[robotID].adjustedStats.offenseTime;
+            let delay = -this.robotData[robotID].adjustedStats.offenseTime;
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
     }
@@ -448,7 +454,7 @@ class Game {
         // Is there power for this action?
         if(this.drainPower(this.robotData[robotID], powerCost)) {
 
-            let delay = this.robotData[robotID].adjustedStats.moveTime;
+            let delay = -this.robotData[robotID].adjustedStats.moveTime;
             delay *= this.robotData[robotID].pos.getDistanceTo(destination);
 
             // Add action to event que.
@@ -506,7 +512,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
     
-            let delay = this.robotData[robotID].items[itemID].timeToActivate;
+            let delay = -this.robotData[robotID].items[itemID].timeToActivate;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -535,7 +541,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            let delay = this.robotData[robotID].items[itemID].timeToActivate;
+            let delay = -this.robotData[robotID].items[itemID].timeToActivate;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -588,7 +594,7 @@ class Game {
             let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
             if(itemID >= 0) {
 
-                let delay = this.robotData[robotID].items[itemID].timeToActivate;
+                let delay = -this.robotData[robotID].items[itemID].timeToActivate;
 
                 // Add action to event que.
                 this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -622,7 +628,7 @@ class Game {
 
             // Set scan range and delay.
             call.range = this.robotData[robotID].adjustedStats.scanRange;
-            let delay = this.robotData[robotID].adjustedStats.scanTime;
+            let delay = -this.robotData[robotID].adjustedStats.scanTime;
 
             // Add action to event queue.
             this.events.push(new GameEvent(robotID, call, delay + this.gameTime));

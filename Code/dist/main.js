@@ -16,7 +16,7 @@ function loadFile(robotNumber) {
     }
 }
 function runGame() {
-    const game = new Game(new GaiaData());
+    const game = new Game(new GaiaData(), 1000);
     // Stop the interval if a program is already running.
     if (intervalID > 0)
         clearInterval(intervalID);
