@@ -1,4 +1,5 @@
 class ScanData {
+    myID: number;
     scanTime: number[][] = [];
     tileMap: number[][] = [];
     tiles: Tile[] = [];
@@ -7,6 +8,8 @@ class ScanData {
     robots: RobotData[] = [];
 
     constructor(world: WorldData, robot: RobotData) {
+
+        this.myID = robot.robotID;
 
         for(var i = 0; i < world.maxRobotCount; i++) {
             this.robots.push(structuredClone(robot));

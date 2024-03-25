@@ -2,7 +2,7 @@
 class Target extends Program {
     state = 'start';
     actionBuffer = [];
-    run(myID, myData, myAction) {
+    run(myData, myAction) {
         // Do nothing.
         if (this.actionBuffer.length < 1) {
             switch (this.state) {

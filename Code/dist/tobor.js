@@ -3,9 +3,10 @@ class Tobor extends Program {
     state = "equip";
     actionBuffer = [];
     target = new Vector(3, 6);
-    run(myID, myData, myAction) {
+    run(myData, myAction) {
         var destination = new Vector(1, 4);
         var destination2 = new Vector(6, 3);
+        var myID = myData.myID;
         if (this.actionBuffer.length < 1) {
             switch (this.state) {
                 case 'equip':
