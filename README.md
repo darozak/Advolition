@@ -7,9 +7,8 @@ Here are my goals for making this game:
 - [Done] An open source game that is free to play.
 - [Done] A perpetually maintained platform such as GitHub.
 - A digitally produced book that describes how to use the game to teach coding.
-- A fun way to learn JavaScript
-- A tournament mode to rate and rank robot performance.
-  - Lighning rounds to generate average score over multiple entries.
+- [Done] A fun way to learn JavaScript
+- [Done] A tournament mode to rate and rank robot performance.
 - [Done] Players compete against one another or default robots to win.
 
 ## Development Tasks
@@ -40,8 +39,6 @@ These are the things that I need to accomplish to consider this a complete game:
     - [Done] Collecting treasures.
 - Starting the game
     - [Done] Allow players to load and run a JS file from their own computer.
-    - Allow players to select a playthrough rate
-    - Have a lighning mode in which robots are rapidly run through a dungeon multiple times to generate an average score.
     - Include start and stop screens.
 - Documentation
     - Create easy to access instructions and demo robots. Publish on Amazon.
