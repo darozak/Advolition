@@ -57,7 +57,7 @@ class Game {
 
             // If the robot is still alive and isn't doing anything.
             if(this.robotData[i].isAlive && !this.events.some(d =>d.robotID == i)){
-                var action: Action = new Action(); 
+                var action: Action = new Action();
 
                 // Make sure the robot's personal data is up to date in scanData.
                 this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
@@ -65,7 +65,7 @@ class Game {
                 this.scanData[i].robots[i].lastScan = this.gameTime;
 
                 // Let the robot run it's code.
-                action = this.programs[i].run(structuredClone(this.scanData[i]), action);
+                action = this.programs[i].run(structuredClone(this.scanData[i]));
 
                     if(action) {
                         switch (action.command) {

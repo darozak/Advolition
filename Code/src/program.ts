@@ -1,3 +1,3 @@
 class Program {
-    run(myData: ScanData, myAction: Action) { return myAction; } 
+    run(myData: ScanData) {return new Action();} 
 }

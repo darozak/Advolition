@@ -3,7 +3,8 @@ class Tobor extends Program {
     actionBuffer: Action[] = [];
     target = new Vector(3, 6);
     
-    run(myData: ScanData, myAction: Action) {
+    run(myData: ScanData) {
+        var myAction = new Action();
         var destination = new Vector(1,4);
         var destination2 = new Vector(6,3);
         var myID = myData.myID;
@@ -47,12 +48,9 @@ class Tobor extends Program {
         if (this.actionBuffer.length > 0) {
             myAction = this.actionBuffer[0];
             this.actionBuffer.shift();           
-        }
-
+        }        
         return myAction;
-        
-    }
-    
+    }    
 }
 
 new Tobor();

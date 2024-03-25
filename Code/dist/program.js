@@ -1,4 +1,4 @@
 "use strict";
 class Program {
-    run(myData, myAction) { return myAction; }
+    run(myData) { return new Action(); }
 }

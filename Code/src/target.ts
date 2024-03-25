@@ -2,7 +2,8 @@ class Target extends Program {
     state = 'start';
     actionBuffer: Action[] = [];
 
-    run(myData: ScanData, myAction: Action) {
+    run(myData: ScanData) {
+        var myAction = new Action();
         // Do nothing.
         if(this.actionBuffer.length < 1) {
             switch(this.state) {

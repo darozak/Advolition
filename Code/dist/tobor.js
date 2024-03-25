@@ -3,7 +3,8 @@ class Tobor extends Program {
     state = "equip";
     actionBuffer = [];
     target = new Vector(3, 6);
-    run(myData, myAction) {
+    run(myData) {
+        var myAction = new Action();
         var destination = new Vector(1, 4);
         var destination2 = new Vector(6, 3);
         var myID = myData.myID;
