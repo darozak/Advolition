@@ -8,7 +8,7 @@ Here are my goals for making this game:
 - [Done] A perpetually maintained platform such as GitHub.
 - A digitally produced book that describes how to use the game to teach coding.
 - A fun way to learn JavaScript
-- A tournament mode to rate and rank robot performance.
+- [Done] A tournament mode to rate and rank robot performance.
 - [Done] Players compete against one another or default robots to win.
 
 ## Development Tasks
