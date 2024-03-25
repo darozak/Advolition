@@ -35,14 +35,14 @@ class Drop extends Action {
         this.item = item;
     }
 }
-class Activate extends Action {
+class Equip extends Action {
     constructor(item) {
         super();
         this.command = "activate";
         this.item = item;
     }
 }
-class Inactivate extends Action {
+class Unequip extends Action {
     constructor(item) {
         super();
         this.command = "inactivate";

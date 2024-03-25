@@ -40,7 +40,7 @@ class Drop extends Action {
     }
 }
 
-class Activate extends Action {
+class Equip extends Action {
     constructor(item: string) {
         super();
         this.command = "activate";
@@ -48,7 +48,7 @@ class Activate extends Action {
     }
 }
 
-class Inactivate extends Action {
+class Unequip extends Action {
     constructor(item: string) {
         super();
         this.command = "inactivate";

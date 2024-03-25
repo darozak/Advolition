@@ -9,8 +9,8 @@ class Target extends Program {
             switch (this.state) {
                 case 'start':
                     this.actionBuffer.push(new Say('Hello!'));
-                    this.actionBuffer.push(new Activate('Armor'));
-                    this.actionBuffer.push(new Activate('Shield'));
+                    this.actionBuffer.push(new Equip('Armor'));
+                    this.actionBuffer.push(new Equip('Shield'));
                     this.state = 'stop';
                     break;
             }

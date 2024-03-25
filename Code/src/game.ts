@@ -83,10 +83,10 @@ class Game {
                                     this.requestTake(i, action);
                                     break;
                                 case "activate":
-                                    this.requestActivate(i, action);
+                                    this.requestEquip(i, action);
                                     break;
                                 case "inactivate":
-                                    this.requestInactivate(i, action);
+                                    this.requestUnequip(i, action);
                                     break;
                                 case "move":
                                     this.requestMove(i, action);
@@ -123,10 +123,10 @@ class Game {
                                 this.resolveTake(this.events[0]);
                                 break;
                             case "activate":
-                                this.resolveActivate(this.events[0]);
+                                this.resolveEquip(this.events[0]);
                                 break;
                             case "inactivate":
-                                this.resolveInactivate(this.events[0]);
+                                this.resolveUnequip(this.events[0]);
                                 break;
                             case "move":
                                 this.resolveMove(this.events[0]);
@@ -506,7 +506,7 @@ class Game {
         this.powerColor[action.robotID].deactivate();
     }
 
-    requestActivate(robotID: number, action: Action) {
+    requestEquip(robotID: number, action: Action) {
 
         // Does item exist in inventory?
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
@@ -519,7 +519,7 @@ class Game {
         }
     }
 
-    resolveActivate(event: GameEvent) {
+    resolveEquip(event: GameEvent) {
 
         // Move item to the top of the list and set to active.
         let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
@@ -528,14 +528,14 @@ class Game {
             this.robotData[event.robotID].items[0].isActive = true;
 
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `activates its ${event.action.item}`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `equips its ${event.action.item}`);
         }
 
         // Equip items and apply mods.
         this.equipItems(this.robotData[event.robotID]);
     }
 
-    requestInactivate(robotID: number, action: Action) {
+    requestUnequip(robotID: number, action: Action) {
 
         // Does item exist in inventory?
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
@@ -548,7 +548,7 @@ class Game {
         }
     }
 
-    resolveInactivate(event: GameEvent) {
+    resolveUnequip(event: GameEvent) {
 
         // Move item to the bottom of the list and set to inactive.
         let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
@@ -557,7 +557,7 @@ class Game {
             this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
         
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `inactivates its ${event.action.item}`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `unequips its ${event.action.item}`);
         }
 
         // Equipe items and apply mods.
