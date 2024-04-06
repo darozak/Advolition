@@ -1,4 +1,5 @@
 class ScanData {
+    mapSize: Vector;
     myID: number;
     scanTime: number[][] = [];
     tileMap: number[][] = [];
@@ -8,6 +9,8 @@ class ScanData {
     robots: RobotData[] = [];
 
     constructor(world: WorldData, robot: RobotData) {
+
+        this.mapSize = new Vector(world.size.x, world.size.y);
 
         this.myID = robot.robotID;
 

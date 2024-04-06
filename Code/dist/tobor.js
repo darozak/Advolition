@@ -1,27 +1,97 @@
 "use strict";
+class Splore {
+    beyondTime = 10000;
+    lastTransitTime = [];
+    doorValue = -1;
+    initialized = false;
+    constructor() { }
+    init(myData) {
+        if (!this.initialized) {
+            this.doorValue = myData.tiles.findLastIndex(d => d.name === 'Door');
+            console.log(`Door: ${this.doorValue}`);
+        }
+        for (var i = 0; i < myData.mapSize.x; i++) {
+            this.lastTransitTime[i] = [];
+            for (var j = 0; j < myData.mapSize.y; j++) {
+                this.lastTransitTime[i][j] = this.beyondTime;
+            }
+        }
+    }
+    isUnobstructed(myData, target) {
+        let isUnobstructed = true;
+        let myPosition = myData.robots[myData.myID].pos;
+        let pathToTarget = target.getPathTo(myPosition);
+        for (var i = 0; i < pathToTarget.length; i++) {
+            let tileType = myData.tileMap[pathToTarget[i].x][pathToTarget[i].y];
+            if (tileType >= 0 && tileType < myData.tiles.length) {
+                let isTransparent = myData.tiles[tileType].transparent;
+                if (!isTransparent)
+                    isUnobstructed = false;
+            }
+            else
+                isUnobstructed = false;
+        }
+        return isUnobstructed;
+    }
+    getDestination(myData) {
+        this.init(myData);
+        let targetedDoor = new Vector(0, 0);
+        let unobstructedDoors = [];
+        // Update lists of known and unobstructed doors.
+        for (var i = 0; i < myData.mapSize.x; i++) {
+            for (var j = 0; j < myData.mapSize.y; j++) {
+                if (myData.tileMap[i][j] == this.doorValue) {
+                    let targetDoor = new Vector(i, j);
+                    console.log(`Found door (${targetDoor.x}, ${targetDoor.y})`);
+                    if (this.lastTransitTime[i][j] < 0)
+                        this.lastTransitTime[i][j] = this.beyondTime;
+                    if (this.isUnobstructed(myData, targetDoor))
+                        unobstructedDoors.push(targetDoor);
+                }
+            }
+        }
+        // Target unobstructed door with latest transit time.
+        let highestTransitTime = 0;
+        for (var i = 0; i < unobstructedDoors.length; i++) {
+            let xpos = unobstructedDoors[i].x;
+            let ypos = unobstructedDoors[i].y;
+            if (this.lastTransitTime[xpos][ypos] > highestTransitTime) {
+                highestTransitTime = this.lastTransitTime[xpos][ypos];
+                targetedDoor = unobstructedDoors[i];
+            }
+        }
+        return targetedDoor;
+    }
+}
 class Tobor extends Program {
+    splore = new Splore();
     state = "equip";
     actionBuffer = [];
     target = new Vector(3, 6);
+    destination = new Vector(0, 0);
     run(myData) {
         var myAction = new Action();
-        var destination = new Vector(1, 4);
-        var destination2 = new Vector(6, 3);
+        // var destination = new Vector(1,4);
+        // var destination2 = new Vector(6,3);
         var myID = myData.myID;
         if (this.actionBuffer.length < 1) {
+            console.log(`Current state: ${this.state}`);
             switch (this.state) {
                 case 'equip':
                     this.actionBuffer.push(new Equip('Scanner'));
                     this.actionBuffer.push(new Equip('Battery'));
                     this.actionBuffer.push(new Equip('Armor'));
-                    this.state = 'start';
+                    this.state = 'scan';
                     break;
-                case "start":
+                case 'target':
+                    this.destination = this.splore.getDestination(myData);
+                    this.state = 'move';
+                    break;
+                case "move":
                     let myPosition = myData.robots[myID].pos;
-                    this.actionBuffer.push(new Scan());
-                    this.actionBuffer.push(new Move(destination));
-                    if (myPosition.x === destination.x && myPosition.y === destination.y)
-                        this.state = "attack";
+                    this.actionBuffer.push(new Move(this.destination));
+                    if (myPosition.x === this.destination.x && myPosition.y === this.destination.y)
+                        this.state = "scan";
                     break;
                 case "attack":
                     this.actionBuffer.push(new Attack(this.target));
@@ -29,14 +99,9 @@ class Tobor extends Program {
                     this.actionBuffer.push(new Attack(this.target));
                     this.state = "end";
                     break;
-                case "move":
-                    this.actionBuffer.push(new Move(destination));
-                    this.state = "scan";
-                    break;
                 case "scan":
                     this.actionBuffer.push(new Scan());
-                    this.actionBuffer.push(new Move(destination2));
-                    this.state = "scan";
+                    this.state = "target";
                     break;
                 case "end":
                     break;

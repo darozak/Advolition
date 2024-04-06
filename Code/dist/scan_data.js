@@ -1,5 +1,6 @@
 "use strict";
 class ScanData {
+    mapSize;
     myID;
     scanTime = [];
     tileMap = [];
@@ -8,6 +9,7 @@ class ScanData {
     robotMap = [];
     robots = [];
     constructor(world, robot) {
+        this.mapSize = new Vector(world.size.x, world.size.y);
         this.myID = robot.robotID;
         for (var i = 0; i < world.maxRobotCount; i++) {
             this.robots.push(structuredClone(robot));

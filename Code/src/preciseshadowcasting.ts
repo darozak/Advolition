@@ -46,6 +46,8 @@ class PreciseShadowcasting extends FOV {
 	 * range from 0-1 and indicate the degree to which the tile is visible in the scan.
 	 */
 	compute(x: number, y: number, R: number, mask: boolean[][]): number[][] {
+		// Current position is automatically transparent.
+		mask[x][y] = true;
 		
 		// Create a results array that is the same size as the input mask.
 		var scanResult: number[][] = [];
