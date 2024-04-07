@@ -21,10 +21,11 @@ class Splore {
     }
     isUnobstructed(myData, target) {
         let isUnobstructed = true;
+        // if(target.getDistanceTo(myData.robots[myData.myID].pos) == 0) {  
         let myPosition = myData.robots[myData.myID].pos;
         let pathToTarget = target.getPathTo(myPosition);
-        // Add target to path.
-        //pathToTarget.push(target);
+        // Do not evaluate the tile that the robot occupies.
+        pathToTarget.pop();
         for (var i = 0; i < pathToTarget.length; i++) {
             let tileType = myData.tileMap[pathToTarget[i].x][pathToTarget[i].y];
             if (tileType >= 0 && tileType < myData.tiles.length) {
@@ -35,6 +36,7 @@ class Splore {
             else
                 isUnobstructed = false;
         }
+        // } else isUnobstructed = false;
         return isUnobstructed;
     }
     getDestination(myData) {
@@ -114,7 +116,7 @@ class Tobor extends Program {
                     this.state = 'move';
                     break;
                 case "move":
-                    let myPosition = myData.robots[myID].pos;
+                    // let myPosition = myData.robots[myID].pos;
                     this.actionBuffer.push(new Move(this.destination));
                     this.state = 'scan';
                     // if(myPosition.x === this.destination.x && myPosition.y === this.destination.y) this.state = "scan";
