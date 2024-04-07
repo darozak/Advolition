@@ -67,6 +67,7 @@ class Game {
                     this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
                     
                     this.scanData[i].robots[i].lastScan = this.gameTime;
+                    this.scanData[i].gameTime = this.gameTime;
 
                     // Let the robot run it's code.
                     action = this.programs[i].run(structuredClone(this.scanData[i]));

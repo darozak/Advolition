@@ -1,6 +1,7 @@
 class ScanData {
     mapSize: Vector;
     myID: number;
+    gameTime = 0;
     scanTime: number[][] = [];
     tileMap: number[][] = [];
     tiles: Tile[] = [];

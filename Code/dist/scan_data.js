@@ -2,6 +2,7 @@
 class ScanData {
     mapSize;
     myID;
+    gameTime = 0;
     scanTime = [];
     tileMap = [];
     tiles = [];

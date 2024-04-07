@@ -32,8 +32,8 @@ class GaiaData extends WorldData {
         this.items.push(new Item('Armor', effects));
 
         effects = new Stats();
-        effects.power = 50;
-        effects.maxPower = 50;
+        effects.power = 200;
+        effects.maxPower = 200;
         this.items.push(new Item('Battery', effects));
 
         console.log(this.items);
