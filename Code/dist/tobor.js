@@ -21,8 +21,7 @@ class Splore {
             this.initialized = true;
         }
     }
-    // STRATEGY: Confirm I have an unobstructed path to the target.
-    isUnobstructed(myData, target) {
+    isUnobstructed(target, myData) {
         let isUnobstructed = true;
         let myPosition = new Vector(0, 0);
         myPosition = myPosition.add(myData.robots[myData.myID].pos);
@@ -42,24 +41,27 @@ class Splore {
         }
         return isUnobstructed;
     }
-    // STRATEGY: Visit the accessible tile that I've neglected the longest.
-    findAccessableTile(tileType, currentDestination, myData) {
+    findAccessibleTile(targetedTileType, mustBeNearUnscannedTile, currentDestination, myData) {
         let unobstructedTargets = [];
+        let myPosition = myData.robots[myData.myID].pos;
         // Find all unobstructed tiles.
         for (var i = 0; i < myData.mapSize.x; i++) {
             for (var j = 0; j < myData.mapSize.y; j++) {
-                if (myData.tileMap[i][j] == tileType) {
+                if ((i != myPosition.x || j != myPosition.y) && myData.tileMap[i][j] == targetedTileType) {
                     let targetedLocation = new Vector(i, j);
                     let isNearUnscannedTile = true;
                     let maxRangeToUnscannedTile = 1;
-                    if (tileType == this.floorValue)
+                    if (mustBeNearUnscannedTile) {
                         isNearUnscannedTile = this.isNearUnscannedTile(targetedLocation, maxRangeToUnscannedTile, myData);
-                    if (isNearUnscannedTile && this.isUnobstructed(myData, targetedLocation))
+                    }
+                    else
+                        isNearUnscannedTile = true;
+                    if (isNearUnscannedTile && this.isUnobstructed(targetedLocation, myData))
                         unobstructedTargets.push(targetedLocation);
                 }
             }
         }
-        // Select tile with latest transit time.
+        // Select tile that I never visited be for or that I visited a long time ago.
         let highestTransitTime = 0;
         if (unobstructedTargets.length > 0) {
             for (var i = 0; i < unobstructedTargets.length; i++) {
@@ -88,12 +90,11 @@ class Splore {
     getDestination(myData) {
         this.init(myData);
         let destination = new Vector(0, 0);
-        // *** Need to check for floor tiles not near unexplored space ***
-        this.findAccessableTile(this.doorValue, destination, myData);
-        this.findAccessableTile(this.floorValue, destination, myData);
+        this.findAccessibleTile(this.floorValue, false, destination, myData);
+        this.findAccessibleTile(this.doorValue, false, destination, myData);
+        this.findAccessibleTile(this.floorValue, true, destination, myData);
         return destination;
     }
-    // STRATEGY: Mark the visit time for current and surrounding tiles.
     markTransitTime(myData) {
         this.init(myData);
         let myPos = myData.robots[myData.myID].pos;
@@ -108,8 +109,6 @@ class Tobor extends Program {
     destination = new Vector(0, 0);
     run(myData) {
         var myAction = new Action();
-        // var destination = new Vector(1,4);
-        // var destination2 = new Vector(6,3);
         var myID = myData.myID;
         this.splore.markTransitTime(myData);
         if (this.actionBuffer.length < 1) {
@@ -126,10 +125,8 @@ class Tobor extends Program {
                     this.state = 'move';
                     break;
                 case "move":
-                    // let myPosition = myData.robots[myID].pos;
                     this.actionBuffer.push(new Move(this.destination));
                     this.state = 'scan';
-                    // if(myPosition.x === this.destination.x && myPosition.y === this.destination.y) this.state = "scan";
                     break;
                 case "attack":
                     this.actionBuffer.push(new Attack(this.target));
