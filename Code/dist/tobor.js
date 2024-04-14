@@ -3,12 +3,14 @@ class Splore {
     beyondTime = 10000;
     lastTransitTime = [];
     doorValue = -1;
+    floorValue = -1;
     unscannedValue = -1;
     initialized = false;
     constructor() { }
     init(myData) {
         if (!this.initialized) {
             this.doorValue = myData.tiles.findLastIndex(d => d.name === 'Door');
+            this.floorValue = myData.tiles.findLastIndex(d => d.name === 'Floor');
             this.beyondTime = myData.gameTime + 1;
             for (var i = 0; i < myData.mapSize.x; i++) {
                 this.lastTransitTime[i] = [];
@@ -19,42 +21,45 @@ class Splore {
             this.initialized = true;
         }
     }
+    // STRATEGY: Confirm I have an unobstructed path to the target.
     isUnobstructed(myData, target) {
         let isUnobstructed = true;
-        // if(target.getDistanceTo(myData.robots[myData.myID].pos) == 0) {  
-        let myPosition = myData.robots[myData.myID].pos;
-        let pathToTarget = target.getPathTo(myPosition);
-        // Do not evaluate the tile that the robot occupies.
-        pathToTarget.pop();
+        let myPosition = new Vector(0, 0);
+        myPosition = myPosition.add(myData.robots[myData.myID].pos);
+        let pathToTarget = myPosition.getPathTo(target);
+        // Allows robot to explore options around corners.
+        if (pathToTarget.length > 2) {
+            pathToTarget.pop();
+            pathToTarget.pop();
+        }
         for (var i = 0; i < pathToTarget.length; i++) {
             let tileType = myData.tileMap[pathToTarget[i].x][pathToTarget[i].y];
             if (tileType >= 0 && tileType < myData.tiles.length) {
                 let isTransparent = myData.tiles[tileType].transparent;
-                if (!isTransparent)
+                if (!isTransparent && tileType != this.doorValue)
                     isUnobstructed = false;
             }
-            else
-                isUnobstructed = false;
         }
-        // } else isUnobstructed = false;
         return isUnobstructed;
     }
-    getDestination(myData) {
-        this.init(myData);
-        let targetedDoor = new Vector(0, 0);
+    // STRATEGY: Visit the accessible tile that I've neglected the longest.
+    findAccessableTile(tileType, currentDestination, myData) {
         let unobstructedTargets = [];
-        // Update lists of unobstructed doors and unscanned spaces.
+        // Find all unobstructed tiles.
         for (var i = 0; i < myData.mapSize.x; i++) {
             for (var j = 0; j < myData.mapSize.y; j++) {
-                if (myData.tileMap[i][j] == this.doorValue || myData.tileMap[i][j] == this.unscannedValue) {
+                if (myData.tileMap[i][j] == tileType) {
                     let targetedLocation = new Vector(i, j);
-                    // if(this.lastTransitTime[i][j] < 0) this.lastTransitTime[i][j] = this.beyondTime;
-                    if (this.isUnobstructed(myData, targetedLocation))
+                    let isNearUnscannedTile = true;
+                    let maxRangeToUnscannedTile = 1;
+                    if (tileType == this.floorValue)
+                        isNearUnscannedTile = this.isNearUnscannedTile(targetedLocation, maxRangeToUnscannedTile, myData);
+                    if (isNearUnscannedTile && this.isUnobstructed(myData, targetedLocation))
                         unobstructedTargets.push(targetedLocation);
                 }
             }
         }
-        // Target unobstructed door with latest transit time.
+        // Select tile with latest transit time.
         let highestTransitTime = 0;
         if (unobstructedTargets.length > 0) {
             for (var i = 0; i < unobstructedTargets.length; i++) {
@@ -62,28 +67,33 @@ class Splore {
                 let ypos = unobstructedTargets[i].y;
                 if (this.lastTransitTime[xpos][ypos] > highestTransitTime) {
                     highestTransitTime = this.lastTransitTime[xpos][ypos];
-                    targetedDoor = unobstructedTargets[i];
+                    currentDestination.setEqualTo(unobstructedTargets[i]);
                 }
             }
         }
-        else {
-            let xpos = myData.robots[myData.myID].pos.x;
-            let ypos = myData.robots[myData.myID].pos.y;
-            for (var i = -1; i <= 1; i++) {
-                for (var j = -1; j <= 1; j++) {
-                    let option = new Vector(xpos + i, ypos + j);
-                    let transitTime = this.lastTransitTime[xpos + i][ypos + j];
-                    let isTransparent = myData.tiles[myData.tileMap[xpos + i][ypos + j]].transparent;
-                    if (isTransparent && transitTime > highestTransitTime) {
-                        highestTransitTime = transitTime;
-                        targetedDoor = option;
-                    }
-                }
-            }
-        }
-        console.log(`Destination: ${targetedDoor.x}, ${targetedDoor.y}`);
-        return targetedDoor;
     }
+    isNearUnscannedTile(target, range, myData) {
+        let isNearUnscannedTile = false;
+        for (var i = target.x - range; i <= target.x + range; i++) {
+            for (var j = target.y - range; j <= target.y + range; j++) {
+                if (i >= 0 && i < myData.mapSize.x && j >= 0 && j < myData.mapSize.y) {
+                    let tileType = myData.tileMap[i][j];
+                    if (tileType < 0)
+                        isNearUnscannedTile = true;
+                }
+            }
+        }
+        return isNearUnscannedTile;
+    }
+    getDestination(myData) {
+        this.init(myData);
+        let destination = new Vector(0, 0);
+        // *** Need to check for floor tiles not near unexplored space ***
+        this.findAccessableTile(this.doorValue, destination, myData);
+        this.findAccessableTile(this.floorValue, destination, myData);
+        return destination;
+    }
+    // STRATEGY: Mark the visit time for current and surrounding tiles.
     markTransitTime(myData) {
         this.init(myData);
         let myPos = myData.robots[myData.myID].pos;

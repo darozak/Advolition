@@ -18,6 +18,10 @@ class Vector {
     isEqualTo(vector) {
         return (this.x === vector.x && this.y === vector.y);
     }
+    setEqualTo(vector) {
+        this.x = vector.x;
+        this.y = vector.y;
+    }
     getDistanceTo(vector) {
         let delta = this.subtract(vector);
         return Math.sqrt((Math.pow(delta.x, 2) + Math.pow(delta.y, 2)));
