@@ -101,31 +101,143 @@ class Splore {
         this.lastTransitTime[myPos.x][myPos.y] = myData.gameTime;
     }
 }
+class Drift {
+    floorTile = 0;
+    doorTile = 0;
+    depth;
+    constructor() {
+        this.depth = [];
+    }
+    init(myData) {
+        this.doorTile = myData.tiles.findLastIndex(d => d.name === 'Door');
+        this.floorTile = myData.tiles.findLastIndex(d => d.name === 'Floor');
+        for (let i = 0; i < myData.mapSize.x; i++) {
+            this.depth[i] = [];
+            for (let j = 0; j < myData.mapSize.y; j++) {
+                this.depth[i][j] = 0;
+            }
+        }
+    }
+    followFlow(target, myData) {
+        this.floodDungeon(target, myData);
+        let position = myData.robots[myData.myID].pos;
+        let minX = position.x;
+        let minY = position.y;
+        let minDepth = this.depth[minX][minY];
+        for (let i = position.x - 1; i <= position.x + 1; i++) {
+            for (let j = position.y - 1; j <= position.y + 1; j++) {
+                if (i >= 0 && i < myData.mapSize.x && j >= 0 && j < myData.mapSize.y) {
+                    let tileType = myData.tileMap[i][j];
+                    if (tileType === this.doorTile || tileType === this.floorTile) {
+                        console.log(`(${i},${j}): ${this.depth[i][j]}`);
+                        if (this.depth[i][j] < minDepth) {
+                            minX = i;
+                            minY = j;
+                            minDepth = this.depth[i][j];
+                        }
+                    }
+                }
+            }
+        }
+        return new Vector(minX, minY);
+    }
+    floodDungeon(target, myData) {
+        this.init(myData);
+        let position = myData.robots[myData.myID].pos;
+        let floodCycles = 500;
+        let floodRate = 20;
+        for (let cycle = 0; cycle < floodCycles; cycle++) {
+            this.depth[position.x][position.y] += floodRate;
+            for (let i = 0; i < myData.mapSize.x; i++) {
+                for (let j = 0; j < myData.mapSize.y; j++) {
+                    this.levelWater(i, j, myData);
+                    this.depth[target.x][target.y] = 0;
+                }
+            }
+        }
+    }
+    isFlooded(sink, myData) {
+        for (let i = 0; i < myData.mapSize.x; i++) {
+            for (let j = 0; j < myData.mapSize.y; j++) {
+                if (!(i == sink.x && j == sink.y) && this.depth[i][j] == 0)
+                    return false;
+            }
+        }
+        return true;
+    }
+    getAverageDepth(x, y, myData) {
+        let averageDepth = 0;
+        let tileCount = 0;
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
+                if (i >= 0 && i < myData.mapSize.x && j >= 0 && j < myData.mapSize.y) {
+                    let tileType = myData.tileMap[i][j];
+                    if (tileType == this.doorTile || tileType == this.floorTile) {
+                        averageDepth += this.depth[i][j];
+                        tileCount += 1;
+                    }
+                }
+            }
+        }
+        return averageDepth / tileCount;
+    }
+    levelWater(x, y, myData) {
+        let averageDepth = this.getAverageDepth(x, y, myData);
+        let levelingRate = 0.2;
+        for (let i = x - 1; i <= x + 1; i++) {
+            for (let j = y - 1; j <= y + 1; j++) {
+                if (i >= 0 && i < myData.mapSize.x && j >= 0 && j < myData.mapSize.y) {
+                    let tileType = myData.tileMap[i][j];
+                    if (tileType == this.doorTile || tileType == this.floorTile) {
+                        this.depth[i][j] += levelingRate * (averageDepth - this.depth[i][j]);
+                    }
+                }
+            }
+        }
+    }
+}
 class Tobor extends Program {
     splore = new Splore();
+    drift = new Drift();
     state = "equip";
     actionBuffer = [];
     target = new Vector(3, 6);
+    startPosition = new Vector(0, 0);
     destination = new Vector(0, 0);
+    stepCounter = 0;
     run(myData) {
         var myAction = new Action();
-        var myID = myData.myID;
         this.splore.markTransitTime(myData);
         if (this.actionBuffer.length < 1) {
             console.log(`Current state: ${this.state}`);
             switch (this.state) {
                 case 'equip':
+                    this.startPosition.setEqualTo(myData.robots[myData.myID].pos);
                     this.actionBuffer.push(new Equip('Scanner'));
                     this.actionBuffer.push(new Equip('Battery'));
                     this.actionBuffer.push(new Equip('Armor'));
                     this.state = 'scan';
                     break;
                 case 'target':
-                    this.destination = this.splore.getDestination(myData);
+                    if (this.stepCounter < 15) {
+                        this.destination = this.splore.getDestination(myData);
+                    }
+                    else {
+                        // let returnPath = this.drift.getPath(this.startPosition, myData);
+                        // this.destination = returnPath[0];
+                        // this.drift.floodDungeon(this.startPosition, myData);
+                        console.log("Going with the flow!");
+                        this.destination = this.drift.followFlow(this.startPosition, myData);
+                    }
                     this.state = 'move';
                     break;
                 case "move":
                     this.actionBuffer.push(new Move(this.destination));
+                    // if(this.stepCounter < 15) {
+                    //     this.drift.floodDungeon(this.startPosition, myData);
+                    // }
+                    this.stepCounter += 1;
+                    console.log(`Step counter: ${this.stepCounter}`);
                     this.state = 'scan';
                     break;
                 case "attack":

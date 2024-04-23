@@ -72,7 +72,7 @@ class Arena {
         }
 
         // Place items
-        let totalItems = 10;
+        let totalItems = 1;
 
         for(var i = 0; i < totalItems; i ++) {
             let x = 0;
