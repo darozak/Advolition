@@ -32,7 +32,7 @@ function runGame() {
         }
     }
     // Game animation loop. The interval sets that animation frame rate in ms.
-    intervalID = setInterval(() => game.run(), 100);
+    intervalID = setInterval(() => game.run(), 10);
 }
 function stopGame() {
     // Stop the interval if a program is already running.
