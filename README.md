@@ -13,11 +13,11 @@ You can play the most recent version of the game at https://darozak.github.io/Ad
 ## Programming your robot
 Players program their robots by creating JavaScript classes that tell the robots how to respond to their environments. Every program must have a class definition that extends the Program class, a run function that accepts a scan data object its an argument and returns an action object, and an object declaration that establishes and unnamed instance of the class.
 
-At a minimum, your JavaScript code must have the following elements structure to work in the game:
+Here is an example of the most basic "Hello world!" program that your robot can run:
 ```javascript
 class MyProgram extends Program {
     run(myData) {
-        var myAction = new Action();
+        var myAction = new Say('Hello world!');
         return myAction;
     }
 }
