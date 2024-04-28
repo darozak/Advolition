@@ -30,7 +30,7 @@ A robot can only perform one action at a time. Different actions take different 
 Therefore, the player must design a run function to analyze the robot's current situation and request a new action from the game engine.
 
 ## Action Classes
-Advolition has a number of pre-defined Action class extensions that the robot can return from its run function to describe it's next move. These classes are as follows:
+Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:
 
 ### Attack(target: Vector)
 The Attack class is used to create an object that instructs the Game Engine to attack a robot at the target Vector using all of its equipped weapons.
@@ -44,11 +44,11 @@ The Equip class creates a JavaScript object that tells the the Game Engine to eq
 ### Move(target: Vector)
 The move class can be used to create a JavaScript object that tells the game engine to move the robot to the adjacent tile that is closest to the target vector.
 
-### Scan()
-The Scan class creates an object that instructs the robot to scan its surroundings using any equipped scanners.
-
 ### Say(message: string)
 The Say class produces an object that causes the Game Engine to post the indicated message to the event log that is displayed to the players.
+
+### Scan()
+The Scan class creates an object that instructs the robot to scan its surroundings using any equipped scanners.
 
 ### Take(item: string)
 The Take class allows the player to create an object that announces the robot's intention to pick up an item from the ground.
