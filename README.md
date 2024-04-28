@@ -29,6 +29,12 @@ A robot can only perform one action at a time. Different actions take different 
 
 Therefore, the player must design a run function to analyze the robot's current situation and request a new action from the game engine.
 
+## myData
+Everthing that a robot needs to know about its environment is contained in the myData data set that is passed to the robot via the `run` method.  
+### ScanData
+- gameTime: Number | This is the current game time.
+- myID: Number | This is the robot's ID, which can be used to access data about itself drom the robots array.
+
 ## Action Classes
 Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:
 
