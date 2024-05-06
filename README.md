@@ -21,19 +21,13 @@ class MyProgram extends Program {
         return myAction;
     }
 }
-new Target();
+new MyProgram();
 ```
 The run function must accept an object that contains the most current information about your robot and its environment. It must also return an extension of the Action class that dictates the robot's next action.
 
 A robot can only perform one action at a time. Different actions take different amounts of time to complete. Whenever an action is complete, the game engine will execute the robot's run function and pass it the most current information about its environment via the myData object.
 
 Therefore, the player must design a run function to analyze the robot's current situation and request a new action from the game engine.
-
-## myData
-Everthing that a robot needs to know about its environment is contained in the myData data set that is passed to the robot via the `run` method.  
-### ScanData
-- gameTime: Number | This is the current game time.
-- myID: Number | This is the robot's ID, which can be used to access data about itself drom the robots array.
 
 ## Action Classes
 Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:
