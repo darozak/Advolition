@@ -125,7 +125,7 @@ class Drift {
         return boarderTiles;
     }
 }
-
+ 
 class Tobor extends Program {
     drift = new Drift();
     state = "equip";
@@ -138,7 +138,7 @@ class Tobor extends Program {
     
     run(myData: ScanData) {
         var myAction = new Action();
-        
+        myData.itemMap[0][0][0].
         if(this.actionBuffer.length < 1) {
             console.log(`Current state: ${this.state}`);
             switch (this.state) {
@@ -150,7 +150,7 @@ class Tobor extends Program {
                     this.state = 'scan';
                     break;
                 case 'target':
-                    if(this.stepCounter < 15) {
+                    if(this.stepCounter < 150) {
                         this.destination = this.drift.followFlow(this.voidPosition, myData);  
                     } else {
                         this.destination = this.drift.followFlow(this.startPosition, myData);

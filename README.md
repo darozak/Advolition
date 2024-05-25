@@ -32,7 +32,7 @@ Therefore, the player must design a run function to analyze the robot's current 
 ## myData
 Everthing that a robot needs to know about its environment is contained in the myData data set that is passed to the robot via the `run` method. 
 
-### ScanData
+### ScanData Class
 
 | Variable | Type | Description |
 | -------- | ---- | ----------- |
@@ -45,6 +45,17 @@ Everthing that a robot needs to know about its environment is contained in the m
 | scanTime[x][y] | Number | The last time at which your robot scanned position x, y.  Any robot or item data asociated with that location will be current as of that point in time. A negative value indicates that this position has not yet been scanned by the robot. |
 | tileMap[x][y] | Number | The numeric ID of the tile at position x, y.  A negative value indicates that the this position has not yet been scaned by the robot. |
 | tiles[n] | Tile | Information on tile type n. |
+
+### Item Class
+The item class is used to describe to properties and status of all in-game items.
+
+| Variable | Type | Description |
+| -------- | ---- | ----------- |
+| effects | Stat | The effect the item has on each of the robot's stats when equipped and activated |
+| isActive | boolean | True if the item has been activated. |
+| isEquipped | boolean | True if the item is equipped. |
+| name | string | The name of the item. |
+| timeToActivate | number | This is the time required to activate the item for use. |
 
 ## Action Classes
 Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:

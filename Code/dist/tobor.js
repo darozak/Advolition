@@ -135,7 +135,7 @@ class Tobor extends Program {
                     this.state = 'scan';
                     break;
                 case 'target':
-                    if (this.stepCounter < 15) {
+                    if (this.stepCounter < 150) {
                         this.destination = this.drift.followFlow(this.voidPosition, myData);
                     }
                     else {
