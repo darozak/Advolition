@@ -36,14 +36,14 @@ Everthing that a robot needs to know about its environment is contained in the m
 
 | Variable | Type | Description |
 | -------- | ---- | ----------- |
-| gameTime | Number | The current game time, which counts down to zero. |
+| gameTime | number | The current game time, which counts down to zero. |
 | itemMap[x][y][n] | Item | A 3D array that can contain any number (n) of items located at the x, y coordinate. |
 | mapSize | Vector | A vector that holds the maximum x, y coordinate of the game map. |
-| myID     | Number | The robot's ID, which can be used to access data about itself drom the robots array. |
-| robotMap[x][y] | Number | A 2D array that contains the ID of the robot located at that position. A negative value indicates that no robot is present at that location. |
+| myID     | number | The robot's ID, which can be used to access data about itself drom the robots array. |
+| robotMap[x][y] | number | A 2D array that contains the ID of the robot located at that position. A negative value indicates that no robot is present at that location. |
 | robots[n] | RobotData | The data on a specific robot (n). |
-| scanTime[x][y] | Number | The last time at which your robot scanned position x, y.  Any robot or item data asociated with that location will be current as of that point in time. A negative value indicates that this position has not yet been scanned by the robot. |
-| tileMap[x][y] | Number | The numeric ID of the tile at position x, y.  A negative value indicates that the this position has not yet been scaned by the robot. |
+| scanTime[x][y] | number | The last time at which your robot scanned position x, y.  Any robot or item data asociated with that location will be current as of that point in time. A negative value indicates that this position has not yet been scanned by the robot. |
+| tileMap[x][y] | number | The numeric ID of the tile at position x, y.  A negative value indicates that the this position has not yet been scaned by the robot. |
 | tiles[n] | Tile | Information on tile type n. |
 
 ### Item Class
@@ -51,11 +51,10 @@ The item class is used to describe to properties and status of all in-game items
 
 | Variable | Type | Description |
 | -------- | ---- | ----------- |
-| effects | Stat | The effect the item has on each of the robot's stats when equipped and activated |
-| isActive | boolean | True if the item has been activated. |
+| effects | Stat | The effect the item has on each of the robot's stats when equipped. |
 | isEquipped | boolean | True if the item is equipped. |
 | name | string | The name of the item. |
-| timeToActivate | number | This is the time required to activate the item for use. |
+| timeToEquip | number | This is the time required to equip an item for use. |
 
 ## Action Classes
 Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:
