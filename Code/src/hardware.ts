@@ -2,8 +2,7 @@
 class Item {   
     name: string;
     effects: Stats;
-    timeToActivate: number = 10;
-    isActive: boolean = false;
+    timeToEquip: number = 10;
     isEquipped: boolean = false;
 
     constructor(name: string, effects: Stats) {

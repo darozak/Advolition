@@ -2,8 +2,7 @@
 class Item {
     name;
     effects;
-    timeToActivate = 10;
-    isActive = false;
+    timeToEquip = 10;
     isEquipped = false;
     constructor(name, effects) {
         this.name = name;

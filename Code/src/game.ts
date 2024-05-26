@@ -342,7 +342,7 @@ class Game {
             for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
                 var color = [180, 180, 180];
                 var text: string;
-                if(this.robotData[robotID].items[i].isActive) color = [51, 110, 156];
+                if(this.robotData[robotID].items[i].isEquipped) color = [51, 110, 156];
 
                 topTextFrame += lineSpacing;
                 text = this.robotData[robotID].items[i].name;
@@ -513,7 +513,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
     
-            let delay = -this.robotData[robotID].items[itemID].timeToActivate;
+            let delay = -this.robotData[robotID].items[itemID].timeToEquip;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -526,7 +526,7 @@ class Game {
         let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
         if(itemID >= 0) {
             this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
-            this.robotData[event.robotID].items[0].isActive = true;
+            this.robotData[event.robotID].items[0].isEquipped = true;
 
             // Write to event log.
             this.appendToLog(this.robotData[event.robotID], this.gameTime, `equips its ${event.action.item}`);
@@ -542,7 +542,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            let delay = -this.robotData[robotID].items[itemID].timeToActivate;
+            let delay = -this.robotData[robotID].items[itemID].timeToEquip;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -554,7 +554,7 @@ class Game {
         // Move item to the bottom of the list and set to inactive.
         let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
         if(itemID >= 0) {
-            this.robotData[event.robotID].items[itemID].isActive = false;
+            this.robotData[event.robotID].items[itemID].isEquipped = false;
             this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
         
             // Write to event log.
@@ -571,7 +571,7 @@ class Game {
         let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            let delay = this.robotData[robotID].items[itemID].timeToActivate;
+            let delay = this.robotData[robotID].items[itemID].timeToEquip;
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -595,7 +595,7 @@ class Game {
             let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
             if(itemID >= 0) {
 
-                let delay = -this.robotData[robotID].items[itemID].timeToActivate;
+                let delay = -this.robotData[robotID].items[itemID].timeToEquip;
 
                 // Add action to event que.
                 this.events.push(new GameEvent(robotID, action, delay + this.gameTime)); 
@@ -667,22 +667,16 @@ class Game {
     }
 
     equipItems(robot: RobotData) {
-        // Equip allowable number of items.
-        for(var i = 0; i < robot.items.length; i ++) {
-            robot.items[i].isEquipped = (i <= robot.adjustedStats.maxEquip);
+        // Unequip any items over the max.
+        for(var i = robot.adjustedStats.maxEquip; i < robot.items.length; i ++) {
+            robot.items[i].isEquipped = false;
         }
 
-        // Inactivate all unequipped items.
-        for(var i = 0; i < robot.items.length; i ++) {
-            if(!robot.items[i].isEquipped) robot.items[i].isActive = false;
-        }
-
-        // Recompute attributes based on active items.
+        // Recompute attributes based on equippws items.
         robot.adjustedStats.copy(robot.baseStats); 
 
-        // Apply mods from equipped items.
         for(var i = 0; i < robot.items.length; i ++) {
-            if(robot.items[i].isActive) {
+            if(robot.items[i].isEquipped) {
                 robot.adjustedStats.add(robot.items[i].effects);
             }
         }
@@ -695,7 +689,7 @@ class Game {
 
             this.appendToLog(robot, this.gameTime, `drops its ${robot.items[itemID].name}`);
 
-            robot.items[itemID].isActive = false;
+            robot.items[itemID].isEquipped = false;
             this.arena.itemMap[location.x][location.y].push(robot.items.splice(itemID, 1)[0]); 
     
             this.equipItems(robot);
@@ -704,7 +698,7 @@ class Game {
 
     takeDamage(robot: RobotData, damage: number){
         for(var i = 0; i < robot.items.length; i ++) {
-            if(robot.items[i].isActive) {
+            if(robot.items[i].isEquipped) {
                 if(damage <= robot.items[i].effects.HPs) {
 
                     // Item absorbes all remaining damage.
@@ -738,7 +732,7 @@ class Game {
         for(var i = 0; i < robot.items.length; i ++) {
 
             // Only take power from active items.
-            if(robot.items[i].isActive) {
+            if(robot.items[i].isEquipped) {
 
                 // Drain required power from item if there is enough.
                 if(amount <= robot.items[i].effects.power) {

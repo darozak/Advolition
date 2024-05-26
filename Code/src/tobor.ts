@@ -138,7 +138,6 @@ class Tobor extends Program {
     
     run(myData: ScanData) {
         var myAction = new Action();
-        myData.itemMap[0][0][0].
         if(this.actionBuffer.length < 1) {
             console.log(`Current state: ${this.state}`);
             switch (this.state) {
@@ -147,6 +146,7 @@ class Tobor extends Program {
                     this.actionBuffer.push(new Equip('Scanner'));
                     this.actionBuffer.push(new Equip('Battery'));
                     this.actionBuffer.push(new Equip('Armor'));
+                    // this.actionBuffer.push(new Equip('Blaster'));
                     this.state = 'scan';
                     break;
                 case 'target':

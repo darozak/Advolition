@@ -132,6 +132,7 @@ class Tobor extends Program {
                     this.actionBuffer.push(new Equip('Scanner'));
                     this.actionBuffer.push(new Equip('Battery'));
                     this.actionBuffer.push(new Equip('Armor'));
+                    // this.actionBuffer.push(new Equip('Blaster'));
                     this.state = 'scan';
                     break;
                 case 'target':
