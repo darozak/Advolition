@@ -1,12 +1,12 @@
 "use strict";
 class Item {
     name;
-    effects;
+    attributes;
     timeToEquip = 10;
     isEquipped = false;
     constructor(name, effects) {
         this.name = name;
-        this.effects = effects;
+        this.attributes = effects;
     }
 }
 class Attributes {

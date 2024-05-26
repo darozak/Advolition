@@ -57,6 +57,16 @@ The item class is used to describe to properties and status of all in-game items
 | timeToEquip | number | This is the time required to equip an item for use. |
 
 ## Attributes Class
+Both robots and items have attributes.  Generally, a robot's attributes sum all the attributes of it's equipped items.
+
+| Variable | Type | Description |
+| -------- | ---- | ----------- |
+| credits | number | The total value of the robot or item.  The robot with the greatest value at the end of the game wins. |
+| HPs | number | The total amount of hitpoints posessed by a robot or provided by an intem. |
+| moveCost | number | The total power cost of a move action. |
+| moveTime | number | The amount of time it takes for a robot to complete a move action. |
+
+
 
 ## Action Classes
 Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:

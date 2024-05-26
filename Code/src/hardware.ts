@@ -1,13 +1,13 @@
  
 class Item {   
     name: string;
-    effects: Attributes;
+    attributes: Attributes;
     timeToEquip: number = 10;
     isEquipped: boolean = false;
 
     constructor(name: string, effects: Attributes) {
         this.name = name;
-        this.effects = effects;
+        this.attributes = effects;
     }
 }
 

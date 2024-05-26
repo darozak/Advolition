@@ -517,7 +517,7 @@ class Game {
         robot.adjustedStats.copy(robot.baseStats);
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isEquipped) {
-                robot.adjustedStats.add(robot.items[i].effects);
+                robot.adjustedStats.add(robot.items[i].attributes);
             }
         }
     }
@@ -533,17 +533,17 @@ class Game {
     takeDamage(robot, damage) {
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isEquipped) {
-                if (damage <= robot.items[i].effects.HPs) {
+                if (damage <= robot.items[i].attributes.HPs) {
                     // Item absorbes all remaining damage.
-                    robot.items[i].effects.HPs -= damage;
+                    robot.items[i].attributes.HPs -= damage;
                     robot.adjustedStats.HPs -= damage;
                     damage = 0;
                 }
                 else {
                     // Item only absorbes some of the remaining damage.
-                    damage -= robot.items[i].effects.HPs;
-                    robot.adjustedStats.HPs -= robot.items[i].effects.HPs;
-                    robot.items[i].effects.HPs = 0;
+                    damage -= robot.items[i].attributes.HPs;
+                    robot.adjustedStats.HPs -= robot.items[i].attributes.HPs;
+                    robot.items[i].attributes.HPs = 0;
                 }
             }
         }
@@ -563,16 +563,16 @@ class Game {
             // Only take power from active items.
             if (robot.items[i].isEquipped) {
                 // Drain required power from item if there is enough.
-                if (amount <= robot.items[i].effects.power) {
-                    robot.items[i].effects.power -= amount;
+                if (amount <= robot.items[i].attributes.power) {
+                    robot.items[i].attributes.power -= amount;
                     robot.adjustedStats.power -= amount;
                     amount = 0;
                     // Otherwise drain what is available from that item.
                 }
                 else {
-                    amount -= robot.items[i].effects.power;
-                    robot.adjustedStats.power -= robot.items[i].effects.power;
-                    robot.items[i].effects.power = 0;
+                    amount -= robot.items[i].attributes.power;
+                    robot.adjustedStats.power -= robot.items[i].attributes.power;
+                    robot.items[i].attributes.power = 0;
                 }
             }
         }
@@ -581,13 +581,13 @@ class Game {
     }
     addPower(robot, amount) {
         for (var i = 0; i < robot.items.length; i++) {
-            if (amount + robot.items[i].effects.power <= robot.items[i].effects.maxPower) {
-                robot.items[i].effects.power += amount;
+            if (amount + robot.items[i].attributes.power <= robot.items[i].attributes.maxPower) {
+                robot.items[i].attributes.power += amount;
                 amount = 0;
             }
             else {
-                amount -= robot.items[i].effects.maxPower - robot.items[i].effects.power;
-                robot.items[i].effects.power = robot.items[i].effects.maxPower;
+                amount -= robot.items[i].attributes.maxPower - robot.items[i].attributes.power;
+                robot.items[i].attributes.power = robot.items[i].attributes.maxPower;
             }
         }
         return (amount == 0);
