@@ -10,28 +10,28 @@ class GaiaData extends WorldData {
         this.tiles.push(new Tile("Door", "+", new Vector(12,3), false, 0.0));
 
         // Create Items
-        var effects: Stats;
+        var effects: Attributes;
 
-        effects = new Stats();
+        effects = new Attributes();
         effects.scanCost = 0;
         effects.scanRange = 4;
         effects.scanTime = 8;
         this.items.push(new Item('Scanner', effects));
 
-        effects = new Stats();
+        effects = new Attributes();
         effects.thermalDamage = 4;
         this.items.push(new Item('Blaster', effects));
 
-        effects = new Stats();
+        effects = new Attributes();
         effects.thermalDefense = 1;
         this.items.push(new Item('Shield', effects));
 
-        effects = new Stats();
+        effects = new Attributes();
         effects.HPs = 60;
         effects.maxHPs = 60;
         this.items.push(new Item('Armor', effects));
 
-        effects = new Stats();
+        effects = new Attributes();
         effects.power = 2000;
         effects.maxPower = 2000;
         this.items.push(new Item('Battery', effects));

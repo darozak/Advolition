@@ -56,6 +56,8 @@ The item class is used to describe to properties and status of all in-game items
 | name | string | The name of the item. |
 | timeToEquip | number | This is the time required to equip an item for use. |
 
+## Attributes Class
+
 ## Action Classes
 Advolition has eight pre-defined Action class extensions that the robot can use to describe it's next move. These classes are as follows:
 

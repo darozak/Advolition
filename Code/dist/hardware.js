@@ -9,7 +9,7 @@ class Item {
         this.effects = effects;
     }
 }
-class Stats {
+class Attributes {
     credits = 0;
     HPs = 0;
     maxHPs = 0;
@@ -82,8 +82,8 @@ class Stats {
     }
 }
 class Robot {
-    baseStats = new Stats();
-    adjustedStats = new Stats();
+    baseStats = new Attributes();
+    adjustedStats = new Attributes();
     items = [];
     constructor() {
         this.baseStats.maxCarry = 4;

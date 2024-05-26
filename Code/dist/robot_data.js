@@ -1,7 +1,7 @@
 "use strict";
 class RobotData {
-    baseStats = new Stats();
-    adjustedStats = new Stats();
+    baseStats = new Attributes();
+    adjustedStats = new Attributes();
     items = [];
     lastScan = 0;
     robotID;

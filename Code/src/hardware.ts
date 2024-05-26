@@ -1,17 +1,17 @@
  
 class Item {   
     name: string;
-    effects: Stats;
+    effects: Attributes;
     timeToEquip: number = 10;
     isEquipped: boolean = false;
 
-    constructor(name: string, effects: Stats) {
+    constructor(name: string, effects: Attributes) {
         this.name = name;
         this.effects = effects;
     }
 }
 
-class Stats {
+class Attributes {
     credits = 0;
     HPs = 0;
     maxHPs = 0;
@@ -42,7 +42,7 @@ class Stats {
 
     constructor() {}
 
-    add(stats: Stats) {
+    add(stats: Attributes) {
         this.credits += stats.credits;
         this.HPs += stats.HPs;
         this.maxHPs += stats.maxHPs;
@@ -75,7 +75,7 @@ class Stats {
         this.backgroundPower += stats.backgroundPower;
     }
 
-    copy(stats: Stats) {
+    copy(stats: Attributes) {
         this.credits = stats.credits;
 
         this.maxHPs = stats.maxHPs;
@@ -108,8 +108,8 @@ class Stats {
 }
 
 class Robot {
-    baseStats = new Stats();
-    adjustedStats = new Stats();
+    baseStats = new Attributes();
+    adjustedStats = new Attributes();
     items: Item[] = [];
 
     constructor() {

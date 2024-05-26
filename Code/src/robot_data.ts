@@ -1,8 +1,8 @@
 
 class RobotData {
 
-    baseStats = new Stats();
-    adjustedStats = new Stats();
+    baseStats = new Attributes();
+    adjustedStats = new Attributes();
 
     items: Item[] = [];
 
