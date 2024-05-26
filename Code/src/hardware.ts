@@ -12,7 +12,7 @@ class Item {
 }
 
 class Stats {
-    value = 0;
+    credits = 0;
     HPs = 0;
     maxHPs = 0;
     power = 0;
@@ -21,20 +21,20 @@ class Stats {
     maxCarry = 0;
     maxEquip = 0;
 
-    scanPower = 0;
+    scanCost = 0;
     scanTime = 0;
     scanRange = 0;
 
-    offensePower = 0;
+    offenseCost = 0;
     offenseTime = 0;
     kineticDamage = 0;
     thermalDamage = 0;
 
-    defensePower = 0;
+    defenseCost = 0;
     kineticDefense = 0;
     thermalDefense = 0;
 
-    movePower = 0;
+    moveCost = 0;
     moveTime = 0;
     permissiveTerrain: string[] = [];
 
@@ -43,7 +43,7 @@ class Stats {
     constructor() {}
 
     add(stats: Stats) {
-        this.value += stats.value;
+        this.credits += stats.credits;
         this.HPs += stats.HPs;
         this.maxHPs += stats.maxHPs;
 
@@ -53,20 +53,20 @@ class Stats {
         this.power += stats.power;
         this.maxPower += stats.maxPower;
 
-        this.scanPower += stats.scanPower;
+        this.scanCost += stats.scanCost;
         this.scanTime += stats.scanTime;
         this.scanRange += stats.scanRange;
 
-        this.offensePower += stats.offensePower;
+        this.offenseCost += stats.offenseCost;
         this.offenseTime += stats.offenseTime;
         this.kineticDamage += stats.kineticDamage;
         this.thermalDamage += stats.thermalDamage;
 
-        this.defensePower += stats.defensePower;
+        this.defenseCost += stats.defenseCost;
         this.kineticDefense += stats.kineticDefense;
         this.thermalDefense += stats.thermalDefense;
 
-        this.movePower += stats.movePower;
+        this.moveCost += stats.moveCost;
         this.moveTime += stats.moveTime;
         for(var i = 0; i < stats.permissiveTerrain.length; i ++) {
             this.permissiveTerrain.push(stats.permissiveTerrain[i]);
@@ -76,7 +76,7 @@ class Stats {
     }
 
     copy(stats: Stats) {
-        this.value = stats.value;
+        this.credits = stats.credits;
 
         this.maxHPs = stats.maxHPs;
         this.HPs = stats.HPs;
@@ -86,20 +86,20 @@ class Stats {
         this.maxCarry = stats.maxCarry;
         this.maxEquip = stats.maxEquip;
 
-        this.scanPower = stats.scanPower;
+        this.scanCost = stats.scanCost;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
 
-        this.offensePower = stats.offensePower;
+        this.offenseCost = stats.offenseCost;
         this.offenseTime = stats.offenseTime;
         this.kineticDamage = stats.kineticDamage;
         this.thermalDamage = stats.thermalDamage;
 
-        this.defensePower = stats.defensePower;
+        this.defenseCost = stats.defenseCost;
         this.kineticDefense = stats.kineticDefense;
         this.thermalDefense = stats.thermalDefense;
 
-        this.movePower = stats.movePower;
+        this.moveCost = stats.moveCost;
         this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
 
@@ -117,7 +117,7 @@ class Robot {
         this.baseStats.maxCarry = 4;
         this.baseStats.maxEquip = 3;
 
-        this.baseStats.movePower = 3;
+        this.baseStats.moveCost = 3;
         this.baseStats.moveTime = 10;
         this.baseStats.permissiveTerrain = [
             'Floor',

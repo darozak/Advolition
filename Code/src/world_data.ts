@@ -13,7 +13,7 @@ class GaiaData extends WorldData {
         var effects: Stats;
 
         effects = new Stats();
-        effects.scanPower = 0;
+        effects.scanCost = 0;
         effects.scanRange = 4;
         effects.scanTime = 8;
         this.items.push(new Item('Scanner', effects));

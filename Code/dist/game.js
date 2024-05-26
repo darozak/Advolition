@@ -158,7 +158,7 @@ class Game {
             topTextFrame += lineSpacing * 1.5;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.robotData[robotID].adjustedStats.value, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Net Worth', this.robotData[robotID].adjustedStats.credits, statRGB);
             topTextFrame += lineSpacing * 1.5;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
             topTextFrame += lineSpacing;
@@ -169,17 +169,17 @@ class Game {
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
             // Display attributes
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Power', this.robotData[robotID].adjustedStats.movePower, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].adjustedStats.moveCost, statRGB);
             topTextFrame += lineSpacing;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Power', this.robotData[robotID].adjustedStats.scanPower, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].adjustedStats.scanCost, statRGB);
             topTextFrame += lineSpacing;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
             topTextFrame += lineSpacing;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Power', this.robotData[robotID].adjustedStats.offensePower, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Cost', this.robotData[robotID].adjustedStats.offenseCost, statRGB);
             topTextFrame += lineSpacing;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
             topTextFrame += lineSpacing;
@@ -187,7 +187,7 @@ class Game {
             topTextFrame += lineSpacing;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Power', this.robotData[robotID].adjustedStats.defensePower, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Cost', this.robotData[robotID].adjustedStats.defenseCost, statRGB);
             topTextFrame += lineSpacing;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
             topTextFrame += lineSpacing;
@@ -305,7 +305,7 @@ class Game {
         }
     }
     requestAttack(robotID, action) {
-        let powerCost = this.robotData[robotID].adjustedStats.offensePower;
+        let powerCost = this.robotData[robotID].adjustedStats.offenseCost;
         if (this.drainPower(this.robotData[robotID], powerCost)) {
             let delay = -this.robotData[robotID].adjustedStats.offenseTime;
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
@@ -334,7 +334,7 @@ class Game {
             let attackerStats = this.robotData[action.robotID].adjustedStats;
             let defenderStats = this.robotData[targetID].adjustedStats;
             // Apply shields if target has enough power to defend itself.
-            if (this.drainPower(this.robotData[targetID], defenderStats.defensePower)) {
+            if (this.drainPower(this.robotData[targetID], defenderStats.defenseCost)) {
                 if (attackerStats.kineticDamage > defenderStats.kineticDefense)
                     damage += attackerStats.kineticDamage - defenderStats.kineticDefense;
                 if (attackerStats.thermalDamage > defenderStats.thermalDefense)
@@ -350,7 +350,7 @@ class Game {
         }
     }
     requestMove(robotID, action) {
-        let powerCost = this.robotData[robotID].adjustedStats.movePower;
+        let powerCost = this.robotData[robotID].adjustedStats.moveCost;
         let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
         // Is there power for this action?
         if (this.drainPower(this.robotData[robotID], powerCost)) {
@@ -475,7 +475,7 @@ class Game {
         this.equipItems(this.robotData[event.robotID]);
     }
     requestScan(robotID, call) {
-        let powerCost = this.robotData[robotID].adjustedStats.scanPower;
+        let powerCost = this.robotData[robotID].adjustedStats.scanCost;
         // Is there power for this action?
         if (this.drainPower(this.robotData[robotID], powerCost)) {
             // Set scan range and delay.
