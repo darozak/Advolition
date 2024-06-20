@@ -10,31 +10,32 @@ class GaiaData extends WorldData {
         this.tiles.push(new Tile("Door", "+", new Vector(12,3), false, 0.0));
 
         // Create Items
-        var effects: Attributes;
+        var stats: Stats;
 
-        effects = new Attributes();
-        effects.scanCost = 0;
-        effects.scanRange = 4;
-        effects.scanTime = 8;
-        this.items.push(new Item('Scanner', effects));
+        stats = new Stats();
+        stats.scanCost = 0;
+        stats.scanRange = 4;
+        stats.scanTime = 8;
+        this.items.push(new Item('Scanner', stats));
 
-        effects = new Attributes();
-        effects.thermalDamage = 4;
-        this.items.push(new Item('Blaster', effects));
+        stats = new Stats();
+        stats.attack[1] = 4;
+        this.items.push(new Item('Blaster', stats));
 
-        effects = new Attributes();
-        effects.thermalDefense = 1;
-        this.items.push(new Item('Shield', effects));
+        stats = new Stats();
+        stats.shield[1] = 1;
+        this.items.push(new Item('Shield', stats));
 
-        effects = new Attributes();
-        effects.HPs = 60;
-        effects.maxHPs = 60;
-        this.items.push(new Item('Armor', effects));
+        stats = new Stats();
+        stats.armor[0] = 60;
+        stats.armor[1] = 60;
+        stats.armor[2] = 60;
+        this.items.push(new Item('Armor', stats));
 
-        effects = new Attributes();
-        effects.power = 2000;
-        effects.maxPower = 2000;
-        this.items.push(new Item('Battery', effects));
+        stats = new Stats();
+        stats.power = 2000;
+        stats.maxPower = 2000;
+        this.items.push(new Item('Battery', stats));
 
         console.log(this.items);
 

@@ -1,7 +1,7 @@
 "use strict";
 class RobotData {
-    baseStats = new Attributes();
-    adjustedStats = new Attributes();
+    baseStats = new Stats();
+    stats = new Stats();
     items = [];
     lastScan = 0;
     robotID;
@@ -18,7 +18,7 @@ class RobotData {
         this.name = name;
         this.isDisplayed = isDisplayed;
         this.baseStats.copy(world.robots[0].baseStats);
-        this.adjustedStats.copy(world.robots[0].adjustedStats);
+        this.stats.copy(world.robots[0].stats);
         this.items = structuredClone(world.robots[0].items);
     }
 }

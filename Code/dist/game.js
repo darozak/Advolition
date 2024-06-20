@@ -158,40 +158,48 @@ class Game {
             topTextFrame += lineSpacing * 1.5;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Net Worth', this.robotData[robotID].adjustedStats.credits, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Net Worth', this.robotData[robotID].stats.credits, statRGB);
             topTextFrame += lineSpacing * 1.5;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
             topTextFrame += lineSpacing;
-            let hps = this.robotData[robotID].adjustedStats.HPs + '/' + this.robotData[robotID].adjustedStats.maxHPs;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'HPs', hps, this.hpsColor[robotID].value());
-            topTextFrame += lineSpacing;
-            let power = this.robotData[robotID].adjustedStats.power + '/' + this.robotData[robotID].adjustedStats.maxPower;
+            let power = this.robotData[robotID].stats.power + '/' + this.robotData[robotID].stats.maxPower;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
             // Display attributes
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].adjustedStats.moveCost, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].stats.moveCost, statRGB);
             topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].adjustedStats.moveTime, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].stats.moveTime, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].adjustedStats.scanCost, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].stats.scanCost, statRGB);
             topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].adjustedStats.scanTime, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].stats.scanTime, statRGB);
             topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].adjustedStats.scanRange, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].stats.scanRange, statRGB);
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Cost', this.robotData[robotID].adjustedStats.offenseCost, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Cost', this.robotData[robotID].stats.attackCost, statRGB);
             topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Offense Time', this.robotData[robotID].adjustedStats.offenseTime, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Damage', this.robotData[robotID].adjustedStats.kineticDamage, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Damage', this.robotData[robotID].adjustedStats.thermalDamage, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Time', this.robotData[robotID].stats.attackTime, statRGB);
+            for (var i = 0; i < this.robotData[robotID].stats.elements.length; i++) {
+                topTextFrame += lineSpacing;
+                let attack = this.robotData[robotID].stats.attack[i];
+                let element = this.robotData[robotID].stats.elements[i];
+                this.paper.showStatus(centerTextFrame, topTextFrame, element + " Attack", attack, this.hpsColor[robotID].value());
+            }
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Defense Cost', this.robotData[robotID].adjustedStats.defenseCost, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Shield Cost', this.robotData[robotID].stats.shieldCost, statRGB);
+            for (var i = 0; i < this.robotData[robotID].stats.elements.length; i++) {
+                topTextFrame += lineSpacing;
+                let shield = this.robotData[robotID].stats.shield[i];
+                let element = this.robotData[robotID].stats.elements[i];
+                this.paper.showStatus(centerTextFrame, topTextFrame, element + " Shield", shield, this.hpsColor[robotID].value());
+            }
             topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Kinetic Defense', this.robotData[robotID].adjustedStats.kineticDefense, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Thermal Defense', this.robotData[robotID].adjustedStats.thermalDefense, statRGB);
+            for (var i = 0; i < this.robotData[robotID].stats.elements.length; i++) {
+                topTextFrame += lineSpacing;
+                let armor = this.robotData[robotID].stats.armor[i];
+                let element = this.robotData[robotID].stats.elements[i];
+                this.paper.showStatus(centerTextFrame, topTextFrame, element + " Armor", armor, this.hpsColor[robotID].value());
+            }
             // Print log.
             topTextFrame += lineSpacing * 2;
             this.paper.printLog(this.robotData[robotID], leftDisplayFrame + 40, topTextFrame);
@@ -248,11 +256,11 @@ class Game {
             topTextFrame = topDisplayFrame + mapFrameSize + 20;
             centerTextFrame = mapFrameSize / 2 + leftMapFrame;
             this.paper.drawListItem(centerTextFrame, topTextFrame, 'Passable Terrain', [120, 120, 120]);
-            for (var i = 0; i < this.robotData[robotID].adjustedStats.permissiveTerrain.length; i++) {
+            for (var i = 0; i < this.robotData[robotID].stats.permissiveTerrain.length; i++) {
                 var color = [180, 180, 180];
                 var text;
                 topTextFrame += lineSpacing;
-                text = this.robotData[robotID].adjustedStats.permissiveTerrain[i];
+                text = this.robotData[robotID].stats.permissiveTerrain[i];
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
             // Display inventory under map.
@@ -305,9 +313,9 @@ class Game {
         }
     }
     requestAttack(robotID, action) {
-        let powerCost = this.robotData[robotID].adjustedStats.offenseCost;
+        let powerCost = this.robotData[robotID].stats.attackCost;
         if (this.drainPower(this.robotData[robotID], powerCost)) {
-            let delay = -this.robotData[robotID].adjustedStats.offenseTime;
+            let delay = -this.robotData[robotID].stats.attackTime;
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
         }
     }
@@ -330,31 +338,63 @@ class Game {
         }
         // Inflict damage on robot if there is one in path.
         if (targetID >= 0) {
-            let damage = 0;
-            let attackerStats = this.robotData[action.robotID].adjustedStats;
-            let defenderStats = this.robotData[targetID].adjustedStats;
+            let damage = [];
+            // let targetRobot = this.robotData[targetID];
+            let attacker = this.robotData[action.robotID];
+            let defender = this.robotData[targetID];
             // Apply shields if target has enough power to defend itself.
-            if (this.drainPower(this.robotData[targetID], defenderStats.defenseCost)) {
-                if (attackerStats.kineticDamage > defenderStats.kineticDefense)
-                    damage += attackerStats.kineticDamage - defenderStats.kineticDefense;
-                if (attackerStats.thermalDamage > defenderStats.thermalDefense)
-                    damage += (attackerStats.thermalDamage - defenderStats.thermalDefense);
+            if (this.drainPower(this.robotData[targetID], defender.stats.shieldCost)) {
+                for (let i = 0; i < defender.stats.elements.length; i++) {
+                    if (attacker.stats.attack[i] > defender.stats.shield[i])
+                        damage.push(attacker.stats.attack[i] - defender.stats.shield[i]);
+                }
             }
             else {
-                damage += attackerStats.kineticDamage + attackerStats.thermalDamage;
+                for (let i = 0; i < defender.stats.elements.length; i++) {
+                    damage.push(attacker.stats.attack[i]);
+                }
             }
             // Apply damage to target robot.
-            this.takeDamage(this.robotData[targetID], damage);
+            // TASK: Need to integrate takeDamage into code here.
+            // this.takeDamage(this.robotData[targetID], damage);
+            for (var i = 0; i < defender.items.length; i++) {
+                if (defender.items[i].isEquipped) {
+                    for (var j = 0; j < defender.stats.elements.length; j++) {
+                        if (damage[j] <= defender.items[i].stats.armor[j]) {
+                            // Item absorbes all remaining damage.
+                            defender.items[i].stats.attack[j] -= damage[j];
+                            defender.stats.attack[j] -= damage[j];
+                            damage[j] = 0;
+                        }
+                        else {
+                            // Item only absorbes some of the remaining damage.
+                            damage[j] -= defender.items[i].stats.attack[j];
+                            defender.stats.attack[j] -= defender.items[i].stats.attack[j];
+                            defender.items[i].stats.attack[j] = 0;
+                        }
+                    }
+                    if (damage[j] > 0) {
+                        // Robot has taken excess damage and is dead.
+                        defender.isAlive = false;
+                        // Drop items
+                        // for(var i = 0; i < robot.items.length; i ++) this.dropItem(robot, i);
+                        while (defender.items.length > 0)
+                            this.dropItem(defender, 0);
+                        // Write to event log.
+                        this.appendToLog(defender, this.gameTime, `dies :(`);
+                    }
+                }
+            }
             // Write to event log.
             this.appendToLog(this.robotData[action.robotID], this.gameTime, `attacks ${this.robotData[targetID].name}`);
         }
     }
     requestMove(robotID, action) {
-        let powerCost = this.robotData[robotID].adjustedStats.moveCost;
+        let powerCost = this.robotData[robotID].stats.moveCost;
         let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
         // Is there power for this action?
         if (this.drainPower(this.robotData[robotID], powerCost)) {
-            let delay = -this.robotData[robotID].adjustedStats.moveTime;
+            let delay = -this.robotData[robotID].stats.moveTime;
             delay *= this.robotData[robotID].pos.getDistanceTo(destination);
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
@@ -368,7 +408,7 @@ class Game {
         var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
         var tileID = this.arena.tileMap[destination.x][destination.y];
         var tileName = this.world.tiles[tileID].name;
-        let permissiveTerrainIndex = this.robotData[action.robotID].adjustedStats.permissiveTerrain.findLastIndex(d => d === tileName);
+        let permissiveTerrainIndex = this.robotData[action.robotID].stats.permissiveTerrain.findLastIndex(d => d === tileName);
         // Can the robot move into this tile?
         if (permissiveTerrainIndex >= 0) {
             // Change position in arena.
@@ -383,7 +423,7 @@ class Game {
             // Take damage if you run into something.
             // Wtite to event log.
             this.appendToLog(this.robotData[action.robotID], this.gameTime, `collides with obstical`);
-            this.takeDamage(this.robotData[action.robotID], 10);
+            // this.takeDamage(this.robotData[action.robotID], 10);
             this.hpsColor[action.robotID].pulse();
             this.chassisColor[action.robotID].pulse();
         }
@@ -451,7 +491,7 @@ class Game {
     }
     requestTake(robotID, action) {
         // Does the robot have enough room in its inventory?
-        if (this.robotData[robotID].adjustedStats.maxCarry > this.robotData[robotID].items.length) {
+        if (this.robotData[robotID].stats.maxCarry > this.robotData[robotID].items.length) {
             // Does item exist in tile?
             let location = this.robotData[robotID].pos;
             let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
@@ -475,12 +515,12 @@ class Game {
         this.equipItems(this.robotData[event.robotID]);
     }
     requestScan(robotID, call) {
-        let powerCost = this.robotData[robotID].adjustedStats.scanCost;
+        let powerCost = this.robotData[robotID].stats.scanCost;
         // Is there power for this action?
         if (this.drainPower(this.robotData[robotID], powerCost)) {
             // Set scan range and delay.
-            call.range = this.robotData[robotID].adjustedStats.scanRange;
-            let delay = -this.robotData[robotID].adjustedStats.scanTime;
+            call.range = this.robotData[robotID].stats.scanRange;
+            let delay = -this.robotData[robotID].stats.scanTime;
             // Add action to event queue.
             this.events.push(new GameEvent(robotID, call, delay + this.gameTime));
             // Animate display elements.
@@ -491,7 +531,7 @@ class Game {
     }
     resolveScan(event) {
         // Set rane and perform scan.        
-        let range = this.robotData[event.robotID].adjustedStats.scanRange;
+        let range = this.robotData[event.robotID].stats.scanRange;
         this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         // Write to event log.
         this.appendToLog(this.robotData[event.robotID], this.gameTime, "scans the area");
@@ -510,14 +550,14 @@ class Game {
     }
     equipItems(robot) {
         // Unequip any items over the max.
-        for (var i = robot.adjustedStats.maxEquip; i < robot.items.length; i++) {
+        for (var i = robot.stats.maxEquip; i < robot.items.length; i++) {
             robot.items[i].isEquipped = false;
         }
-        // Recompute attributes based on equippws items.
-        robot.adjustedStats.copy(robot.baseStats);
+        // Recompute attributes based on equipped items.
+        robot.stats.copy(robot.baseStats);
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isEquipped) {
-                robot.adjustedStats.add(robot.items[i].attributes);
+                robot.stats.add(robot.items[i].stats);
             }
         }
     }
@@ -530,49 +570,21 @@ class Game {
             this.equipItems(robot);
         }
     }
-    takeDamage(robot, damage) {
-        for (var i = 0; i < robot.items.length; i++) {
-            if (robot.items[i].isEquipped) {
-                if (damage <= robot.items[i].attributes.HPs) {
-                    // Item absorbes all remaining damage.
-                    robot.items[i].attributes.HPs -= damage;
-                    robot.adjustedStats.HPs -= damage;
-                    damage = 0;
-                }
-                else {
-                    // Item only absorbes some of the remaining damage.
-                    damage -= robot.items[i].attributes.HPs;
-                    robot.adjustedStats.HPs -= robot.items[i].attributes.HPs;
-                    robot.items[i].attributes.HPs = 0;
-                }
-            }
-        }
-        if (damage > 0) {
-            // Robot has taken excess damage and is dead.
-            robot.isAlive = false;
-            // Drop items
-            // for(var i = 0; i < robot.items.length; i ++) this.dropItem(robot, i);
-            while (robot.items.length > 0)
-                this.dropItem(robot, 0);
-            // Write to event log.
-            this.appendToLog(robot, this.gameTime, `dies :(`);
-        }
-    }
     drainPower(robot, amount) {
         for (var i = 0; i < robot.items.length; i++) {
             // Only take power from active items.
             if (robot.items[i].isEquipped) {
                 // Drain required power from item if there is enough.
-                if (amount <= robot.items[i].attributes.power) {
-                    robot.items[i].attributes.power -= amount;
-                    robot.adjustedStats.power -= amount;
+                if (amount <= robot.items[i].stats.power) {
+                    robot.items[i].stats.power -= amount;
+                    robot.stats.power -= amount;
                     amount = 0;
                     // Otherwise drain what is available from that item.
                 }
                 else {
-                    amount -= robot.items[i].attributes.power;
-                    robot.adjustedStats.power -= robot.items[i].attributes.power;
-                    robot.items[i].attributes.power = 0;
+                    amount -= robot.items[i].stats.power;
+                    robot.stats.power -= robot.items[i].stats.power;
+                    robot.items[i].stats.power = 0;
                 }
             }
         }
@@ -581,13 +593,13 @@ class Game {
     }
     addPower(robot, amount) {
         for (var i = 0; i < robot.items.length; i++) {
-            if (amount + robot.items[i].attributes.power <= robot.items[i].attributes.maxPower) {
-                robot.items[i].attributes.power += amount;
+            if (amount + robot.items[i].stats.power <= robot.items[i].stats.maxPower) {
+                robot.items[i].stats.power += amount;
                 amount = 0;
             }
             else {
-                amount -= robot.items[i].attributes.maxPower - robot.items[i].attributes.power;
-                robot.items[i].attributes.power = robot.items[i].attributes.maxPower;
+                amount -= robot.items[i].stats.maxPower - robot.items[i].stats.power;
+                robot.items[i].stats.power = robot.items[i].stats.maxPower;
             }
         }
         return (amount == 0);

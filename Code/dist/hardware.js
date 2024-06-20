@@ -1,41 +1,50 @@
 "use strict";
 class Item {
     name;
-    attributes;
+    stats;
     timeToEquip = 10;
     isEquipped = false;
     constructor(name, effects) {
         this.name = name;
-        this.attributes = effects;
+        this.stats = effects;
     }
 }
-class Attributes {
+class Stats {
     credits = 0;
-    HPs = 0;
-    maxHPs = 0;
     power = 0;
     maxPower = 0;
+    elements = [];
+    armor = [];
     maxCarry = 0;
     maxEquip = 0;
     scanCost = 0;
     scanTime = 0;
     scanRange = 0;
-    offenseCost = 0;
-    offenseTime = 0;
-    kineticDamage = 0;
-    thermalDamage = 0;
-    defenseCost = 0;
-    kineticDefense = 0;
-    thermalDefense = 0;
+    attackCost = 0;
+    attackTime = 0;
+    attack = [];
+    shieldCost = 0;
+    shield = [];
     moveCost = 0;
     moveTime = 0;
     permissiveTerrain = [];
-    backgroundPower = 0;
-    constructor() { }
+    constructor() {
+        this.elements.push('Kinetic');
+        this.elements.push('Thermal');
+        this.elements.push('Electrical');
+        for (var i = 0; i < this.elements.length; i++) {
+            this.armor.push(0);
+            this.shield.push(0);
+            this.attack.push(0);
+        }
+    }
     add(stats) {
         this.credits += stats.credits;
-        this.HPs += stats.HPs;
-        this.maxHPs += stats.maxHPs;
+        for (var i = 0; i < this.elements.length; i++) {
+            this.armor[i] += stats.armor[i];
+            this.shield[i] += stats.shield[i];
+            this.attack[i] += stats.attack[i];
+        }
         this.maxCarry += stats.maxCarry;
         this.maxEquip += stats.maxEquip;
         this.power += stats.power;
@@ -43,47 +52,40 @@ class Attributes {
         this.scanCost += stats.scanCost;
         this.scanTime += stats.scanTime;
         this.scanRange += stats.scanRange;
-        this.offenseCost += stats.offenseCost;
-        this.offenseTime += stats.offenseTime;
-        this.kineticDamage += stats.kineticDamage;
-        this.thermalDamage += stats.thermalDamage;
-        this.defenseCost += stats.defenseCost;
-        this.kineticDefense += stats.kineticDefense;
-        this.thermalDefense += stats.thermalDefense;
+        this.attackCost += stats.attackCost;
+        this.attackTime += stats.attackTime;
+        this.shieldCost += stats.shieldCost;
         this.moveCost += stats.moveCost;
         this.moveTime += stats.moveTime;
         for (var i = 0; i < stats.permissiveTerrain.length; i++) {
             this.permissiveTerrain.push(stats.permissiveTerrain[i]);
         }
-        this.backgroundPower += stats.backgroundPower;
     }
     copy(stats) {
         this.credits = stats.credits;
-        this.maxHPs = stats.maxHPs;
-        this.HPs = stats.HPs;
         this.maxPower = stats.maxPower;
         this.power = stats.power;
+        for (var i = 0; i < this.elements.length; i++) {
+            this.armor[i] = stats.armor[i];
+            this.shield[i] = stats.shield[i];
+            this.attack[i] = stats.attack[i];
+        }
         this.maxCarry = stats.maxCarry;
         this.maxEquip = stats.maxEquip;
         this.scanCost = stats.scanCost;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
-        this.offenseCost = stats.offenseCost;
-        this.offenseTime = stats.offenseTime;
-        this.kineticDamage = stats.kineticDamage;
-        this.thermalDamage = stats.thermalDamage;
-        this.defenseCost = stats.defenseCost;
-        this.kineticDefense = stats.kineticDefense;
-        this.thermalDefense = stats.thermalDefense;
+        this.attackCost = stats.attackCost;
+        this.attackTime = stats.attackTime;
+        this.shieldCost = stats.shieldCost;
         this.moveCost = stats.moveCost;
         this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
-        this.backgroundPower = stats.backgroundPower;
     }
 }
 class Robot {
-    baseStats = new Attributes();
-    adjustedStats = new Attributes();
+    baseStats = new Stats();
+    stats = new Stats();
     items = [];
     constructor() {
         this.baseStats.maxCarry = 4;
@@ -94,14 +96,13 @@ class Robot {
             'Floor',
             'Door'
         ];
-        this.baseStats.backgroundPower = 0;
     }
 }
 class Humanoid extends Robot {
     constructor(items) {
         super();
         var ID;
-        this.adjustedStats.copy(this.baseStats);
+        this.stats.copy(this.baseStats);
         // Add items
         ID = items.findLastIndex(d => d.name === "Battery");
         if (ID >= 0)
