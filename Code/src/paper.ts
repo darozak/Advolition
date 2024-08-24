@@ -62,7 +62,7 @@ class Paper {
         this.ctx.drawImage(this.image,sx,sy,sh,sw, rx, ry, this.renderTileSize, this.renderTileSize);
     }
 
-    showStatus(centerFrame: number, topFrame: number, title: string, value: any, valueRGB: number[]) {
+    showStatus(centerFrame: number, topFrame: number, title: string, value: number, valueRGB: number[]) {
         this.ctx.font = '12px Arial';
 
         this.ctx.fillStyle = 'rgb(120,120,120)';
@@ -71,7 +71,7 @@ class Paper {
 
         this.ctx.fillStyle = this.rgbStringFromArray(valueRGB);
         this.ctx.textAlign = 'left';
-        this.ctx.fillText(value, centerFrame + 5, topFrame);
+        this.ctx.fillText(value.toString(), centerFrame + 5, topFrame);
     }
 
     drawListItem(centerFrame: number, topFrame: number, name: string, rgb: number[]) {

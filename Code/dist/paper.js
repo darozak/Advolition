@@ -55,7 +55,7 @@ class Paper {
         this.ctx.fillText(title, centerFrame - 5, topFrame);
         this.ctx.fillStyle = this.rgbStringFromArray(valueRGB);
         this.ctx.textAlign = 'left';
-        this.ctx.fillText(value, centerFrame + 5, topFrame);
+        this.ctx.fillText(value.toString(), centerFrame + 5, topFrame);
     }
     drawListItem(centerFrame, topFrame, name, rgb) {
         this.ctx.font = '12px Arial';

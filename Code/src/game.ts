@@ -184,7 +184,8 @@ class Game {
             let centerTextFrame = leftDisplayFrame + 120;
             let topTextFrame = topDisplayFrame + 10;
 
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
+            // this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot ID', robotID, statRGB);
 
             topTextFrame += lineSpacing * 1.5;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
@@ -193,11 +194,13 @@ class Game {
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Net Worth', this.robotData[robotID].stats.credits, statRGB);
 
             topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB);
+            topTextFrame += lineSpacing;
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB);
 
-            topTextFrame += lineSpacing; 
+            topTextFrame += lineSpacing * 1.5; 
             let power: string = this.robotData[robotID].stats.generatorPower + '/' + this.robotData[robotID].stats.batteryCapacity;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
+            this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', this.robotData[robotID].stats.generatorPower, this.powerColor[robotID].value());
 
             // Display attributes
             topTextFrame += lineSpacing * 1.5;
