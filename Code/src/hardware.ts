@@ -13,8 +13,9 @@ class Item {
 
 class Stats {
     credits = 0;
-    power = 0;
-    maxPower = 0;
+    generatorPower = 0;
+    batteryPower = 0;
+    batteryCapacity = 0;
 
     elements: string[] = [];
 
@@ -41,7 +42,7 @@ class Stats {
     constructor() {
         this.elements.push('Kinetic');
         this.elements.push('Thermal');
-        this.elements.push('Electrical');
+        this.elements.push('ElectroMagnetic');
 
         for(var i = 0; i < this.elements.length ; i ++) {
             this.armor.push(0);
@@ -63,8 +64,8 @@ class Stats {
         this.maxCarry += stats.maxCarry;
         this.maxEquip += stats.maxEquip;
 
-        this.power += stats.power;
-        this.maxPower += stats.maxPower;
+        this.generatorPower += stats.generatorPower;
+        this.batteryCapacity += stats.batteryCapacity;
 
         this.scanCost += stats.scanCost;
         this.scanTime += stats.scanTime;
@@ -85,8 +86,8 @@ class Stats {
     copy(stats: Stats) {
         this.credits = stats.credits;
 
-        this.maxPower = stats.maxPower;
-        this.power = stats.power;
+        this.batteryCapacity = stats.batteryCapacity;
+        this.generatorPower = stats.generatorPower;
 
         for(var i = 0; i < this.elements.length ; i ++) {
             this.armor[i] = stats.armor[i];

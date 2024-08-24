@@ -25,8 +25,8 @@ class GaiaData extends WorldData {
         stats.armor[2] = 60;
         this.items.push(new Item('Armor', stats));
         stats = new Stats();
-        stats.power = 2000;
-        stats.maxPower = 2000;
+        stats.generatorPower = 2000;
+        stats.batteryCapacity = 2000;
         this.items.push(new Item('Battery', stats));
         console.log(this.items);
         // Create New Robot Models

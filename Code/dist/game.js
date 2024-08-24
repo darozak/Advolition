@@ -162,7 +162,7 @@ class Game {
             topTextFrame += lineSpacing * 1.5;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Position', this.robotData[robotID].pos.print(), statRGB);
             topTextFrame += lineSpacing;
-            let power = this.robotData[robotID].stats.power + '/' + this.robotData[robotID].stats.maxPower;
+            let power = this.robotData[robotID].stats.generatorPower + '/' + this.robotData[robotID].stats.batteryCapacity;
             this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', power, this.powerColor[robotID].value());
             // Display attributes
             topTextFrame += lineSpacing * 1.5;
@@ -417,7 +417,7 @@ class Game {
             // Change position in stats.
             this.robotData[action.robotID].pos = destination;
             // Write to event log.
-            this.appendToLog(this.robotData[action.robotID], this.gameTime, `moves to ${destination.print()}`);
+            this.appendToLog(this.robotData[action.robotID], this.gameTime, `runs to ${destination.print()}`);
         }
         else {
             // Take damage if you run into something.
@@ -575,16 +575,16 @@ class Game {
             // Only take power from active items.
             if (robot.items[i].isEquipped) {
                 // Drain required power from item if there is enough.
-                if (amount <= robot.items[i].stats.power) {
-                    robot.items[i].stats.power -= amount;
-                    robot.stats.power -= amount;
+                if (amount <= robot.items[i].stats.generatorPower) {
+                    robot.items[i].stats.generatorPower -= amount;
+                    robot.stats.generatorPower -= amount;
                     amount = 0;
                     // Otherwise drain what is available from that item.
                 }
                 else {
-                    amount -= robot.items[i].stats.power;
-                    robot.stats.power -= robot.items[i].stats.power;
-                    robot.items[i].stats.power = 0;
+                    amount -= robot.items[i].stats.generatorPower;
+                    robot.stats.generatorPower -= robot.items[i].stats.generatorPower;
+                    robot.items[i].stats.generatorPower = 0;
                 }
             }
         }
@@ -593,13 +593,13 @@ class Game {
     }
     addPower(robot, amount) {
         for (var i = 0; i < robot.items.length; i++) {
-            if (amount + robot.items[i].stats.power <= robot.items[i].stats.maxPower) {
-                robot.items[i].stats.power += amount;
+            if (amount + robot.items[i].stats.generatorPower <= robot.items[i].stats.batteryCapacity) {
+                robot.items[i].stats.generatorPower += amount;
                 amount = 0;
             }
             else {
-                amount -= robot.items[i].stats.maxPower - robot.items[i].stats.power;
-                robot.items[i].stats.power = robot.items[i].stats.maxPower;
+                amount -= robot.items[i].stats.batteryCapacity - robot.items[i].stats.generatorPower;
+                robot.items[i].stats.generatorPower = robot.items[i].stats.batteryCapacity;
             }
         }
         return (amount == 0);
