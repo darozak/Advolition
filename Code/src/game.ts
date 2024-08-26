@@ -26,7 +26,7 @@ class Game {
 
         this.arena = new Arena(this.world, this.robotData);
         this.arena.generateMap();
-        this.paper = new Paper();   
+        this.paper = new Paper(14);   
     } 
 
     addRobot(robot: Program, name: string, isDisplayed: boolean) {
@@ -184,65 +184,55 @@ class Game {
             let centerTextFrame = leftDisplayFrame + 120;
             let topTextFrame = topDisplayFrame + 10;
 
-            // this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot', this.robotData[robotID].name, statRGB);
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot ID', robotID, statRGB);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot ID', robotID, statRGB, true);
 
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB);
+            topTextFrame += lineSpacing * 0.5; 
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB, false);
 
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Net Worth', this.robotData[robotID].stats.credits, statRGB);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Net Worth', this.robotData[robotID].stats.credits, statRGB, false);
 
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB, false);
 
-            topTextFrame += lineSpacing * 1.5; 
+            topTextFrame += lineSpacing * 0.5; 
             let power: string = this.robotData[robotID].stats.generatorPower + '/' + this.robotData[robotID].stats.batteryCapacity;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', this.robotData[robotID].stats.generatorPower, this.powerColor[robotID].value());
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', this.robotData[robotID].stats.generatorPower, this.powerColor[robotID].value(), false);
 
             // Display attributes
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].stats.moveCost, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].stats.moveTime, statRGB);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].stats.moveCost, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].stats.moveTime, statRGB, false);
 
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].stats.scanCost, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].stats.scanTime, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].stats.scanRange, statRGB);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].stats.scanCost, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].stats.scanTime, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].stats.scanRange, statRGB, false);
 
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Cost', this.robotData[robotID].stats.attackCost, statRGB);
-            topTextFrame += lineSpacing;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Time', this.robotData[robotID].stats.attackTime, statRGB);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Cost', this.robotData[robotID].stats.attackCost, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Time', this.robotData[robotID].stats.attackTime, statRGB, false);
 
             for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
-                topTextFrame += lineSpacing;
                 let attack = this.robotData[robotID].stats.attack[i];
                 let element = this.robotData[robotID].stats.elements[i];
-                this.paper.showStatus(centerTextFrame, topTextFrame, element + " Attack", attack, this.hpsColor[robotID].value());
+                topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Attack", attack, this.hpsColor[robotID].value(), false);
             }
 
-            topTextFrame += lineSpacing * 1.5;
-            this.paper.showStatus(centerTextFrame, topTextFrame, 'Shield Cost', this.robotData[robotID].stats.shieldCost, statRGB);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Shield Cost', this.robotData[robotID].stats.shieldCost, statRGB, false);
 
             for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
-                topTextFrame += lineSpacing;
                 let shield = this.robotData[robotID].stats.shield[i];
                 let element = this.robotData[robotID].stats.elements[i];
-                this.paper.showStatus(centerTextFrame, topTextFrame, element + " Shield", shield, this.hpsColor[robotID].value());
+                topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Shield", shield, this.hpsColor[robotID].value(), false);
             }
-            topTextFrame += lineSpacing;
             
             for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
-                topTextFrame += lineSpacing;
                 let armor = this.robotData[robotID].stats.armor[i];
                 let element = this.robotData[robotID].stats.elements[i];
-                this.paper.showStatus(centerTextFrame, topTextFrame, element + " Armor", armor, this.hpsColor[robotID].value());
+                topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Armor", armor, this.hpsColor[robotID].value(), false);
             }
             // Print log.
             topTextFrame += lineSpacing * 2;

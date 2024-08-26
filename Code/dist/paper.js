@@ -8,12 +8,13 @@ class Paper {
     image;
     ctx;
     lineSpacing = 14;
-    constructor() {
+    constructor(lineSpacing) {
         this.canvas = document.getElementById('canvas');
         this.image = document.getElementById('sprites');
         this.CANVAS_HEIGHT = this.canvas.height = 600;
         this.CANVAS_WIDTH = this.canvas.width = 1500;
         this.ctx = this.canvas.getContext('2d');
+        this.lineSpacing = lineSpacing;
     }
     printLog(robot, centerFrame, topFrame) {
         this.ctx.font = '12px Arial';
@@ -48,14 +49,18 @@ class Paper {
         this.ctx.globalAlpha = alpha;
         this.ctx.drawImage(this.image, sx, sy, sh, sw, rx, ry, this.renderTileSize, this.renderTileSize);
     }
-    showStatus(centerFrame, topFrame, title, value, valueRGB) {
-        this.ctx.font = '12px Arial';
-        this.ctx.fillStyle = 'rgb(120,120,120)';
-        this.ctx.textAlign = 'right';
-        this.ctx.fillText(title, centerFrame - 5, topFrame);
-        this.ctx.fillStyle = this.rgbStringFromArray(valueRGB);
-        this.ctx.textAlign = 'left';
-        this.ctx.fillText(value.toString(), centerFrame + 5, topFrame);
+    showStatus(centerFrame, topFrame, title, value, valueRGB, forceDisplay) {
+        if (value > 0 || forceDisplay) {
+            this.ctx.font = '12px Arial';
+            this.ctx.fillStyle = 'rgb(120,120,120)';
+            this.ctx.textAlign = 'right';
+            this.ctx.fillText(title, centerFrame - 5, topFrame);
+            this.ctx.fillStyle = this.rgbStringFromArray(valueRGB);
+            this.ctx.textAlign = 'left';
+            this.ctx.fillText(value.toString(), centerFrame + 5, topFrame);
+            topFrame += this.lineSpacing;
+        }
+        return topFrame;
     }
     drawListItem(centerFrame, topFrame, name, rgb) {
         this.ctx.font = '12px Arial';
