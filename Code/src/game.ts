@@ -1,5 +1,7 @@
 // import { Arena } from "./arena";
 
+// Start simplifying the game (241205).
+
 class Game {
     gameTime: number;
     world: WorldData;
