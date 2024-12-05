@@ -12,7 +12,7 @@ class Item {
 }
 
 class Stats {
-    credits = 0;
+    worth = 0;
     generatorPower = 0;
     batteryPower = 0;
     batteryCapacity = 0;
@@ -53,7 +53,7 @@ class Stats {
     }
 
     add(stats: Stats) {
-        this.credits += stats.credits;
+        this.worth += stats.worth;
 
         for(var i = 0; i < this.elements.length; i ++) {
             this.armor[i] += stats.armor[i];
@@ -81,10 +81,10 @@ class Stats {
         for(var i = 0; i < stats.permissiveTerrain.length; i ++) {
             this.permissiveTerrain.push(stats.permissiveTerrain[i]);
         }
-    }
+    } 
 
     copy(stats: Stats) {
-        this.credits = stats.credits;
+        this.worth = stats.worth;
 
         this.batteryCapacity = stats.batteryCapacity;
         this.generatorPower = stats.generatorPower;
