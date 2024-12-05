@@ -13,6 +13,8 @@ class Item {
 
 class Stats {
     worth = 0;
+    bulk = 0;
+
     generatorPower = 0;
     batteryPower = 0;
     batteryCapacity = 0;
@@ -54,6 +56,7 @@ class Stats {
 
     add(stats: Stats) {
         this.worth += stats.worth;
+        this.bulk += stats.bulk;
 
         for(var i = 0; i < this.elements.length; i ++) {
             this.armor[i] += stats.armor[i];
@@ -85,6 +88,7 @@ class Stats {
 
     copy(stats: Stats) {
         this.worth = stats.worth;
+        this.bulk = stats.bulk;
 
         this.batteryCapacity = stats.batteryCapacity;
         this.generatorPower = stats.generatorPower;

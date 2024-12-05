@@ -25,7 +25,7 @@ Both robots and items share the same set of traits. Generally speaking, a robot'
 (To Do) A robot can cary up to four items.
 
 ## Bulk
-(To Do) Every item has a bulk associated with it. This represents how combersome it is to carry and use the item. The robot's bulk is the sum of bulks for the items that it's carying.
+Every item has a bulk associated with it. This represents how cumbersome it is to carry and use the item. The robot's bulk is the sum of bulks for the items that it's carying.
 
 (To Do) This cumulative bulk affects the time it takes a robot to complete different actions. For example, the more bulk that a robot is carying, the longer it will take the robot to move, attack, and scan.
 
@@ -44,7 +44,7 @@ When a robot is removed from the game, it drops all its items in the grid space 
 The ammount of damage they block in each category is the sum of the defense attributes for the items that they're carrying.
 
 ## Worth
-(To Do) Each item has a worth associated with it. The robot's worth is the sum of all the objects that it's carrying. 
+Each item has a worth associated with it. The robot's worth is the sum of all the objects that it's carrying. 
 
 (To Do) At the end of the game the worth of all items on a robots base tile (to include the robot itself) are summed and the player with the most accumulated worth wins the game.
 
