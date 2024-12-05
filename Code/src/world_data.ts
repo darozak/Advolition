@@ -14,26 +14,31 @@ class GaiaData extends WorldData {
         var stats: Stats;
 
         stats = new Stats();
+        stats.worth = 10;
         stats.scanCost = 0;
         stats.scanRange = 4;
         stats.scanTime = 8;
         this.items.push(new Item('Scanner', stats));
 
         stats = new Stats();
+        stats.worth = 20;
         stats.attack[1] = 4;
         this.items.push(new Item('Blaster', stats));
 
         stats = new Stats();
+        stats.worth = 5;
         stats.shield[1] = 1;
         this.items.push(new Item('Shield', stats));
 
         stats = new Stats();
+        stats.worth = 6.
         stats.armor[0] = 60;
         stats.armor[1] = 60;
         stats.armor[2] = 60;
         this.items.push(new Item('Armor', stats));
 
         stats = new Stats();
+        stats.worth = 12;
         stats.generatorPower = 2000;
         stats.batteryCapacity = 2000;
         this.items.push(new Item('Battery', stats));
