@@ -530,15 +530,15 @@ class Game {
             // Change position in stats.
             this.robotData[action.robotID].pos = destination;
 
-            // Write to event log.
-            this.appendToLog(this.robotData[action.robotID], this.gameTime, `runs to ${destination.print()}`);
+            // Write to event log
+            this.appendToLog(this.robotData[action.robotID], this.gameTime, `Moves to ${destination.print()}`);
 
             
         } else {
             // Take damage if you run into something.
 
             // Wtite to event log.
-            this.appendToLog(this.robotData[action.robotID], this.gameTime, `collides with obstical`);
+            this.appendToLog(this.robotData[action.robotID], this.gameTime, `Collides with obstical`);
 
             // this.takeDamage(this.robotData[action.robotID], 10);
             this.hpsColor[action.robotID].pulse();            
@@ -573,7 +573,7 @@ class Game {
             this.robotData[event.robotID].items[0].isEquipped = true;
 
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `equips its ${event.action.item}`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `Equips its ${event.action.item}`);
         }
 
         // Equip items and apply mods.
@@ -602,7 +602,7 @@ class Game {
             this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
         
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `unequips its ${event.action.item}`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `Unequips its ${event.action.item}`);
         }
 
         // Equipe items and apply mods.
@@ -657,7 +657,7 @@ class Game {
             this.robotData[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);          
             
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `takes the ${event.action.item}`);
+            this.appendToLog(this.robotData[event.robotID], this.gameTime, `Takes the ${event.action.item}`);
         }
 
         // Equip items and apply mods.
@@ -692,7 +692,7 @@ class Game {
         this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         
         // Write to event log.
-        this.appendToLog(this.robotData[event.robotID], this.gameTime, "scans the area");
+        this.appendToLog(this.robotData[event.robotID], this.gameTime, "Scans the area");
 
         // Animate display elements.
         this.scannerColor[event.robotID].deactivate();
@@ -707,7 +707,7 @@ class Game {
 
     resolveSay(event: GameEvent) {
         // Write to event log.
-        this.appendToLog(this.robotData[event.robotID], this.gameTime, 'says: ' + event.action.message);
+        this.appendToLog(this.robotData[event.robotID], this.gameTime, 'Says: ' + event.action.message);
     }
 
     equipItems(robot: RobotData) {
