@@ -124,8 +124,8 @@ class Robot {
 
     constructor() {
 
-        this.baseStats.maxCarry = 4;
-        this.baseStats.maxEquip = 3;
+        this.baseStats.maxCarry = 8;
+        this.baseStats.maxEquip = 4;
 
         this.baseStats.moveCost = 3;
         this.baseStats.moveTime = 10;

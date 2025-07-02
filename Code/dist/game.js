@@ -161,6 +161,8 @@ class Game {
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Worth', this.robotData[robotID].stats.worth, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.robotData[robotID].stats.bulk, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'MaxCarry', this.robotData[robotID].stats.maxCarry, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'MaxEquip', this.robotData[robotID].stats.maxEquip, statRGB, false);
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB, false);
