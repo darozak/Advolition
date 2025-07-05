@@ -161,17 +161,17 @@ class Game {
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Worth', this.robotData[robotID].stats.worth, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.robotData[robotID].stats.bulk, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'MaxCarry', this.robotData[robotID].stats.maxCarry, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'MaxEquip', this.robotData[robotID].stats.maxEquip, statRGB, false);
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'MaxCarry', this.robotData[robotID].stats.maxCarry, statRGB, false);
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'MaxEquip', this.robotData[robotID].stats.maxEquip, statRGB, false);
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB, false);
-            topTextFrame += lineSpacing * 0.5;
-            let power = this.robotData[robotID].stats.generatorPower + '/' + this.robotData[robotID].stats.batteryCapacity;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', this.robotData[robotID].stats.generatorPower, this.powerColor[robotID].value(), false);
+            // topTextFrame += lineSpacing * 0.5; 
+            // let power: string = this.robotData[robotID].stats.generatorPower + '/' + this.robotData[robotID].stats.batteryCapacity;
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Power', this.robotData[robotID].stats.generatorPower, this.powerColor[robotID].value(), false);
             // Display attributes
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].stats.moveCost, statRGB, false);
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Cost', this.robotData[robotID].stats.moveCost, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].stats.moveTime, statRGB, false);
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].stats.scanCost, statRGB, false);
@@ -311,10 +311,10 @@ class Game {
     }
     requestAttack(robotID, action) {
         let powerCost = this.robotData[robotID].stats.attackCost;
-        if (this.drainPower(this.robotData[robotID], powerCost)) {
-            let delay = -this.robotData[robotID].stats.attackTime;
-            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
-        }
+        // if(this.drainPower(this.robotData[robotID], powerCost)) {
+        let delay = -this.robotData[robotID].stats.attackTime;
+        this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+        // }
     }
     resolveAttack(action) {
         // Map path to target.
@@ -340,17 +340,16 @@ class Game {
             let attacker = this.robotData[action.robotID];
             let defender = this.robotData[targetID];
             // Apply shields if target has enough power to defend itself.
-            if (this.drainPower(this.robotData[targetID], defender.stats.shieldCost)) {
-                for (let i = 0; i < defender.stats.elements.length; i++) {
-                    if (attacker.stats.attack[i] > defender.stats.shield[i])
-                        damage.push(attacker.stats.attack[i] - defender.stats.shield[i]);
-                }
+            // if(this.drainPower(this.robotData[targetID], defender.stats.shieldCost)) {
+            for (let i = 0; i < defender.stats.elements.length; i++) {
+                if (attacker.stats.attack[i] > defender.stats.shield[i])
+                    damage.push(attacker.stats.attack[i] - defender.stats.shield[i]);
             }
-            else {
-                for (let i = 0; i < defender.stats.elements.length; i++) {
-                    damage.push(attacker.stats.attack[i]);
-                }
-            }
+            // } else {
+            //     for(let i = 0; i < defender.stats.elements.length; i ++){
+            //         damage.push(attacker.stats.attack[i]);
+            //     }
+            // }
             // Apply damage to target robot.
             // TASK: Need to integrate takeDamage into code here.
             // this.takeDamage(this.robotData[targetID], damage);
@@ -387,19 +386,19 @@ class Game {
         }
     }
     requestMove(robotID, action) {
-        let powerCost = this.robotData[robotID].stats.moveCost;
+        // let powerCost = this.robotData[robotID].stats.moveCost;
         let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
         // Is there power for this action?
-        if (this.drainPower(this.robotData[robotID], powerCost)) {
-            let delay = -this.robotData[robotID].stats.moveTime;
-            delay *= this.robotData[robotID].pos.getDistanceTo(destination);
-            // Add action to event que.
-            this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
-            // Animate display elements
-            this.coreColor[robotID].activate();
-            this.batteryColor[robotID].activate();
-            this.powerColor[robotID].activate();
-        }
+        // if(this.drainPower(this.robotData[robotID], powerCost)) {
+        let delay = -this.robotData[robotID].stats.moveTime;
+        delay *= this.robotData[robotID].pos.getDistanceTo(destination);
+        // Add action to event que.
+        this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+        // Animate display elements
+        this.coreColor[robotID].activate();
+        this.batteryColor[robotID].activate();
+        this.powerColor[robotID].activate();
+        // }
     }
     resolveMove(action) {
         var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
@@ -514,17 +513,17 @@ class Game {
     requestScan(robotID, call) {
         let powerCost = this.robotData[robotID].stats.scanCost;
         // Is there power for this action?
-        if (this.drainPower(this.robotData[robotID], powerCost)) {
-            // Set scan range and delay.
-            call.range = this.robotData[robotID].stats.scanRange;
-            let delay = -this.robotData[robotID].stats.scanTime;
-            // Add action to event queue.
-            this.events.push(new GameEvent(robotID, call, delay + this.gameTime));
-            // Animate display elements.
-            this.scannerColor[robotID].activate();
-            this.batteryColor[robotID].activate();
-            this.powerColor[robotID].activate();
-        }
+        // if(this.drainPower(this.robotData[robotID], powerCost)) {
+        // Set scan range and delay.
+        call.range = this.robotData[robotID].stats.scanRange;
+        let delay = -this.robotData[robotID].stats.scanTime;
+        // Add action to event queue.
+        this.events.push(new GameEvent(robotID, call, delay + this.gameTime));
+        // Animate display elements.
+        this.scannerColor[robotID].activate();
+        this.batteryColor[robotID].activate();
+        this.powerColor[robotID].activate();
+        // }
     }
     resolveScan(event) {
         // Set rane and perform scan.        
@@ -567,40 +566,38 @@ class Game {
             this.equipItems(robot);
         }
     }
-    drainPower(robot, amount) {
-        for (var i = 0; i < robot.items.length; i++) {
-            // Only take power from active items.
-            if (robot.items[i].isEquipped) {
-                // Drain required power from item if there is enough.
-                if (amount <= robot.items[i].stats.generatorPower) {
-                    robot.items[i].stats.generatorPower -= amount;
-                    robot.stats.generatorPower -= amount;
-                    amount = 0;
-                    // Otherwise drain what is available from that item.
-                }
-                else {
-                    amount -= robot.items[i].stats.generatorPower;
-                    robot.stats.generatorPower -= robot.items[i].stats.generatorPower;
-                    robot.items[i].stats.generatorPower = 0;
-                }
-            }
-        }
-        // Return true if robot has enough power to complete the action.
-        return (amount == 0);
-    }
-    addPower(robot, amount) {
-        for (var i = 0; i < robot.items.length; i++) {
-            if (amount + robot.items[i].stats.generatorPower <= robot.items[i].stats.batteryCapacity) {
-                robot.items[i].stats.generatorPower += amount;
-                amount = 0;
-            }
-            else {
-                amount -= robot.items[i].stats.batteryCapacity - robot.items[i].stats.generatorPower;
-                robot.items[i].stats.generatorPower = robot.items[i].stats.batteryCapacity;
-            }
-        }
-        return (amount == 0);
-    }
+    // drainPower(robot: RobotData, amount: number){
+    //     for(var i = 0; i < robot.items.length; i ++) {
+    //         // Only take power from active items.
+    //         if(robot.items[i].isEquipped) {
+    //             // Drain required power from item if there is enough.
+    //             if(amount <= robot.items[i].stats.generatorPower) {
+    //                 robot.items[i].stats.generatorPower -= amount;
+    //                 robot.stats.generatorPower -= amount;
+    //                 amount = 0;
+    //             // Otherwise drain what is available from that item.
+    //             } else {
+    //                 amount -= robot.items[i].stats.generatorPower;
+    //                 robot.stats.generatorPower -= robot.items[i].stats.generatorPower;
+    //                 robot.items[i].stats.generatorPower = 0;
+    //             }
+    //         }
+    //     }
+    //     // Return true if robot has enough power to complete the action.
+    //     return (amount == 0);
+    // }
+    // addPower(robot: RobotData, amount: number){
+    //     for(var i = 0; i < robot.items.length; i ++) {
+    //         if(amount + robot.items[i].stats.generatorPower <= robot.items[i].stats.batteryCapacity) {
+    //             robot.items[i].stats.generatorPower += amount;
+    //             amount = 0;
+    //         } else {
+    //             amount -= robot.items[i].stats.batteryCapacity - robot.items[i].stats.generatorPower;
+    //             robot.items[i].stats.generatorPower = robot.items[i].stats.batteryCapacity;
+    //         }
+    //     }
+    //     return (amount == 0);
+    // }
     appendToLog(robot, time, entry) {
         robot.logTime.push(time);
         robot.logEntry.push(entry);
