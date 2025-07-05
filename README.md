@@ -22,7 +22,7 @@ Depending on the tile type, a grid space can contain a single robot and any numb
 # Managing Traits
 Both robots and items share the same set of traits. Generally speaking, a robot's traits equal the sum of the corresponding traits for all the items that the robot has equipped.
 
-(To Do) A robot can eqip up to four items and carry up to eight items.
+A robot can eqip up to four items and carry up to eight items.
 
 ## Bulk
 Every item has a bulk associated with it. This represents how cumbersome it is to carry and use the item. The robot's bulk is the sum of bulks for the items that it's carying.
