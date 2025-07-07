@@ -26,7 +26,7 @@ A robot's traits are equal the sum of the traits for all the items that the robo
 
 The robot's worth is equal to the total worth of all the items that it's carying.
 
-(To Do) The more items that a robot is carrying the longer it will take that robot perform an action.
+(To Do) Each item has a bulk value. The more bulk that a robot is carrying, the longer it will take to complete an action.
 
 ## Fighting other robots
 (To Do) Robots cause different amounts of thermal, kinetic, and/or radiation damage when they attack another robot. The ammount of damage they inflict in each of these categories is the sum of the damage attributes for the items that they're carrying.
