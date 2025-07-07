@@ -9,7 +9,7 @@ The only factors that distinguish one robot from another are their programs and 
 You can play the most recent version of the game at https://darozak.github.io/Advolition/
 
 # Exploring the dungeon
-The randomly-generated dungeons are laid out in a grid. Robots use scanners to map the dungeon and locate items.
+Robots use scanners to map randomly generated dungeons and locate items.
 
 Each dungeon grid is comprised of a single tile, which prermits or restricts movement.  
 
@@ -20,9 +20,9 @@ Depending on the tile type, a grid space can contain a single robot and any numb
 The items a player robots are randomly distributed throughout the dungeon at the begining of the game.
 
 # Collecting items
-A robot can carry up to eight items and equip up to four of the items that it's carrying.
+A robot can carry up to eight items and equip up to four of these.
 
-A robot's traits equal the sum of the corresponding traits for all the items that the robot has equipped.
+A robot's traits are equal the sum of the traits for all the items that the robot has equipped.
 
 The robot's worth is equal to the total worth of all the items that it's carying.
 
