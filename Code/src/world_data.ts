@@ -41,12 +41,12 @@ class GaiaData extends WorldData {
         stats.armor[2] = 60;
         this.items.push(new Item('Armor', stats));
 
-        stats = new Stats();
-        stats.worth = 12;
-        stats.bulk = 11;
-        // stats.generatorPower = 2000;
-        // stats.batteryCapacity = 2000;
-        this.items.push(new Item('Battery', stats));
+        // stats = new Stats();
+        // stats.worth = 12;
+        // stats.bulk = 11;
+        // // stats.generatorPower = 2000;
+        // // stats.batteryCapacity = 2000;
+        // this.items.push(new Item('Battery', stats));
 
         console.log(this.items);
 

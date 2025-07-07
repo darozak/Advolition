@@ -139,14 +139,14 @@ class Robot {
         this.stats.copy(this.baseStats);
 
         // Add items
-        ID = items.findLastIndex(d => d.name === "Battery");
-        if(ID >= 0) this.items.push(structuredClone(items[ID]));
+        // ID = items.findLastIndex(d => d.name === "Battery");
+        // if(ID >= 0) this.items.push(structuredClone(items[ID]));
 
         ID = items.findLastIndex(d => d.name === "Blaster");
         if(ID >= 0) this.items.push(structuredClone(items[ID]));
 
-        ID = items.findLastIndex(d => d.name === "Shield");
-        if(ID >= 0) this.items.push(structuredClone(items[ID]));
+        // ID = items.findLastIndex(d => d.name === "Shield");
+        // if(ID >= 0) this.items.push(structuredClone(items[ID]));
 
         ID = items.findLastIndex(d => d.name === "Scanner");
         if(ID >= 0) this.items.push(structuredClone(items[ID]));
