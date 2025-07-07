@@ -211,12 +211,12 @@ class Game {
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].stats.moveTime, statRGB, false);
 
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].stats.scanCost, statRGB, false);
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Cost', this.robotData[robotID].stats.scanCost, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].stats.scanTime, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].stats.scanRange, statRGB, false);
 
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Cost', this.robotData[robotID].stats.attackCost, statRGB, false);
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Cost', this.robotData[robotID].stats.attackCost, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Time', this.robotData[robotID].stats.attackTime, statRGB, false);
 
             for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
@@ -226,7 +226,7 @@ class Game {
             }
 
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Shield Cost', this.robotData[robotID].stats.shieldCost, statRGB, false);
+            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Shield Cost', this.robotData[robotID].stats.shieldCost, statRGB, false);
 
             for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
                 let shield = this.robotData[robotID].stats.shield[i];
@@ -400,7 +400,7 @@ class Game {
     }
 
     requestAttack(robotID: number, action: Action) {
-        let powerCost = this.robotData[robotID].stats.attackCost;
+        // let powerCost = this.robotData[robotID].stats.attackCost;
         
         // if(this.drainPower(this.robotData[robotID], powerCost)) {
             let delay = -this.robotData[robotID].stats.attackTime;
@@ -668,7 +668,7 @@ class Game {
 
     requestScan(robotID: number, call: Action) {
 
-        let powerCost = this.robotData[robotID].stats.scanCost;
+        // let powerCost = this.robotData[robotID].stats.scanCost;
 
         // Is there power for this action?
         // if(this.drainPower(this.robotData[robotID], powerCost)) {

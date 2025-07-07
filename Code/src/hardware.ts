@@ -26,15 +26,15 @@ class Stats {
     maxCarry = 0;
     maxEquip = 0;
 
-    scanCost = 0;
+    // scanCost = 0;
     scanTime = 0;
     scanRange = 0;
 
-    attackCost = 0;
+    // attackCost = 0;
     attackTime = 0;
     attack: number[] = [];
 
-    shieldCost = 0;
+    // shieldCost = 0;
     shield: number[] = [];
 
     // moveCost = 0;
@@ -70,14 +70,14 @@ class Stats {
         // this.generatorPower += stats.generatorPower;
         // this.batteryCapacity += stats.batteryCapacity;
 
-        this.scanCost += stats.scanCost;
+        // this.scanCost += stats.scanCost;
         this.scanTime += stats.scanTime;
         this.scanRange += stats.scanRange;
 
-        this.attackCost += stats.attackCost;
+        // this.attackCost += stats.attackCost;
         this.attackTime += stats.attackTime;
 
-        this.shieldCost += stats.shieldCost;
+        // this.shieldCost += stats.shieldCost;
 
         // this.moveCost += stats.moveCost;
         this.moveTime += stats.moveTime;
@@ -102,14 +102,14 @@ class Stats {
         this.maxCarry = stats.maxCarry;
         this.maxEquip = stats.maxEquip;
 
-        this.scanCost = stats.scanCost;
+        // this.scanCost = stats.scanCost;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
 
-        this.attackCost = stats.attackCost;
+        // this.attackCost = stats.attackCost;
         this.attackTime = stats.attackTime;
 
-        this.shieldCost = stats.shieldCost;
+        // this.shieldCost = stats.shieldCost;
 
         // this.moveCost = stats.moveCost;
         this.moveTime = stats.moveTime;
