@@ -12,22 +12,15 @@ class Item {
 class Stats {
     worth = 0;
     bulk = 0;
-    // generatorPower = 0;
-    // batteryPower = 0;
-    // batteryCapacity = 0;
     elements = [];
     armor = [];
     maxCarry = 0;
     maxEquip = 0;
-    // scanCost = 0;
     scanTime = 0;
     scanRange = 0;
-    // attackCost = 0;
     attackTime = 0;
     attack = [];
-    // shieldCost = 0;
     shield = [];
-    // moveCost = 0;
     moveTime = 0;
     permissiveTerrain = [];
     constructor() {
@@ -50,15 +43,9 @@ class Stats {
         }
         this.maxCarry += stats.maxCarry;
         this.maxEquip += stats.maxEquip;
-        // this.generatorPower += stats.generatorPower;
-        // this.batteryCapacity += stats.batteryCapacity;
-        // this.scanCost += stats.scanCost;
         this.scanTime += stats.scanTime;
         this.scanRange += stats.scanRange;
-        // this.attackCost += stats.attackCost;
         this.attackTime += stats.attackTime;
-        // this.shieldCost += stats.shieldCost;
-        // this.moveCost += stats.moveCost;
         this.moveTime += stats.moveTime;
         for (var i = 0; i < stats.permissiveTerrain.length; i++) {
             this.permissiveTerrain.push(stats.permissiveTerrain[i]);
@@ -67,8 +54,6 @@ class Stats {
     copy(stats) {
         this.worth = stats.worth;
         this.bulk = stats.bulk;
-        // this.batteryCapacity = stats.batteryCapacity;
-        // this.generatorPower = stats.generatorPower;
         for (var i = 0; i < this.elements.length; i++) {
             this.armor[i] = stats.armor[i];
             this.shield[i] = stats.shield[i];
@@ -76,13 +61,9 @@ class Stats {
         }
         this.maxCarry = stats.maxCarry;
         this.maxEquip = stats.maxEquip;
-        // this.scanCost = stats.scanCost;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
-        // this.attackCost = stats.attackCost;
         this.attackTime = stats.attackTime;
-        // this.shieldCost = stats.shieldCost;
-        // this.moveCost = stats.moveCost;
         this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
     }
@@ -94,7 +75,6 @@ class Robot {
     constructor(items) {
         this.baseStats.maxCarry = 8;
         this.baseStats.maxEquip = 4;
-        // this.baseStats.moveCost = 3;
         this.baseStats.moveTime = 10;
         this.baseStats.permissiveTerrain = [
             'Floor',
@@ -103,13 +83,9 @@ class Robot {
         var ID;
         this.stats.copy(this.baseStats);
         // Add items
-        // ID = items.findLastIndex(d => d.name === "Battery");
-        // if(ID >= 0) this.items.push(structuredClone(items[ID]));
         ID = items.findLastIndex(d => d.name === "Blaster");
         if (ID >= 0)
             this.items.push(structuredClone(items[ID]));
-        // ID = items.findLastIndex(d => d.name === "Shield");
-        // if(ID >= 0) this.items.push(structuredClone(items[ID]));
         ID = items.findLastIndex(d => d.name === "Scanner");
         if (ID >= 0)
             this.items.push(structuredClone(items[ID]));
@@ -118,24 +94,6 @@ class Robot {
             this.items.push(structuredClone(items[ID]));
     }
 }
-// class Humanoid extends Robot {
-//     constructor(items: Item[]) {
-//         super(); 
-//         var ID: number; 
-//         this.stats.copy(this.baseStats);
-//         // Add items
-//         ID = items.findLastIndex(d => d.name === "Battery");
-//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
-//         ID = items.findLastIndex(d => d.name === "Blaster");
-//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
-//         ID = items.findLastIndex(d => d.name === "Shield");
-//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
-//         ID = items.findLastIndex(d => d.name === "Scanner");
-//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
-//         ID = items.findLastIndex(d => d.name === "Armor");
-//         if(ID >= 0) this.items.push(structuredClone(items[ID]));    
-//     }
-// }
 class Tile {
     name;
     key;
