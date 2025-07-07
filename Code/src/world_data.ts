@@ -52,7 +52,7 @@ class GaiaData extends WorldData {
 
 
         // Create New Robot Models
-        this.robots[0] = new Humanoid(this.items);
+        this.robots[0] = new Robot(this.items);
         console.log(this.robots[0]);
     }
 }

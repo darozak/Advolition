@@ -122,7 +122,7 @@ class Robot {
     stats = new Stats();
     items: Item[] = [];
 
-    constructor() {
+    constructor(items: Item[]) {
 
         this.baseStats.maxCarry = 8;
         this.baseStats.maxEquip = 4;
@@ -133,14 +133,8 @@ class Robot {
             'Floor',
             'Door'
         ]
-    }
-}
 
-class Humanoid extends Robot {
-
-    constructor(items: Item[]) {
-        super(); 
-        var ID: number; 
+                var ID: number; 
         
         this.stats.copy(this.baseStats);
 
@@ -158,9 +152,35 @@ class Humanoid extends Robot {
         if(ID >= 0) this.items.push(structuredClone(items[ID]));
 
         ID = items.findLastIndex(d => d.name === "Armor");
-        if(ID >= 0) this.items.push(structuredClone(items[ID]));    
+        if(ID >= 0) this.items.push(structuredClone(items[ID])); 
     }
 }
+
+// class Humanoid extends Robot {
+
+//     constructor(items: Item[]) {
+//         super(); 
+//         var ID: number; 
+        
+//         this.stats.copy(this.baseStats);
+
+//         // Add items
+//         ID = items.findLastIndex(d => d.name === "Battery");
+//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
+
+//         ID = items.findLastIndex(d => d.name === "Blaster");
+//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
+
+//         ID = items.findLastIndex(d => d.name === "Shield");
+//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
+
+//         ID = items.findLastIndex(d => d.name === "Scanner");
+//         if(ID >= 0) this.items.push(structuredClone(items[ID]));
+
+//         ID = items.findLastIndex(d => d.name === "Armor");
+//         if(ID >= 0) this.items.push(structuredClone(items[ID]));    
+//     }
+// }
 
 class Tile {
     name: string;
