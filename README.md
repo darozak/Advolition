@@ -4,54 +4,39 @@ Advolition is a roguelike adventure game in which 1-4 players program robots tha
 
 The robots are programmed by creating and uploading JavaScript classes that the game engine uses to determine how each of the machines responds to its environment.
 
-The only factors that distinguish one robot from another are their programs and the items that they find and equip in the dungeon. These items affect the robots' abilities and add their overall scores. The robot with the highest score at the end of the game wins.
-
-I'm creating the game to help teach students how to program in object oriented programming languages like JavaScript.
+The only factors that distinguish one robot from another are their programs and the items that they find and equip in the dungeon. These items affect the robots' abilities and add to their overall wealth. The robot with the highest wealth at the end of the game wins.
 
 You can play the most recent version of the game at https://darozak.github.io/Advolition/
 
-# Navigating the Dungeon
-Dungeons are laid out in a grid. 
+# Exploring the dungeon
+The randomly-generated dungeons are laid out in a grid. Robots use scanners to map the dungeon and locate items.
 
-Each grid space is comprised of a single tile, which prermits or restricts movement.  
+Each dungeon grid is comprised of a single tile, which prermits or restricts movement.  
 
 Some tiles, such as doors, do not restrict movement but they do prevent robots from scanning or attacking through them.
 
 Depending on the tile type, a grid space can contain a single robot and any number of items.
 
-# Managing Traits
-Both robots and items share the same set of traits. Generally speaking, a robot's traits equal the sum of the corresponding traits for all the items that the robot has equipped.
+The items a player robots are randomly distributed throughout the dungeon at the begining of the game.
 
-A robot can eqip up to four items and carry up to eight items.
+# Collecting items
+A robot can carry up to eight items and equip up to four of the items that it's carrying.
 
-## Bulk
-Every item has a bulk associated with it. This represents how cumbersome it is to carry and use the item. The robot's bulk is the sum of bulks for the items that it's carying.
+A robot's traits equal the sum of the corresponding traits for all the items that the robot has equipped.
 
-(To Do) This cumulative bulk affects the time it takes a robot to complete different actions. For example, the more bulk that a robot is carying, the longer it will take the robot to move, attack, and scan.
+The robot's worth is equal to the total worth of all the items that it's carying.
 
-## Thermal, Kinetic, and Radation Damage
-(To Do) Robots cause different amounts of thermal, kinetic, and/or radiation damage when they attack another robot. 
+(To Do) The more items that a robot is carrying the longer it will take that robot perform an action.
 
-The ammount of damage they inflict in each of these categories is the sum of the damage attributes for the items that they're carrying.
+## Fighting other robots
+(To Do) Robots cause different amounts of thermal, kinetic, and/or radiation damage when they attack another robot. The ammount of damage they inflict in each of these categories is the sum of the damage attributes for the items that they're carrying.
 
-(To Do) A robot can sustain up to 50 points of damage before it is killed and removed from the game.  
+(To Do) Robots can also block a certain amount of thermal, kinetic, and/or radiation damage inflected on them by another robot. The ammount of damage they block in each category is the sum of the defense attributes for the items that they're carrying.
 
-When a robot is removed from the game, it drops all its items in the grid space where it died.
-
-## Thermal, Kinetic, and Radiation Defense
-(To Do) Robots can also block or dissopate a certain amount of thermal, kinetic, and/or radiation damage inflected on them by another robot. 
-
-The ammount of damage they block in each category is the sum of the defense attributes for the items that they're carrying.
-
-## Worth
-Each item has a worth associated with it. The robot's worth is the sum of all the objects that it's carrying. 
-
-(To Do) At the end of the game the worth of all items on a robots base tile (to include the robot itself) are summed and the player with the most accumulated worth wins the game.
+(To Do) A robot can sustain up to 50 points of unblocked damage before it's killed and removed from the game. When a robot is removed from the game, it drops all its items in the grid space where it died.
 
 # Winning the Game
-(To Do) Each robot starts the game on their home tile.
-
-(To Do) Robots must ammas as much worth in their home tiles as they can before the timer runs down to zero.  When the timer reaches zero, the robot with the most accumulated worth on its home tile will win, regardless of whether the robot has been killed.
+(To Do) An exit tile is located someplace in the dungeon. When a robot enters an exit tile it will it will automiticallt exit dungeon and be out of the game.  The robot which has the highest worth when it leaves the dungeon wins the game.
 
 ## Programming your robot
 Players program their robots by creating JavaScript classes that tell the robots how to respond to their environments. Every program must have a class definition that extends the Program class, a run function that accepts a scan data object its an argument and returns an action object, and an object declaration that establishes and unnamed instance of the class.
