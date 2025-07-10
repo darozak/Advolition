@@ -67,6 +67,10 @@ class Stats {
         this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
     }
+    getActionTime() {
+        const BASE_DELAY = 10;
+        return this.bulk + BASE_DELAY;
+    }
 }
 class Robot {
     baseStats = new Stats();

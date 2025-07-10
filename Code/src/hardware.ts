@@ -91,9 +91,14 @@ class Stats {
         this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
     } 
+
+    getActionTime() {
+        const BASE_DELAY = 10;
+        return this.bulk + BASE_DELAY;
+    }
 }
 
-class Robot {
+class Robot {   
     baseStats = new Stats();
     stats = new Stats();
     items: Item[] = [];
@@ -123,6 +128,9 @@ class Robot {
         ID = items.findLastIndex(d => d.name === "Armor");
         if(ID >= 0) this.items.push(structuredClone(items[ID])); 
     }
+
+        
+
 }
 
 class Tile {
