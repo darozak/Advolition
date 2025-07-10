@@ -36,7 +36,7 @@ Each item has a bulk value. The more bulk that a robot is carrying, the longer i
 (To Do) A robot can sustain up to 50 points of unblocked damage before it's killed and removed from the game. When a robot is removed from the game, it drops all its items in the grid space where it died.
 
 # Winning the Game
-(To Do) An exit tile is located someplace in the dungeon. When a robot enters an exit tile it will it will automiticallt exit dungeon and be out of the game.  The robot which has the highest worth when it leaves the dungeon wins the game.
+(To Do) The robot begins the game on its home tile. When time runs out, robots will be scored based on the total worth of items located on their home tile to include the robot (assuming it made it back in time) and any items that it is carying.
 
 ## Programming your robot
 Players program their robots by creating JavaScript classes that tell the robots how to respond to their environments. Every program must have a class definition that extends the Program class, a run function that accepts a scan data object its an argument and returns an action object, and an object declaration that establishes and unnamed instance of the class.
