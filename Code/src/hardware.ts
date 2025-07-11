@@ -156,7 +156,6 @@ class WorldData {
     sketch: string[] = [];
     entrances: Vector[] = [];
     tiles: Tile[] = [];
-    // slots: Slot[] = [];
     items: Item[] = [];
     robots: Robot[] = [];
 

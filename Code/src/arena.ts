@@ -153,4 +153,22 @@ class Arena {
                 break;
         }
     }
+
+    getScore(robotID: number) {
+        let score = 0;
+        let nest = this.robots[robotID].nest;
+
+        // Add worth of local robot
+        if(this.robotMap[nest.x][nest.y] >= 0) {
+            score += this.robots[this.robotMap[nest.x][nest.y]].stats.worth;
+        }
+
+        // Add worth of local items
+        let itemCount = this.itemMap[nest.x][nest.y].length;
+        for (let i = 0; i < itemCount; i++) {
+            score += this.itemMap[nest.x][nest.y][i].stats.worth;
+        }
+
+        return score;
+    }
 }

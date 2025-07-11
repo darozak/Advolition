@@ -15,7 +15,6 @@ class GaiaData extends WorldData {
         stats = new Stats();
         stats.worth = 10;
         stats.bulk = 9;
-        // stats.scanCost = 0;
         stats.scanRange = 4;
         stats.scanTime = 8;
         this.items.push(new Item('Scanner', stats));

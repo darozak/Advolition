@@ -31,6 +31,8 @@ class Game {
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID;
         // Locate robot
         this.robotData[robotID].pos = this.arena.placeRobot();
+        // Create nest
+        this.robotData[robotID].nest.setEqualTo(this.robotData[robotID].pos);
         // Equip items
         this.equipItems(this.robotData[robotID]);
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
@@ -156,9 +158,13 @@ class Game {
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB, false);
             topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.arena.getScore(robotID), statRGB, true);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Worth', this.robotData[robotID].stats.worth, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.robotData[robotID].stats.bulk, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Action Time', this.robotData[robotID].stats.getActionTime(), statRGB, false);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Home', this.robotData[robotID].nest.x, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Home', this.robotData[robotID].nest.y, statRGB, false);
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB, false);

@@ -119,7 +119,6 @@ class WorldData {
     sketch = [];
     entrances = [];
     tiles = [];
-    // slots: Slot[] = [];
     items = [];
     robots = [];
     constructor() {

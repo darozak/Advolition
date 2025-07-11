@@ -9,6 +9,7 @@ class RobotData {
     name;
     isDisplayed;
     pos = new Vector(0, 0);
+    nest = new Vector(0, 0);
     sprite = new Vector(23, 35);
     logTime = [];
     logEntry = [];
