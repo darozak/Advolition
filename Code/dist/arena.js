@@ -87,6 +87,8 @@ class Arena {
             x = rng.getUniformInt(0, this.world.size.x - 1);
             y = rng.getUniformInt(0, this.world.size.y - 1);
         }
+        let tileID = this.world.tiles.findLastIndex(d => d.key === '@');
+        this.tileMap[x][y] = tileID;
         return new Vector(x, y);
     }
     scan(pov, scanRadius, scan, scanTime) {

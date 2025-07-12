@@ -26,9 +26,8 @@ function runGame() {
     for (var i = 0; i < robotCodes.length; i++) {
         if (robotCodes[i] != 'Empty') {
             game.addRobot(eval(robotCodes[0]), `Robot ${i + 1}`, true);
-        }
-        else {
-            game.addRobot(new Target(), `Robot ${i + 1}`, false);
+            // } else {
+            //   game.addRobot(new Target(), `Robot ${i + 1}`, false);
         }
     }
     // Game animation loop. The interval sets that animation frame rate in ms.

@@ -8,6 +8,7 @@ class GaiaData extends WorldData {
         this.tiles.push(new Tile("Floor", ".", new Vector(16,31), true, 1.0));
         this.tiles.push(new Tile("Wall", "#", new Vector(10,10), false, 0.0));
         this.tiles.push(new Tile("Door", "+", new Vector(12,3), false, 0.0));
+        this.tiles.push(new Tile("Nest", "@", new Vector(14,1), true, 1.0));
 
         // Create Items
         var stats: Stats;
