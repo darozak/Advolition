@@ -35,7 +35,7 @@ class Game {
         this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID; 
 
         // Locate robot
-        this.robotData[robotID].pos = this.arena.placeRobot();
+        this.robotData[robotID].pos = this.arena.placeRobot(robotID);
 
         // Create nest
         this.robotData[robotID].nest.setEqualTo(this.robotData[robotID].pos);

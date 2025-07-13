@@ -80,15 +80,19 @@ class Arena {
             this.itemMap[x][y].push(structuredClone(this.world.items[i]));
         }
     }
-    placeRobot() {
+    placeRobot(robotID) {
         var x = 0;
         var y = 0;
-        while (this.world.tiles[this.tileMap[x][y]].key != '.') {
-            x = rng.getUniformInt(0, this.world.size.x - 1);
-            y = rng.getUniformInt(0, this.world.size.y - 1);
+        if (this.robots.length > robotID) {
+            while (this.world.tiles[this.tileMap[x][y]].key != '.') {
+                x = rng.getUniformInt(0, this.world.size.x - 1);
+                y = rng.getUniformInt(0, this.world.size.y - 1);
+            }
+            this.robots[robotID].nest.x = x;
+            this.robots[robotID].nest.x = y;
+            let tileID = this.world.tiles.findLastIndex(d => d.key === '@');
+            this.tileMap[x][y] = tileID;
         }
-        let tileID = this.world.tiles.findLastIndex(d => d.key === '@');
-        this.tileMap[x][y] = tileID;
         return new Vector(x, y);
     }
     scan(pov, scanRadius, scan, scanTime) {
@@ -135,6 +139,10 @@ class Arena {
         // Add worth of local robot
         if (this.robotMap[nest.x][nest.y] >= 0) {
             score += this.robots[this.robotMap[nest.x][nest.y]].stats.worth;
+            score += 10;
+        }
+        else {
+            score += 20;
         }
         // Add worth of local items
         let itemCount = this.itemMap[nest.x][nest.y].length;
