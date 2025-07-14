@@ -4,7 +4,6 @@ class Game {
     arena: Arena;
     events: GameEvent[] = [];
     programs: Program[] = [];
-    robotData: RobotData[] = [];
     scanData: ScanData[] = [];
     paper: Paper;
     sysTime = new Date();
@@ -22,7 +21,7 @@ class Game {
         this.gameTime = duration;
         this.world = world;
 
-        this.arena = new Arena(this.world, this.robotData);
+        this.arena = new Arena(this.world);
         this.arena.generateMap();
         this.paper = new Paper(14);   
     } 
@@ -30,18 +29,18 @@ class Game {
     addRobot(robot: Program, name: string, isDisplayed: boolean) {
         this.programs.push(robot);
         let robotID = this.programs.length-1;
-        this.robotData.push(new RobotData(this.world, robotID, name, isDisplayed));
-        this.scanData.push(new ScanData(this.world, this.robotData[robotID]));
-        this.arena.robotMap[this.robotData[robotID].pos.x][this.robotData[robotID].pos.y] = robotID; 
+        this.arena.robots.push(new RobotData(this.world, robotID, name, isDisplayed));
+        this.scanData.push(new ScanData(this.world, this.arena.robots[robotID]));
+        this.arena.robotMap[this.arena.robots[robotID].pos.x][this.arena.robots[robotID].pos.y] = robotID; 
 
         // Locate robot
-        this.robotData[robotID].pos = this.arena.placeRobot(robotID);
+        this.arena.robots[robotID].pos = this.arena.placeRobot(robotID);
 
         // Create nest
-        this.robotData[robotID].nest.setEqualTo(this.robotData[robotID].pos);
+        this.arena.robots[robotID].nest.setEqualTo(this.arena.robots[robotID].pos);
 
         // Equip items
-        this.equipItems(this.robotData[robotID]);
+        this.equipItems(this.arena.robots[robotID]);
 
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
         this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
@@ -62,11 +61,11 @@ class Game {
             for(var i = 0; i < this.programs.length; i++) {
 
                 // If the robot is still alive and isn't doing anything.
-                if(this.robotData[i].isAlive && !this.events.some(d =>d.robotID == i)){
+                if(this.arena.robots[i].isAlive && !this.events.some(d =>d.robotID == i)){
                     var action: Action = new Action();
 
                     // Make sure the robot's personal data is up to date in scanData.
-                    this.scanData[i].robots[i] = structuredClone(this.robotData[i]);
+                    this.scanData[i].robots[i] = structuredClone(this.arena.robots[i]);
                     
                     this.scanData[i].robots[i].lastScan = this.gameTime;
                     this.scanData[i].gameTime = this.gameTime;
@@ -149,7 +148,7 @@ class Game {
 
                 // Every frame, redraw the game window.
                 this.paper.erasePaper();
-                for(var i = 0; i < this.robotData.length; i++) {
+                for(var i = 0; i < this.arena.robots.length; i++) {
                     this.displayRobotStats(i);
             }
         }
@@ -157,7 +156,7 @@ class Game {
     
     displayRobotStats(robotID: number) {
 
-        if(this.robotData[robotID].isDisplayed) {
+        if(this.arena.robots[robotID].isDisplayed) {
             var spriteWidth = 10;
             var mapRadius = 7;
             var mapFrameSize = (mapRadius * 2 + 1) * spriteWidth;
@@ -166,16 +165,16 @@ class Game {
 
             var leftDisplayFrame = 10 - (robotDisplayWidth + 10); 
             for(var i = 0; i <= robotID; i ++) {
-                if(this.robotData[i].isDisplayed) leftDisplayFrame += (robotDisplayWidth + 10);
+                if(this.arena.robots[i].isDisplayed) leftDisplayFrame += (robotDisplayWidth + 10);
             }
 
             var topDisplayFrame = 35;
             var lineSpacing = 15;
             
-            var x0 = this.robotData[robotID].pos.x - mapRadius;
-            var y0 = this.robotData[robotID].pos.y - mapRadius;
-            var x1 = this.robotData[robotID].pos.x + mapRadius;
-            var y1 = this.robotData[robotID].pos.y + mapRadius;
+            var x0 = this.arena.robots[robotID].pos.x - mapRadius;
+            var y0 = this.arena.robots[robotID].pos.y - mapRadius;
+            var x1 = this.arena.robots[robotID].pos.x + mapRadius;
+            var y1 = this.arena.robots[robotID].pos.y + mapRadius;
          
             // Display text
             let statRGB = [180, 180, 180];
@@ -192,52 +191,47 @@ class Game {
 
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.arena.getScore(robotID), statRGB, true);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Worth', this.robotData[robotID].stats.worth, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.robotData[robotID].stats.bulk, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Action Time', this.robotData[robotID].stats.getActionTime(), statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Worth', this.arena.robots[robotID].stats.worth, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.arena.robots[robotID].stats.bulk, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Action Time', this.arena.robots[robotID].stats.getActionTime(), statRGB, false);
 
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Home', this.robotData[robotID].nest.x, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Home', this.robotData[robotID].nest.y, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Home', this.arena.robots[robotID].nest.x, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Home', this.arena.robots[robotID].nest.y, statRGB, false);
 
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.robotData[robotID].pos.x, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.robotData[robotID].pos.y, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'X Position', this.arena.robots[robotID].pos.x, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Y Position', this.arena.robots[robotID].pos.y, statRGB, false);
 
             // Display attributes
 
-            // topTextFrame += lineSpacing * 0.5;
-            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Move Time', this.robotData[robotID].stats.moveTime, statRGB, false);
+            topTextFrame += lineSpacing * 0.5;
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.arena.robots[robotID].stats.scanRange, statRGB, false);
 
             topTextFrame += lineSpacing * 0.5;
-            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Time', this.robotData[robotID].stats.scanTime, statRGB, false);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Scan Range', this.robotData[robotID].stats.scanRange, statRGB, false);
 
-            topTextFrame += lineSpacing * 0.5;
-            // topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Attack Time', this.robotData[robotID].stats.attackTime, statRGB, false);
-
-            for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
-                let attack = this.robotData[robotID].stats.attack[i];
-                let element = this.robotData[robotID].stats.elements[i];
+            for(var i = 0; i < this.arena.robots[robotID].stats.elements.length; i ++) {
+                let attack = this.arena.robots[robotID].stats.attack[i];
+                let element = this.arena.robots[robotID].stats.elements[i];
                 topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Attack", attack, this.hpsColor[robotID].value(), false);
             }
 
             topTextFrame += lineSpacing * 0.5;
 
-            for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
-                let shield = this.robotData[robotID].stats.shield[i];
-                let element = this.robotData[robotID].stats.elements[i];
+            for(var i = 0; i < this.arena.robots[robotID].stats.elements.length; i ++) {
+                let shield = this.arena.robots[robotID].stats.shield[i];
+                let element = this.arena.robots[robotID].stats.elements[i];
                 topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Shield", shield, this.hpsColor[robotID].value(), false);
             }
             
-            for(var i = 0; i < this.robotData[robotID].stats.elements.length; i ++) {
-                let armor = this.robotData[robotID].stats.armor[i];
-                let element = this.robotData[robotID].stats.elements[i];
+            for(var i = 0; i < this.arena.robots[robotID].stats.elements.length; i ++) {
+                let armor = this.arena.robots[robotID].stats.armor[i];
+                let element = this.arena.robots[robotID].stats.elements[i];
                 topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Armor", armor, this.hpsColor[robotID].value(), false);
             }
             // Print log.
             topTextFrame += lineSpacing * 2;
-            this.paper.printLog(this.robotData[robotID], leftDisplayFrame + 40, topTextFrame);
+            this.paper.printLog(this.arena.robots[robotID], leftDisplayFrame + 40, topTextFrame);
             
             // Display scan view
             let leftMapFrame = leftDisplayFrame + attributeDisplayWidth;
@@ -294,7 +288,7 @@ class Game {
                         this.paper.drawTile(
                             leftMapFrame,
                             topMapFrame,
-                            this.robotData[robotScanID].sprite,
+                            this.arena.robots[robotScanID].sprite,
                             new Vector(i-x0, j-y0),
                             robotAlpha,
                             false);
@@ -303,11 +297,11 @@ class Game {
             }
         
             // Draw self in center of map.
-            if(this.robotData[robotID].isAlive) {
+            if(this.arena.robots[robotID].isAlive) {
                 this.paper.drawTile(
                     leftMapFrame, 
                     topMapFrame,
-                    this.robotData[robotID].sprite, 
+                    this.arena.robots[robotID].sprite, 
                     new Vector(mapRadius, mapRadius), 
                     1,
                     true);
@@ -329,12 +323,12 @@ class Game {
 
             this.paper.drawListItem(centerTextFrame, topTextFrame, 'Passable Terrain', [120, 120, 120]);
 
-            for(var i = 0; i < this.robotData[robotID].stats.permissiveTerrain.length; i ++) {
+            for(var i = 0; i < this.arena.robots[robotID].stats.permissiveTerrain.length; i ++) {
                 var color = [180, 180, 180];
                 var text: string;
 
                 topTextFrame += lineSpacing;
-                text = this.robotData[robotID].stats.permissiveTerrain[i];
+                text = this.arena.robots[robotID].stats.permissiveTerrain[i];
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             }
 
@@ -342,18 +336,18 @@ class Game {
             topTextFrame += lineSpacing * 1.5;
             this.paper.drawListItem(centerTextFrame, topTextFrame, 'Inventory', [120, 120, 120]);
 
-            for(var i = 0; i < this.robotData[robotID].items.length; i ++) {
+            for(var i = 0; i < this.arena.robots[robotID].items.length; i ++) {
                 var color = [180, 180, 180];
                 var text: string;
-                if(this.robotData[robotID].items[i].isEquipped) color = [51, 110, 156];
+                if(this.arena.robots[robotID].items[i].isEquipped) color = [51, 110, 156];
 
                 topTextFrame += lineSpacing;
-                text = this.robotData[robotID].items[i].name;
+                text = this.arena.robots[robotID].items[i].name;
                 this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
             } 
 
             // Display items on ground under robot.
-            let loc = this.robotData[robotID].pos;
+            let loc = this.arena.robots[robotID].pos;
 
             if(this.arena.itemMap[loc.x][loc.y].length>0) {
                 topTextFrame += lineSpacing * 2;
@@ -388,22 +382,22 @@ class Game {
         }
 
         // Add live robots
-        for(var i = 0; i < this.robotData.length; i++) {
-            if(this.robotData[i].isAlive) { 
-                this.arena.robotMap[this.robotData[i].pos.x][this.robotData[i].pos.y] = i;
+        for(var i = 0; i < this.arena.robots.length; i++) {
+            if(this.arena.robots[i].isAlive) { 
+                this.arena.robotMap[this.arena.robots[i].pos.x][this.arena.robots[i].pos.y] = i;
             }
         }
     }
 
     requestAttack(robotID: number, action: Action) {
-        let delay = -this.robotData[robotID].stats.attackTime;
+        let delay = -this.arena.robots[robotID].stats.attackTime;
         this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
     }
 
     resolveAttack(action: GameEvent) {
 
         // Map path to target.
-        let path = this.robotData[action.robotID].pos.getPathTo(action.action.target);
+        let path = this.arena.robots[action.robotID].pos.getPathTo(action.action.target);
         let targetID = -1;
 
         // Follow path until it hits something.
@@ -424,8 +418,8 @@ class Game {
         // Inflict damage on robot if there is one in path.
         if(targetID >= 0) {
             let damage: number[] = [];
-            let attacker = this.robotData[action.robotID];
-            let defender = this.robotData[targetID];
+            let attacker = this.arena.robots[action.robotID];
+            let defender = this.arena.robots[targetID];
 
             // Apply shields.
                 for(let i = 0; i < defender.stats.elements.length; i ++){
@@ -466,17 +460,16 @@ class Game {
             }
     
             // Write to event log.
-            this.appendToLog(this.robotData[action.robotID], this.gameTime, `attacks ${this.robotData[targetID].name}`);
+            this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `attacks ${this.arena.robots[targetID].name}`);
         }
 
     }
 
     requestMove(robotID: number, action: Action) { 
-        let destination = this.robotData[robotID].pos.getPathTo(action.target)[0];
+        let destination = this.arena.robots[robotID].pos.getPathTo(action.target)[0];
 
-        // let delay = this.robotData[robotID].stats.moveTime;
-        let delay = this.robotData[robotID].stats.getActionTime();
-        delay *= this.robotData[robotID].pos.getDistanceTo(destination);
+        let delay = this.arena.robots[robotID].stats.getActionTime();
+        delay *= this.arena.robots[robotID].pos.getDistanceTo(destination);
 
         // Add action to event que.
         this.events.push(new GameEvent(robotID, action, this.gameTime - delay));   
@@ -488,34 +481,34 @@ class Game {
     }
 
     resolveMove(action: GameEvent) {
-        var destination = this.robotData[action.robotID].pos.getPathTo(action.action.target)[0];
+        var destination = this.arena.robots[action.robotID].pos.getPathTo(action.action.target)[0];
         var tileID = this.arena.tileMap[destination.x][destination.y];
         var tileName = this.world.tiles[tileID].name;
 
-        let permissiveTerrainIndex = this.robotData[action.robotID].stats.permissiveTerrain.findLastIndex(d => d === tileName);
+        let permissiveTerrainIndex = this.arena.robots[action.robotID].stats.permissiveTerrain.findLastIndex(d => d === tileName);
 
 
         // Can the robot move into this tile?
         if (permissiveTerrainIndex >= 0) {
             
             // Change position in arena.
-            this.arena.robotMap[this.robotData[action.robotID].pos.x][this.robotData[action.robotID].pos.y] = -1;
+            this.arena.robotMap[this.arena.robots[action.robotID].pos.x][this.arena.robots[action.robotID].pos.y] = -1;
             this.arena.robotMap[destination.x][destination.y] = action.robotID;
 
             // Change position in stats.
-            this.robotData[action.robotID].pos = destination;
+            this.arena.robots[action.robotID].pos = destination;
 
             // Write to event log
-            this.appendToLog(this.robotData[action.robotID], this.gameTime, `Moves to ${destination.print()}`);
+            this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Moves to ${destination.print()}`);
 
             
         } else {
             // Take damage if you run into something.
 
             // Wtite to event log.
-            this.appendToLog(this.robotData[action.robotID], this.gameTime, `Collides with obstical`);
+            this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Collides with obstical`);
 
-            // this.takeDamage(this.robotData[action.robotID], 10);
+            // this.takeDamage(this.arena.robots[action.robotID], 10);
             this.hpsColor[action.robotID].pulse();            
             this.chassisColor[action.robotID].pulse();        
         }
@@ -529,11 +522,10 @@ class Game {
     requestEquip(robotID: number, action: Action) {
 
         // Does item exist in inventory?
-        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        let itemID = this.arena.robots[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
     
-            // let delay = this.robotData[robotID].items[itemID].timeToEquip;
-            let delay = this.robotData[robotID].stats.getActionTime();
+            let delay = this.arena.robots[robotID].stats.getActionTime();
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, this.gameTime - delay)); 
@@ -543,27 +535,26 @@ class Game {
     resolveEquip(event: GameEvent) {
 
         // Move item to the top of the list and set to active.
-        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        let itemID = this.arena.robots[event.robotID].items.findLastIndex(d => d.name === event.action.item);
         if(itemID >= 0) {
-            this.robotData[event.robotID].items.unshift(this.robotData[event.robotID].items.splice(itemID, 1)[0]);
-            this.robotData[event.robotID].items[0].isEquipped = true;
+            this.arena.robots[event.robotID].items.unshift(this.arena.robots[event.robotID].items.splice(itemID, 1)[0]);
+            this.arena.robots[event.robotID].items[0].isEquipped = true;
 
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `Equips its ${event.action.item}`);
+            this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Equips its ${event.action.item}`);
         }
 
         // Equip items and apply mods.
-        this.equipItems(this.robotData[event.robotID]);
+        this.equipItems(this.arena.robots[event.robotID]);
     }
 
     requestUnequip(robotID: number, action: Action) {
 
         // Does item exist in inventory?
-        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        let itemID = this.arena.robots[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            // let delay = this.robotData[robotID].items[itemID].timeToEquip;
-            let delay = this.robotData[robotID].stats.getActionTime();
+            let delay = this.arena.robots[robotID].stats.getActionTime();
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, this.gameTime - delay)); 
@@ -573,27 +564,26 @@ class Game {
     resolveUnequip(event: GameEvent) {
 
         // Move item to the bottom of the list and set to inactive.
-        let itemID = this.robotData[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        let itemID = this.arena.robots[event.robotID].items.findLastIndex(d => d.name === event.action.item);
         if(itemID >= 0) {
-            this.robotData[event.robotID].items[itemID].isEquipped = false;
-            this.robotData[event.robotID].items.push(this.robotData[event.robotID].items.splice(itemID, 1)[0]);          
+            this.arena.robots[event.robotID].items[itemID].isEquipped = false;
+            this.arena.robots[event.robotID].items.push(this.arena.robots[event.robotID].items.splice(itemID, 1)[0]);          
         
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `Unequips its ${event.action.item}`);
+            this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Unequips its ${event.action.item}`);
         }
 
         // Equipe items and apply mods.
-        this.equipItems(this.robotData[event.robotID]);
+        this.equipItems(this.arena.robots[event.robotID]);
     }
 
     requestDrop(robotID: number, action: Action) {
 
         // Does item exist in inventory?
-        let itemID = this.robotData[robotID].items.findLastIndex(d => d.name === action.item);
+        let itemID = this.arena.robots[robotID].items.findLastIndex(d => d.name === action.item);
         if(itemID >= 0) {
 
-            // let delay = this.robotData[robotID].items[itemID].timeToEquip;
-            let delay = this.robotData[robotID].stats.getActionTime();
+            let delay = this.arena.robots[robotID].stats.getActionTime();
 
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, this.gameTime - delay)); 
@@ -601,7 +591,7 @@ class Game {
     }
 
     resolveDrop(event: GameEvent) {
-        let robot = this.robotData[event.robotID]
+        let robot = this.arena.robots[event.robotID]
         let itemID = robot.items.findLastIndex(d => d.name === event.action.item);
 
         if(itemID >= 0) this.dropItem(robot, itemID);
@@ -610,15 +600,14 @@ class Game {
     requestTake(robotID: number, action: Action) {
 
         // Does the robot have enough room in its inventory?
-        if(this.robotData[robotID].stats.maxCarry > this.robotData[robotID].items.length) {
+        if(this.arena.robots[robotID].stats.maxCarry > this.arena.robots[robotID].items.length) {
             
             // Does item exist in tile?
-            let location = this.robotData[robotID].pos;
+            let location = this.arena.robots[robotID].pos;
             let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
             if(itemID >= 0) {
 
-                // let delay = this.robotData[robotID].items[itemID].timeToEquip;
-                let delay = this.robotData[robotID].stats.getActionTime();
+                let delay = this.arena.robots[robotID].stats.getActionTime();
 
                 // Add action to event que.
                 this.events.push(new GameEvent(robotID, action, this.gameTime - delay)); 
@@ -629,27 +618,26 @@ class Game {
     resolveTake(event: GameEvent) {
 
         // Move item to inventory.
-        let location = this.robotData[event.robotID].pos;
+        let location = this.arena.robots[event.robotID].pos;
         let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === event.action.item);
        
         if(itemID >= 0) {
-            this.robotData[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);          
+            this.arena.robots[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);          
             
             // Write to event log.
-            this.appendToLog(this.robotData[event.robotID], this.gameTime, `Takes the ${event.action.item}`);
+            this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Takes the ${event.action.item}`);
         }
 
         // Equip items and apply mods.
-        this.equipItems(this.robotData[event.robotID]);
+        this.equipItems(this.arena.robots[event.robotID]);
     }
 
     requestScan(robotID: number, call: Action) {
 
         // Set scan range and delay.
-        call.range = this.robotData[robotID].stats.scanRange;
-        // let delay = this.robotData[robotID].stats.scanTime;
+        call.range = this.arena.robots[robotID].stats.scanRange;
 
-        let delay = this.robotData[robotID].stats.getActionTime();
+        let delay = this.arena.robots[robotID].stats.getActionTime();
 
         // Add action to event queue.
         this.events.push(new GameEvent(robotID, call, this.gameTime - delay));
@@ -664,11 +652,11 @@ class Game {
     resolveScan(event: GameEvent) {
 
         // Set rane and perform scan.        
-        let range = this.robotData[event.robotID].stats.scanRange;
-        this.scanData[event.robotID] = this.arena.scan(this.robotData[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
+        let range = this.arena.robots[event.robotID].stats.scanRange;
+        this.scanData[event.robotID] = this.arena.scan(this.arena.robots[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         
         // Write to event log.
-        this.appendToLog(this.robotData[event.robotID], this.gameTime, "Scans the area");
+        this.appendToLog(this.arena.robots[event.robotID], this.gameTime, "Scans the area");
 
         // Animate display elements.
         this.scannerColor[event.robotID].deactivate();
@@ -683,7 +671,7 @@ class Game {
 
     resolveSay(event: GameEvent) {
         // Write to event log.
-        this.appendToLog(this.robotData[event.robotID], this.gameTime, 'Says: ' + event.action.message);
+        this.appendToLog(this.arena.robots[event.robotID], this.gameTime, 'Says: ' + event.action.message);
     }
 
     equipItems(robot: RobotData) {

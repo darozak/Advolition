@@ -6,13 +6,12 @@ class Arena {
     tileMap: number[][] = [];
     itemMap: Item[][][] = [];
     robotMap: number[][] = [];
-    robots: RobotData[] = [];
+    robots: RobotData[] = []; 
 
     fov = new PreciseShadowcasting();
 
-    constructor(world: WorldData, robots: RobotData[]) {
+    constructor(world: WorldData) {
         this.world = world;
-        this.robots = robots;
 
         this.world.size.x = 25;
         this.world.size.y = 25;
@@ -170,8 +169,8 @@ class Arena {
         // Add worth of local robot
         if(this.robotMap[nest.x][nest.y] >= 0) {
             score += this.robots[this.robotMap[nest.x][nest.y]].stats.worth;
-            score += 10;
-        } else {score += 20;}
+            // score += 10;
+        }
 
         // Add worth of local items
         let itemCount = this.itemMap[nest.x][nest.y].length;
