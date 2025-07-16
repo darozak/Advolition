@@ -27,9 +27,10 @@ class Game {
         let robotID = this.programs.length - 1;
         this.arena.robots.push(new RobotData(this.world, robotID, name, isDisplayed));
         this.scanData.push(new ScanData(this.world, this.arena.robots[robotID]));
-        this.arena.robotMap[this.arena.robots[robotID].pos.x][this.arena.robots[robotID].pos.y] = robotID;
         // Locate robot
         this.arena.robots[robotID].pos = this.arena.placeRobot(robotID);
+        // Record robot on map
+        this.arena.robotMap[this.arena.robots[robotID].pos.x][this.arena.robots[robotID].pos.y] = robotID;
         // Create nest
         this.arena.robots[robotID].nest.setEqualTo(this.arena.robots[robotID].pos);
         // Equip items

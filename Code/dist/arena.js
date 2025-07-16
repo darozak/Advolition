@@ -138,7 +138,6 @@ class Arena {
         // Add worth of local robot
         if (this.robotMap[nest.x][nest.y] >= 0) {
             score += this.robots[this.robotMap[nest.x][nest.y]].stats.worth;
-            // score += 10;
         }
         // Add worth of local items
         let itemCount = this.itemMap[nest.x][nest.y].length;
