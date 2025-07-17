@@ -18,10 +18,8 @@ class Stats {
     maxEquip = 0;
     scanTime = 0;
     scanRange = 0;
-    attackTime = 0;
     attack = [];
     shield = [];
-    moveTime = 0;
     permissiveTerrain = [];
     constructor() {
         this.elements.push('Kinetic');
@@ -45,8 +43,6 @@ class Stats {
         this.maxEquip += stats.maxEquip;
         this.scanTime += stats.scanTime;
         this.scanRange += stats.scanRange;
-        this.attackTime += stats.attackTime;
-        this.moveTime += stats.moveTime;
         for (var i = 0; i < stats.permissiveTerrain.length; i++) {
             this.permissiveTerrain.push(stats.permissiveTerrain[i]);
         }
@@ -63,13 +59,10 @@ class Stats {
         this.maxEquip = stats.maxEquip;
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
-        this.attackTime = stats.attackTime;
-        this.moveTime = stats.moveTime;
         this.permissiveTerrain = stats.permissiveTerrain;
     }
     getActionTime() {
-        const BASE_DELAY = 10;
-        return this.bulk + BASE_DELAY;
+        return this.bulk;
     }
 }
 class Robot {
@@ -79,7 +72,9 @@ class Robot {
     constructor(items) {
         this.baseStats.maxCarry = 8;
         this.baseStats.maxEquip = 4;
-        this.baseStats.moveTime = 10;
+        // Robots have an inherent worth and bulk
+        this.baseStats.worth = 10;
+        this.baseStats.bulk = 10;
         this.baseStats.permissiveTerrain = [
             'Floor',
             'Door'

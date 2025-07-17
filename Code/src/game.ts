@@ -393,8 +393,8 @@ class Game {
     }
 
     requestAttack(robotID: number, action: Action) {
-        let delay = -this.arena.robots[robotID].stats.attackTime;
-        this.events.push(new GameEvent(robotID, action, delay + this.gameTime));
+        let delay = this.arena.robots[robotID].stats.getActionTime();
+        this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
     }
 
     resolveAttack(action: GameEvent) {
