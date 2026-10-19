@@ -81,7 +81,8 @@ class Stats {
         this.scanTime = stats.scanTime;
         this.scanRange = stats.scanRange;
 
-        this.permissiveTerrain = stats.permissiveTerrain;
+        // Copy the list so later add() calls don't change the source stats.
+        this.permissiveTerrain = [...stats.permissiveTerrain];
     } 
 
     getActionTime() {
