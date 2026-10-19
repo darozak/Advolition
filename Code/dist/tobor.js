@@ -6,10 +6,14 @@ class Drift {
     nestTileID = 0;
     waterDepth = [];
     constructor() { }
-    init(myData) {
+    // Look up the tile IDs used to decide which tiles are passable.
+    setTileIDs(myData) {
         this.doorTileID = myData.tiles.findLastIndex(d => d.name === 'Door');
         this.floorTileID = myData.tiles.findLastIndex(d => d.name === 'Floor');
         this.nestTileID = myData.tiles.findLastIndex(d => d.name === 'Nest');
+    }
+    init(myData) {
+        this.setTileIDs(myData);
         for (let i = 0; i < myData.mapSize.x; i++) {
             this.waterDepth[i] = [];
             for (let j = 0; j < myData.mapSize.y; j++) {
@@ -21,6 +25,10 @@ class Drift {
         return tileID == this.floorTileID || tileID == this.doorTileID || tileID == this.nestTileID;
     }
     followFlow(drainLocation, myData) {
+        // Set tile IDs before looking for drains. Otherwise doors aren't
+        // recognised on the first call, and a robot in a small room whose
+        // only unexplored edge is a door never finds a way out.
+        this.setTileIDs(myData);
         let drainTileID = myData.tileMap[drainLocation.x][drainLocation.y];
         let drainList = [];
         // Drain water from edge tiles if drainLocation is invalid.
