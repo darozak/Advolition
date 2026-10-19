@@ -10,6 +10,10 @@ class RobotData {
     robotID: number;
     isAlive: boolean = true;
     deathTime = -1;         // gameTime when the robot was destroyed
+
+    // The last time this robot was hit: who fired, from where, and the
+    // damage per element after shields. Null until it is first hit.
+    lastHit: { attackerID: number, attackerName: string, from: Vector, time: number, damage: number[] } | null = null;
     name: string;
     isDisplayed: boolean;
     pos = new Vector(0, 0);

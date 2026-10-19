@@ -10,7 +10,7 @@ class Target extends Program {
                 case 'start':
                     this.actionBuffer.push(new Say('Hello!'));
                     this.actionBuffer.push(new Equip('Armor'));
-                    this.actionBuffer.push(new Equip('Shield'));
+                    this.actionBuffer.push(new Equip('Thermal Shield'));
                     this.state = 'stop';
                     break;
             }
