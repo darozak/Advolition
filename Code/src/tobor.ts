@@ -144,7 +144,6 @@ class Tobor extends Program {
                 case 'equip':
                     this.startPosition.setEqualTo(myData.robots[myData.myID].pos)
                     this.actionBuffer.push(new Equip('Scanner'));
-                    this.actionBuffer.push(new Equip('Battery'));
                     this.actionBuffer.push(new Equip('Armor'));
                     // this.actionBuffer.push(new Equip('Blaster'));
                     this.state = 'scan';
