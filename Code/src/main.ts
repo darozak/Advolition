@@ -6,6 +6,7 @@ for(var i = 0; i < robotCount; i ++) robotCodes.push('Empty');
 // The game being played, and a counter that changes whenever a game starts
 // or stops, so an old game loop knows to quit.
 var currentGame: Game | null = null;
+var lastGame: Game | null = null;       // kept after stopping, for downloading its logs
 var gameRunID = 0;
 var gameTimer = 0;
 
@@ -58,6 +59,7 @@ async function runGame() {
       } 
     }
     currentGame = game;
+    lastGame = game;
 
     // Game loop: play one turn, then wait 10 ms before the next.
     const step = async () => {
@@ -73,6 +75,20 @@ async function runGame() {
       }
     };
     step();
+}
+
+// Saves every robot's full log from the current or last game as a text file.
+function downloadLogs() {
+    if(!lastGame) {
+      alert('Run a game first, then download its logs.');
+      return;
+    }
+    const text = `Advolition game logs (gameTime counts down from ${lastGame.duration})\n\n` + lastGame.fullLogText();
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
+    link.download = 'advolition-logs.txt';
+    link.click();
+    URL.revokeObjectURL(link.href);
 }
 
 function stopGame() {

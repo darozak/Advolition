@@ -115,7 +115,7 @@ class SandboxedBot {
      * use, plus a small message handler that loads the program and calls run().
      */
     static workerSource() {
-        const api = [Vector, Action, Attack, Move, Take, Drop, Equip, Unequip, Scan, Say, Program]
+        const api = [Vector, Action, Attack, Move, Take, Drop, Equip, Unequip, Scan, Say, Program, findPath]
             .map((apiClass) => apiClass.toString())
             .join('\n\n');
         return `${api}

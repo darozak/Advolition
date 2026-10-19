@@ -22,6 +22,11 @@ class RobotData {
 
     logTime: number[] = [];
     logEntry: string[] = [];
+    logRepeat: number[] = [];   // how many times in a row each entry happened
+
+    // The result of the robot's last action: its command, whether it worked
+    // ('done' or 'failed'), why it failed, and when.
+    lastAction: { command: string, status: string, reason: string, time: number } | null = null;
     maxLogLength = 10;
 
     constructor(world: WorldData, robotID: number, name: string, isDisplayed: boolean) {

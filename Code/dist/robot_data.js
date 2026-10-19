@@ -17,6 +17,10 @@ class RobotData {
     sprite = new Vector(23, 35);
     logTime = [];
     logEntry = [];
+    logRepeat = []; // how many times in a row each entry happened
+    // The result of the robot's last action: its command, whether it worked
+    // ('done' or 'failed'), why it failed, and when.
+    lastAction = null;
     maxLogLength = 10;
     constructor(world, robotID, name, isDisplayed) {
         this.robotID = robotID;

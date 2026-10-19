@@ -12,10 +12,11 @@ You can play the most recent version of the game at https://darozak.github.io/Ad
 1. Open the game page.
 2. Use the **Robot 1**–**Robot 4** buttons to upload a program file for each robot you want in the game. Empty slots are left out.
 3. Click **Run** to start a new game, or **Stop** to end it. Stopping can't be undone: clicking **Run** again starts a new game.
+4. Click **Download logs** at any point to save every robot's full log from the current or last game as a text file.
 
 Each robot gets its own panel showing its stats, its event log, a map of what it has scanned, its inventory, and any items on the ground beneath it.
 
-A sample program is included at [`Code/dist/tobor.js`](Code/dist/tobor.js).
+A sample robot is included at [`Samples/gatherer.js`](Samples/gatherer.js). It explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot. An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
 ## The dungeon
 Each game builds a new 25×25 dungeon of rooms and corridors. Every grid space is one of these tiles:
@@ -29,16 +30,14 @@ Each game builds a new 25×25 dungeon of rooms and corridors. Every grid space i
 
 A grid space can hold one robot and any number of items. Ten random items are scattered on floor tiles at the start of each game, and a new random item appears somewhere on the floor every 500 turns.
 
-## Time
-The game lasts 10,000 ticks. `gameTime` counts down from 10,000 to 0, and the game stops at 0.
-
-A robot does one action at a time. When its current action is finished, the engine calls its program again to get the next one.
-
-Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 10. Diagonal moves take about 1.4 times as long.
-
-Actions that finish on the same turn happen in a random order, so no robot always goes first.
-
-If a program returns an action that can't be started (for example, equipping an item it doesn't have), nothing is queued and the program is called again on the next tick.
+## Time and movement rules
+- **Game length.** The game lasts 10,000 ticks. `gameTime` **counts down** from 10,000 to 0, so `myData.gameTime` is also the time you have left. A bigger `gameTime` means earlier, not later.
+- **Turns.** A robot does one action at a time. Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. The program is called again on the tick after the action finishes, so a robot with an action time of 10 gets a new turn every 11 ticks. `Say` finishes at once, so the program is called again on the next tick.
+- **Bulk.** A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 10.
+- **Moving.** `Move` takes one step toward its target, along a straight line. It doesn't find a way around walls: if the next tile on that line is a wall, the robot bumps into it and stays put. Use `findPath` (below) to get a route around obstacles. Diagonal steps take about 1.4 times as long.
+- **Ties.** Actions that finish on the same tick happen in a random order, so no robot always goes first.
+- **Failed actions.** If an action can't be started (for example, equipping an item you don't have), nothing is queued and the program is called again on the next tick. `lastAction` says why.
+- **Memory.** Your map only updates when you scan. Items you've picked up still show in your `itemMap` until you scan that spot again.
 
 ## Robots
 Every robot starts with:
@@ -155,9 +154,22 @@ A program's `run` method returns one of these:
 | `new Equip(itemName)` | Equips the named item. If this goes over the limit of 4, the item equipped longest ago is unequipped. |
 | `new Unequip(itemName)` | Unequips the named item. |
 | `new Attack(target)` | Attacks along a straight line toward the `target` Vector. |
-| `new Say(message)` | Writes a message to the robot's log. Takes no time. |
+| `new Say(message)` | Writes a message to the robot's log. It finishes at once, so the program is called again on the next tick. |
 
-Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` targets are rounded to the nearest whole tile. It has helpers such as `add`, `subtract`, `isEqualTo`, `getDistanceTo` and `getPathTo`.
+Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` targets are rounded to the nearest whole tile. It has helpers such as `add`, `subtract`, `isEqualTo`, `getDistanceTo` and `getPathTo` (the straight line a move or shot follows, ignoring walls).
+
+### findPath
+`findPath(myData, target, allowUnknown)` returns the quickest walking route from your robot to `target`, as a list of steps, using what your robot knows about the map. It returns an empty list if there's no known route.
+- Scanned walls are avoided. Unscanned tiles are avoided too, unless `allowUnknown` is `true`.
+- Other robots aren't taken into account.
+- Walk the route one step at a time: `new Move(findPath(myData, target)[0])`.
+
+## Debugging your robot
+- **The on-screen log** shows each robot's last 10 events. The same event repeated in a row is shown once with a count, such as `Scans the area ×12`.
+- **Download logs** saves every robot's complete log for the game, with tick numbers, as a text file.
+- **`lastAction`**, in your own `myData.robots[myData.myID]`, tells your program how its last action turned out. For example: `{ command: 'take', status: 'failed', reason: 'inventory full' }`. Failed actions and invalid return values show up here too, so check it when your robot seems stuck.
+- **`lastHit`** tells you who last shot you and from where.
+- **`console.log`** works inside your program. Its output appears in the browser's developer console (usually opened with F12).
 
 ## myData
 `run` receives a fresh copy of the robot's scan data each time. Because it is a copy, positions inside it are plain `{x, y}` objects without `Vector` methods. Use `new Vector(p.x, p.y)` if you need them.
@@ -188,6 +200,7 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 | `baseStats` | Stats | Stats with no items equipped. |
 | `items` | Item[] | Inventory. Equipped items come first. |
 | `lastScan` | number | The `gameTime` when this data was recorded. |
+| `lastAction` | object or null | How the robot's last action turned out: `command`, `status` (`'done'` or `'failed'`), `reason` (why it failed) and `time`. |
 | `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position), `time` and `damage` (per element, after shields). `null` until it is first hit. |
 
 ### Stats

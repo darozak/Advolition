@@ -5,6 +5,9 @@ class Game {
     world;
     arena;
     events = [];
+    // Every log entry for each robot, for downloading after a game.
+    // Repeats in a row are collapsed into one line with a count.
+    fullLogs = [];
     programs = [];
     scanData = [];
     paper;
@@ -84,6 +87,12 @@ class Game {
                         }
                     }
                     let action = this.checkAction(i, result.action);
+                    if (result.error !== undefined) {
+                        this.setActionResult(i, '', result.error);
+                    }
+                    else if (!action) {
+                        this.setActionResult(i, '', 'not a valid action');
+                    }
                     if (action) {
                         switch (action.command) {
                             case "attack":
@@ -110,6 +119,11 @@ class Game {
                             case "scan":
                                 this.requestScan(i, action);
                                 break;
+                            case "":
+                                // A plain Action() means "do nothing".
+                                break;
+                            default:
+                                this.setActionResult(i, action.command, `unknown command "${action.command}"`);
                         }
                     }
                 }
@@ -458,6 +472,7 @@ class Game {
         // A shot that hits nobody is logged as a miss.
         if (targetID < 0) {
             this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Misses its shot at ${new Vector(action.action.target.x, action.action.target.y).print()}`);
+            this.setActionResult(action.robotID, 'attack', 'missed');
         }
         // Inflict damage on robot if there is one in path.
         if (targetID >= 0) {
@@ -475,6 +490,7 @@ class Game {
             // Both robots learn about the hit. The defender also learns who
             // fired and from where, even if it can't see the attacker.
             this.appendToLog(attacker, this.gameTime, `attacks ${defender.name} for ${total} damage`);
+            this.setActionResult(action.robotID, 'attack');
             this.appendToLog(defender, this.gameTime, `Hit by ${attacker.name} for ${total} damage`);
             defender.lastHit = {
                 attackerID: action.robotID,
@@ -539,15 +555,18 @@ class Game {
             this.arena.robots[action.robotID].pos = destination;
             // Write to event log
             this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Moves to ${destination.print()}`);
+            this.setActionResult(action.robotID, 'move');
         }
         else {
             // Take damage if you run into something.
             // Write to event log.
             if (isOccupied) {
                 this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Bumps into ${this.arena.robots[occupantID].name}`);
+                this.setActionResult(action.robotID, 'move', `blocked by ${this.arena.robots[occupantID].name}`);
             }
             else {
                 this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Collides with obstacle`);
+                this.setActionResult(action.robotID, 'move', `blocked by ${tileName}`);
             }
             // this.takeDamage(this.arena.robots[action.robotID], 10);
             this.hpsColor[action.robotID].pulse();
@@ -558,62 +577,91 @@ class Game {
         this.batteryColor[action.robotID].deactivate();
         this.powerColor[action.robotID].deactivate();
     }
+    // Finds the item a command refers to. With several items of the same name,
+    // prefer one in the right state: an unequipped one to equip, an equipped one
+    // to unequip, and an unequipped one to drop.
+    findItem(items, name, prefer) {
+        let wanted = items.findLastIndex(d => d.name === name && d.isEquipped == (prefer == 'equipped'));
+        return wanted >= 0 ? wanted : items.findLastIndex(d => d.name === name);
+    }
     requestEquip(robotID, action) {
         // Does item exist in inventory?
-        let itemID = this.arena.robots[robotID].items.findLastIndex(d => d.name === action.item);
+        let itemID = this.findItem(this.arena.robots[robotID].items, action.item, 'unequipped');
         if (itemID >= 0) {
             let delay = this.arena.robots[robotID].stats.getActionTime();
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
         }
+        else {
+            this.setActionResult(robotID, 'equip', `has no ${action.item}`);
+        }
     }
     resolveEquip(event) {
         // Move item to the top of the list and set to active.
-        let itemID = this.arena.robots[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        let itemID = this.findItem(this.arena.robots[event.robotID].items, event.action.item, 'unequipped');
         if (itemID >= 0) {
             this.arena.robots[event.robotID].items.unshift(this.arena.robots[event.robotID].items.splice(itemID, 1)[0]);
             this.arena.robots[event.robotID].items[0].isEquipped = true;
             // Write to event log.
             this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Equips its ${event.action.item}`);
+            this.setActionResult(event.robotID, 'equip');
+        }
+        else {
+            this.setActionResult(event.robotID, 'equip', `has no ${event.action.item}`);
         }
         // Equip items and apply mods.
         this.equipItems(this.arena.robots[event.robotID]);
     }
     requestUnequip(robotID, action) {
         // Does item exist in inventory?
-        let itemID = this.arena.robots[robotID].items.findLastIndex(d => d.name === action.item);
+        let itemID = this.findItem(this.arena.robots[robotID].items, action.item, 'equipped');
         if (itemID >= 0) {
             let delay = this.arena.robots[robotID].stats.getActionTime();
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
         }
+        else {
+            this.setActionResult(robotID, 'unequip', `has no ${action.item}`);
+        }
     }
     resolveUnequip(event) {
         // Move item to the bottom of the list and set to inactive.
-        let itemID = this.arena.robots[event.robotID].items.findLastIndex(d => d.name === event.action.item);
+        let itemID = this.findItem(this.arena.robots[event.robotID].items, event.action.item, 'equipped');
         if (itemID >= 0) {
             this.arena.robots[event.robotID].items[itemID].isEquipped = false;
             this.arena.robots[event.robotID].items.push(this.arena.robots[event.robotID].items.splice(itemID, 1)[0]);
             // Write to event log.
             this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Unequips its ${event.action.item}`);
+            this.setActionResult(event.robotID, 'unequip');
         }
-        // Equipe items and apply mods.
+        else {
+            this.setActionResult(event.robotID, 'unequip', `has no ${event.action.item}`);
+        }
+        // Equip items and apply mods.
         this.equipItems(this.arena.robots[event.robotID]);
     }
     requestDrop(robotID, action) {
         // Does item exist in inventory?
-        let itemID = this.arena.robots[robotID].items.findLastIndex(d => d.name === action.item);
+        let itemID = this.findItem(this.arena.robots[robotID].items, action.item, 'unequipped');
         if (itemID >= 0) {
             let delay = this.arena.robots[robotID].stats.getActionTime();
             // Add action to event que.
             this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
         }
+        else {
+            this.setActionResult(robotID, 'drop', `has no ${action.item}`);
+        }
     }
     resolveDrop(event) {
         let robot = this.arena.robots[event.robotID];
-        let itemID = robot.items.findLastIndex(d => d.name === event.action.item);
-        if (itemID >= 0)
+        let itemID = this.findItem(robot.items, event.action.item, 'unequipped');
+        if (itemID >= 0) {
             this.dropItem(robot, itemID);
+            this.setActionResult(event.robotID, 'drop');
+        }
+        else {
+            this.setActionResult(event.robotID, 'drop', `has no ${event.action.item}`);
+        }
     }
     requestTake(robotID, action) {
         // Does the robot have enough room in its inventory?
@@ -626,6 +674,12 @@ class Game {
                 // Add action to event que.
                 this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
             }
+            else {
+                this.setActionResult(robotID, 'take', `no ${action.item} here`);
+            }
+        }
+        else {
+            this.setActionResult(robotID, 'take', 'inventory full');
         }
     }
     resolveTake(event) {
@@ -636,6 +690,10 @@ class Game {
             this.arena.robots[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);
             // Write to event log.
             this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Takes the ${event.action.item}`);
+            this.setActionResult(event.robotID, 'take');
+        }
+        else {
+            this.setActionResult(event.robotID, 'take', `no ${event.action.item} here`);
         }
         // Equip items and apply mods.
         this.equipItems(this.arena.robots[event.robotID]);
@@ -657,6 +715,7 @@ class Game {
         this.scanData[event.robotID] = this.arena.scan(this.arena.robots[event.robotID].pos, range, this.scanData[event.robotID], this.gameTime);
         // Write to event log.
         this.appendToLog(this.arena.robots[event.robotID], this.gameTime, "Scans the area");
+        this.setActionResult(event.robotID, 'scan');
         // Animate display elements.
         this.scannerColor[event.robotID].deactivate();
         this.batteryColor[event.robotID].deactivate();
@@ -669,6 +728,7 @@ class Game {
     resolveSay(event) {
         // Write to event log.
         this.appendToLog(this.arena.robots[event.robotID], this.gameTime, 'Says: ' + event.action.message);
+        this.setActionResult(event.robotID, 'say');
     }
     equipItems(robot) {
         // Unequip any items over the max.
@@ -698,11 +758,56 @@ class Game {
         }
     }
     appendToLog(robot, time, entry) {
-        robot.logTime.push(time);
-        robot.logEntry.push(entry);
-        if (robot.logTime.length > robot.maxLogLength) {
-            robot.logTime.shift();
-            robot.logEntry.shift();
+        // The on-screen log: the same entry repeated in a row is shown once with a count.
+        let last = robot.logEntry.length - 1;
+        if (last >= 0 && robot.logEntry[last] == entry) {
+            robot.logRepeat[last]++;
+            robot.logTime[last] = time;
         }
+        else {
+            robot.logTime.push(time);
+            robot.logEntry.push(entry);
+            robot.logRepeat.push(1);
+            if (robot.logTime.length > robot.maxLogLength) {
+                robot.logTime.shift();
+                robot.logEntry.shift();
+                robot.logRepeat.shift();
+            }
+        }
+        // The full log, for downloading.
+        let log = this.fullLogs[robot.robotID];
+        if (!log)
+            log = this.fullLogs[robot.robotID] = [];
+        let previous = log[log.length - 1];
+        if (previous && previous.entry == entry) {
+            previous.end = time;
+            previous.count++;
+        }
+        else {
+            log.push({ start: time, end: time, entry: entry, count: 1 });
+        }
+    }
+    // Records how the robot's last action turned out, for its program to read.
+    setActionResult(robotID, command, failure = '') {
+        this.arena.robots[robotID].lastAction = {
+            command: command,
+            status: failure ? 'failed' : 'done',
+            reason: failure,
+            time: this.gameTime,
+        };
+    }
+    // All robots' full logs as plain text.
+    fullLogText() {
+        let lines = [];
+        this.arena.robots.forEach((robot, i) => {
+            lines.push(`=== ${robot.name} ===`);
+            (this.fullLogs[i] || []).forEach(line => {
+                let when = line.count > 1 ? `${line.start}-${line.end}` : `${line.start}`;
+                let repeat = line.count > 1 ? ` (x${line.count})` : '';
+                lines.push(`${when}\t${line.entry}${repeat}`);
+            });
+            lines.push('');
+        });
+        return lines.join('\n');
     }
 }
