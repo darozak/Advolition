@@ -69,12 +69,12 @@ class Drift {
     floodDungeon(drainLocations, myData) {
         this.init(myData);
         let faucetLocation = myData.robots[myData.myID].pos;
-        let floodCycles = 5000;
+        let floodCycles = 1000;
         let faucetRate = 10;
         for (let cycle = 0; cycle < floodCycles; cycle++) {
             // Disperse water throughout dungeon.
             this.waterDepth[faucetLocation.x][faucetLocation.y] += faucetRate;
-            let temporaryDepth = structuredClone(this.waterDepth);
+            let temporaryDepth = this.waterDepth.map(column => column.slice());
             for (let i = 0; i < myData.mapSize.x; i++) {
                 for (let j = 0; j < myData.mapSize.y; j++) {
                     let averageDepth = this.getAverageDepth(i, j, myData);

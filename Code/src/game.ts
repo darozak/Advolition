@@ -122,8 +122,8 @@ class Game {
                 // Then resolve and remove any actions that are occuring now.
                 if(this.events.length > 0) {
 
-                    // Sort the events in reverse chronological order.
-                    this.events.sort((a,b) => b.duration - a.duration);
+                    // Sort the events in reverse chronological order. Ties go in random order.
+                    this.events.sort((a,b) => (b.duration - a.duration) || (a.tieBreak - b.tieBreak));
 
                     // Evaluate any events that should have occurred by now.
                     while(this.events[0].duration >= this.gameTime) {
@@ -166,7 +166,26 @@ class Game {
                 for(var i = 0; i < this.arena.robots.length; i++) {
                     this.displayRobotStats(i);
             }
+
+            // When time runs out, announce the result.
+            if(this.gameTime == 0) this.showResult();
         }
+    }
+
+    showResult() {
+        let robots = this.arena.robots;
+        if(robots.length == 0) return;
+
+        let scores = robots.map((r, i) => this.arena.getScore(i));
+        let best = Math.max(...scores);
+        let winners = robots.filter((r, i) => scores[i] == best).map(r => r.name);
+
+        let text = winners.length == 1
+            ? `GAME OVER: ${winners[0]} wins with a score of ${best}`
+            : `GAME OVER: Tie between ${winners.join(' and ')} with a score of ${best}`;
+
+        this.paper.drawBanner(10, 22, text, [255, 215, 0]);
+        console.log(text);
     }
     
     displayRobotStats(robotID: number) {

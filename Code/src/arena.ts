@@ -101,7 +101,8 @@ class Arena {
         var y = 0;
 
         if(this.robots.length > robotID) {
-            while(this.world.tiles[this.tileMap[x][y]].key != '.') {
+            // Pick an empty floor tile, so no items start on the robot's nest.
+            while(this.world.tiles[this.tileMap[x][y]].key != '.' || this.itemMap[x][y].length > 0) {
                 x = rng.getUniformInt(0,this.world.size.x-1);
                 y = rng.getUniformInt(0,this.world.size.y-1);  
             }

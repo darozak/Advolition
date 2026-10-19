@@ -87,6 +87,14 @@ class Paper {
         this.ctx.fillText(name, centerFrame, topFrame);
     }
 
+    drawBanner(leftFrame: number, topFrame: number, text: string, rgb: number[]) {
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.font = 'bold 16px Arial';
+        this.ctx.fillStyle = this.rgbStringFromArray(rgb);
+        this.ctx.textAlign = 'left';
+        this.ctx.fillText(text, leftFrame, topFrame);
+    }
+
     erasePaper() {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
