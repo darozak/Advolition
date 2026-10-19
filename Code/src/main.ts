@@ -36,7 +36,19 @@ function runGame() {
     // Evaluate the robotCodes to create a new program object.
     for(var i = 0; i < robotCodes.length; i ++) {   
       if(robotCodes[i] != 'Empty') {
-        game.addRobot(eval(robotCodes[i]) as Program, `Robot ${i + 1}`, true); 
+        // Skip a robot whose file has an error or doesn't end with `new MyProgram();`.
+        let program: any;
+        try {
+          program = eval(robotCodes[i]);
+        } catch(error) {
+          alert(`Robot ${i + 1} wasn't added because its program has an error:\n${error}`);
+          continue;
+        }
+        if(!program || typeof program.run !== 'function') {
+          alert(`Robot ${i + 1} wasn't added. Its program file must end by creating the program, for example: new MyProgram();`);
+          continue;
+        }
+        game.addRobot(program as Program, `Robot ${i + 1}`, true); 
       // } else {
       //   game.addRobot(new Target(), `Robot ${i + 1}`, false);
       } 

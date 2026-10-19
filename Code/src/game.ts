@@ -73,8 +73,19 @@ class Game {
                     this.scanData[i].robots[i].lastScan = this.gameTime;
                     this.scanData[i].gameTime = this.gameTime;
 
-                    // Let the robot run it's code.
-                    action = this.programs[i].run(structuredClone(this.scanData[i]));
+                    // Let the robot run its code. If it throws, the robot does
+                    // nothing this turn and the error goes in its log.
+                    try {
+                        action = this.programs[i].run(structuredClone(this.scanData[i]));
+                    } catch(error) {
+                        action = new Action();
+                        let entry = `Program error: ${error instanceof Error ? error.message : error}`;
+                        let robot = this.arena.robots[i];
+                        if(robot.logEntry[robot.logEntry.length - 1] != entry) {
+                            this.appendToLog(robot, this.gameTime, entry);
+                            console.error(`${robot.name}:`, error);
+                        }
+                    }
 
                         if(action) {
                             switch (action.command) {

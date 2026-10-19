@@ -77,7 +77,7 @@ For each element:
 The tile where a robot starts becomes its **nest**. A robot's score is:
 
 - the worth of all items lying on its nest, plus
-- the robot's own worth (base worth plus everything it's carrying), if it is standing on its nest.
+- the robot's own worth (base worth plus everything it's carrying), if it is standing on its nest. Other robots standing on your nest don't add to your score.
 
 Scores are shown live in each robot's panel. The highest score when time runs out wins.
 
@@ -112,7 +112,7 @@ class Starter extends Program {
 new Starter();
 ```
 
-If a program throws an error, the game stops, so it's worth wrapping risky logic in `try`/`catch`.
+If a program throws an error, that robot does nothing for that turn and the error appears in its log. If a file has an error or doesn't end by creating the program, that robot is left out of the game and a message explains why.
 
 ## Actions
 A program's `run` method returns one of these:
@@ -128,7 +128,7 @@ A program's `run` method returns one of these:
 | `new Attack(target)` | Attacks along a straight line toward the `target` Vector. |
 | `new Say(message)` | Writes a message to the robot's log. Takes no time. |
 
-Positions use the `Vector` class: `new Vector(x, y)`. It has helpers such as `add`, `subtract`, `isEqualTo`, `getDistanceTo` and `getPathTo`.
+Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` targets are rounded to the nearest whole tile. It has helpers such as `add`, `subtract`, `isEqualTo`, `getDistanceTo` and `getPathTo`.
 
 ## myData
 `run` receives a fresh copy of the robot's scan data each time. Because it is a copy, positions inside it are plain `{x, y}` objects without `Vector` methods. Use `new Vector(p.x, p.y)` if you need them.

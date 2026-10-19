@@ -28,10 +28,14 @@ class Vector {
     }
     getPathTo(destination) {
         var path = [];
-        var x0 = this.x;
-        var y0 = this.y;
-        var x1 = destination.x;
-        var y1 = destination.y;
+        var x0 = Math.round(this.x);
+        var y0 = Math.round(this.y);
+        // Round the target to a whole tile. Fractional targets would never be
+        // reached exactly and the loop below would run forever.
+        var x1 = Math.round(destination.x);
+        var y1 = Math.round(destination.y);
+        if (!Number.isFinite(x1) || !Number.isFinite(y1))
+            return [new Vector(x0, y0)];
         var dx = Math.abs(x1 - x0);
         var dy = Math.abs(y1 - y0);
         var sx = (x0 < x1) ? 1 : -1;
