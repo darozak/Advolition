@@ -30,7 +30,8 @@ class Paper {
             this.ctx.textAlign = 'right';
             this.ctx.fillText(`${robot.logTime[i]}`, centerFrame - 10, topFrame);
             this.ctx.textAlign = 'left';
-            this.ctx.fillText(robot.logEntry[i], centerFrame + 10, topFrame);
+            let repeat = robot.logRepeat[i] > 1 ? ` ×${robot.logRepeat[i]}` : '';
+            this.ctx.fillText(robot.logEntry[i] + repeat, centerFrame + 10, topFrame);
             topFrame += this.lineSpacing;
         }
     }
