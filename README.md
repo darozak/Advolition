@@ -34,7 +34,7 @@ The game lasts 10,000 ticks. `gameTime` counts down from 10,000 to 0, and the ga
 
 A robot does one action at a time. When its current action is finished, the engine calls its program again to get the next one.
 
-Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. A bare robot has a bulk of 10, and every item it carries (equipped or not) adds its own bulk. Diagonal moves take about 1.4 times as long.
+Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 10. Diagonal moves take about 1.4 times as long.
 
 If a program returns an action that can't be started (for example, equipping an item it doesn't have), nothing is queued and the program is called again on the next tick.
 
@@ -44,7 +44,7 @@ Every robot starts with:
 | Stat | Value |
 | ---- | ----- |
 | Worth | 10 |
-| Bulk | 10 |
+| Bulk | 4 |
 | Max items carried | 8 |
 | Max items equipped | 4 |
 | Passable terrain | Floor, Door, Nest |
