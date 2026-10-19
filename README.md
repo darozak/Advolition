@@ -11,7 +11,7 @@ You can play the most recent version of the game at https://darozak.github.io/Ad
 ## Playing a game
 1. Open the game page.
 2. Use the **Robot 1**–**Robot 4** buttons to upload a program file for each robot you want in the game. Empty slots are left out.
-3. Click **Run** to start a new game, or **Stop** to pause it.
+3. Click **Run** to start a new game, or **Stop** to end it. Stopping can't be undone: clicking **Run** again starts a new game.
 
 Each robot gets its own panel showing its stats, its event log, a map of what it has scanned, its inventory, and any items on the ground beneath it.
 
@@ -35,6 +35,8 @@ The game lasts 10,000 ticks. `gameTime` counts down from 10,000 to 0, and the ga
 A robot does one action at a time. When its current action is finished, the engine calls its program again to get the next one.
 
 Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 10. Diagonal moves take about 1.4 times as long.
+
+Actions that finish on the same turn happen in a random order, so no robot always goes first.
 
 If a program returns an action that can't be started (for example, equipping an item it doesn't have), nothing is queued and the program is called again on the next tick.
 
@@ -81,7 +83,9 @@ The tile where a robot starts becomes its **nest**. A robot's score is:
 - the worth of all items lying on its nest, plus
 - the robot's own worth (base worth plus everything it's carrying), if it is standing on its nest. Other robots standing on your nest don't add to your score.
 
-Scores are shown live in each robot's panel. The highest score when time runs out wins.
+Scores are shown live in each robot's panel. When time runs out, the winner (or a tie) is announced at the top of the screen.
+
+Robots always start on an empty tile, so nothing is on a nest at the start.
 
 ## Programming your robot
 A program file must define a class that extends `Program`, give it a `run` method that takes the robot's scan data and returns an action, and end with an expression that creates an instance of the class.
