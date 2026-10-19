@@ -13,7 +13,11 @@ class GaiaData extends WorldData {
         // Create Items (each item class is defined in items.ts)
         this.items.push(new Scanner());
         this.items.push(new Blaster());
-        this.items.push(new Shield());
+        this.items.push(new Railgun());
+        this.items.push(new IonGun());
+        this.items.push(new ThermalShield());
+        this.items.push(new KineticShield());
+        this.items.push(new EMShield());
         this.items.push(new Armor());
 
         console.log(this.items);

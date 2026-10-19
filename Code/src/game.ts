@@ -67,6 +67,7 @@ class Game {
             // Late game: new items appear, and destroyed robots come back.
             this.spawnItems();
             this.respawnRobots();
+            this.repairAtNests();
 
             // Ask every robot that is alive and not busy for its next action.
             // Programs run in their own sandboxes, so they think in parallel.
@@ -495,6 +496,30 @@ class Game {
         });
     }
 
+    // Equipped armor slowly repairs while its robot stands on its nest.
+    repairAtNests() {
+        let interval = this.world.nestRepairInterval;
+        if(interval <= 0 || (this.duration - this.gameTime) % interval != 0) return;
+
+        this.arena.robots.forEach(robot => {
+            if(!robot.isAlive || robot.pos.x != robot.nest.x || robot.pos.y != robot.nest.y) return;
+
+            let repaired = false;
+            robot.items.forEach(item => {
+                if(!item.isEquipped) return;
+                let original = this.world.items.find(d => d.name === item.name);
+                if(!original) return;
+                for(let e = 0; e < item.stats.armor.length; e++) {
+                    if(item.stats.armor[e] < original.stats.armor[e]) {
+                        item.stats.armor[e] ++;
+                        repaired = true;
+                    }
+                }
+            });
+            if(repaired) this.equipItems(robot);
+        });
+    }
+
     // Stops every robot's program.
     stop() {
         this.programs.forEach(program => program.stop());
@@ -530,19 +555,37 @@ class Game {
             if(!this.world.tiles[tileID].transparent) break;
         }
 
+        // A shot that hits nobody is logged as a miss.
+        if(targetID < 0) {
+            this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Misses its shot at ${new Vector(action.action.target.x, action.action.target.y).print()}`);
+        }
+
         // Inflict damage on robot if there is one in path.
         if(targetID >= 0) {
             let attacker = this.arena.robots[action.robotID];
             let defender = this.arena.robots[targetID];
 
-            // Write to event log.
-            this.appendToLog(attacker, this.gameTime, `attacks ${defender.name}`);
-
-            // Shields block part of each element's attack.
+            // Shields block part of each element's attack, but never more
+            // than maxShieldBlock of it, so every hit does some damage.
             let damage: number[] = [];
             for(let i = 0; i < defender.stats.elements.length; i ++) {
-                damage.push(Math.max(0, attacker.stats.attack[i] - defender.stats.shield[i]));
+                let attack = attacker.stats.attack[i];
+                let blocked = Math.min(defender.stats.shield[i], Math.floor(attack * this.world.maxShieldBlock));
+                damage.push(Math.max(0, attack - blocked));
             }
+            let total = damage.reduce((a, b) => a + b, 0);
+
+            // Both robots learn about the hit. The defender also learns who
+            // fired and from where, even if it can't see the attacker.
+            this.appendToLog(attacker, this.gameTime, `attacks ${defender.name} for ${total} damage`);
+            this.appendToLog(defender, this.gameTime, `Hit by ${attacker.name} for ${total} damage`);
+            defender.lastHit = {
+                attackerID: action.robotID,
+                attackerName: attacker.name,
+                from: new Vector(attacker.pos.x, attacker.pos.y),
+                time: this.gameTime,
+                damage: damage.slice(),
+            };
 
             // Equipped armor absorbs the rest and wears down as it does.
             for(let i = 0; i < defender.items.length; i ++) {
@@ -572,7 +615,7 @@ class Game {
                 this.events = this.events.filter(e => e.robotID != targetID);
 
                 // Write to event log.
-                this.appendToLog(defender, this.gameTime, `dies :(`);
+                this.appendToLog(defender, this.gameTime, `dies :( destroyed by ${attacker.name}`);
             }
         }
     }

@@ -25,12 +25,47 @@ class Blaster extends Item {
         this.stats.attack[1] = 4; // Thermal
     }
 }
-class Shield extends Item {
+// Weapons: one per element. Heavier weapons hit harder.
+class Railgun extends Item {
     constructor() {
-        super('Shield', new Stats());
-        this.stats.worth = 5;
+        super('Railgun', new Stats());
+        this.stats.worth = 25;
         this.stats.bulk = 4;
-        this.stats.shield[1] = 1; // Thermal
+        this.stats.attack[0] = 6; // Kinetic
+    }
+}
+class IonGun extends Item {
+    constructor() {
+        super('Ion Gun', new Stats());
+        this.stats.worth = 15;
+        this.stats.bulk = 1;
+        this.stats.attack[2] = 3; // ElectroMagnetic
+    }
+}
+// Shields: one per element. A shield blocks part of every hit of its
+// element, but never more than half of it (see Game.resolveAttack).
+class ThermalShield extends Item {
+    constructor() {
+        super('Thermal Shield', new Stats());
+        this.stats.worth = 8;
+        this.stats.bulk = 2;
+        this.stats.shield[1] = 2; // Thermal
+    }
+}
+class KineticShield extends Item {
+    constructor() {
+        super('Kinetic Shield', new Stats());
+        this.stats.worth = 8;
+        this.stats.bulk = 2;
+        this.stats.shield[0] = 3; // Kinetic
+    }
+}
+class EMShield extends Item {
+    constructor() {
+        super('EM Shield', new Stats());
+        this.stats.worth = 8;
+        this.stats.bulk = 2;
+        this.stats.shield[2] = 2; // ElectroMagnetic
     }
 }
 class Armor extends Item {

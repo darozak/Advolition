@@ -60,8 +60,14 @@ A robot's stats are its base stats plus the stats of all its equipped items. Wor
 | ---- | ----- | ---- | -------------------- |
 | Scanner | 10 | 3 | Scan range +4 |
 | Blaster | 20 | 2 | Thermal attack +4 |
-| Shield | 5 | 4 | Thermal shield +1 |
+| Railgun | 25 | 4 | Kinetic attack +6 |
+| Ion Gun | 15 | 1 | ElectroMagnetic attack +3 |
+| Thermal Shield | 8 | 2 | Thermal shield +2 |
+| Kinetic Shield | 8 | 2 | Kinetic shield +3 |
+| EM Shield | 8 | 2 | ElectroMagnetic shield +2 |
 | Armor | 6 | 1 | 60 armor against each element |
+
+Every robot starts with a Blaster, a Scanner and Armor. The other items are only found in the dungeon.
 
 Without an equipped Scanner, a robot's scan range is 0.
 
@@ -72,10 +78,18 @@ There are three damage elements: **Kinetic**, **Thermal** and **ElectroMagnetic*
 
 An attack travels in a straight line toward the target position and hits the first robot in its path. Walls and doors block it, but a robot standing in a doorway can still be hit. There is no range limit.
 
-For each element:
-1. The defender's **shield** is subtracted from the attacker's **attack**.
+An attack fires all of the attacker's equipped weapons at once. For each element:
+1. The defender's **shield** for that element blocks part of the attack, but never more than half of it. Every hit does some damage, and a second shield of the same element only helps against stronger attacks.
 2. The defender's equipped **armor** absorbs what's left. Armor wears down by the amount it absorbs, so it eventually runs out.
 3. If any damage gets past the armor, the defender is destroyed. It drops all of its items where it stood and is removed from the map.
+
+Because shields only work against their own element, it pays to check an enemy's shields (they show up when you scan it) and fire a weapon they don't block. For example, it takes 16 Blaster hits to destroy a robot with Armor, 31 if that robot also has a Thermal Shield, or 11 Railgun hits either way.
+
+Both robots are told about every hit:
+- The attacker's log shows the damage it did, and its missed shots.
+- The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired and from where, even if the attacker is outside its scan range.
+
+While a robot stands on its nest, its equipped armor repairs by 1 point per element every 5 turns, up to the item's original armor.
 
 A destroyed robot respawns at its nest 500 turns later, with no items. It waits if another robot is standing on its nest. Items it banked on its nest are still there to pick up again.
 
@@ -174,6 +188,7 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 | `baseStats` | Stats | Stats with no items equipped. |
 | `items` | Item[] | Inventory. Equipped items come first. |
 | `lastScan` | number | The `gameTime` when this data was recorded. |
+| `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position), `time` and `damage` (per element, after shields). `null` until it is first hit. |
 
 ### Stats
 Arrays indexed by element use 0 = Kinetic, 1 = Thermal, 2 = ElectroMagnetic.
@@ -205,13 +220,15 @@ Arrays indexed by element use 0 = Kinetic, 1 = Thermal, 2 = ElectroMagnetic.
 | `transparent` | boolean | True if scans and attacks can pass through. |
 
 ## Tuning the game
-The late-game settings are on `WorldData` in `Code/src/hardware.ts`:
+The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 
 | Setting | Default | What it does |
 | ------- | ------- | ------------ |
 | `startingItems` | 10 | Items on the map at the start. |
 | `itemSpawnInterval` | 500 | Turns between new random items. 0 turns this off. |
 | `respawnDelay` | 500 | Turns before a destroyed robot respawns. 0 turns respawning off. |
+| `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |
+| `nestRepairInterval` | 5 | Turns per point of armor repaired on the nest. 0 turns repair off. |
 
 ## Building from source
 The game is written in TypeScript in `Code/src/` and compiled to `Code/dist/`, which `index.html` loads directly. To rebuild after changing the source:

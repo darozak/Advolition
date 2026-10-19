@@ -124,6 +124,12 @@ class WorldData {
     startingItems = 10;
     itemSpawnInterval = 500;
     respawnDelay = 500;
+    // Combat settings. A shield can block at most this fraction of each
+    // element's damage per hit. While a robot stands on its nest, its
+    // equipped armor regains 1 point per element every nestRepairInterval
+    // ticks, up to the item's original armor (0 turns repair off).
+    maxShieldBlock = 0.5;
+    nestRepairInterval = 5;
     constructor() {
     }
 }
