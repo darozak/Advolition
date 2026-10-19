@@ -118,6 +118,12 @@ class WorldData {
     tiles = [];
     items = [];
     robots = [];
+    // Late-game settings (in ticks). A new random item appears every
+    // itemSpawnInterval ticks, and a destroyed robot comes back at its nest
+    // respawnDelay ticks after it died. Set either to 0 to turn it off.
+    startingItems = 10;
+    itemSpawnInterval = 500;
+    respawnDelay = 500;
     constructor() {
     }
 }

@@ -9,6 +9,7 @@ class RobotData {
     lastScan: number = 0;
     robotID: number;
     isAlive: boolean = true;
+    deathTime = -1;         // gameTime when the robot was destroyed
     name: string;
     isDisplayed: boolean;
     pos = new Vector(0, 0);

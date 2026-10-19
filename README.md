@@ -27,7 +27,7 @@ Each game builds a new 25×25 dungeon of rooms and corridors. Every grid space i
 | Door | `+` | Yes | No |
 | Nest | `@` | Yes | Yes |
 
-A grid space can hold one robot and any number of items. Ten random items are scattered on floor tiles at the start of each game.
+A grid space can hold one robot and any number of items. Ten random items are scattered on floor tiles at the start of each game, and a new random item appears somewhere on the floor every 500 turns.
 
 ## Time
 The game lasts 10,000 ticks. `gameTime` counts down from 10,000 to 0, and the game stops at 0.
@@ -75,7 +75,9 @@ An attack travels in a straight line toward the target position and hits the fir
 For each element:
 1. The defender's **shield** is subtracted from the attacker's **attack**.
 2. The defender's equipped **armor** absorbs what's left. Armor wears down by the amount it absorbs, so it eventually runs out.
-3. If any damage gets past the armor, the defender dies. It drops all of its items where it stood and is removed from the map.
+3. If any damage gets past the armor, the defender is destroyed. It drops all of its items where it stood and is removed from the map.
+
+A destroyed robot respawns at its nest 500 turns later, with no items. It waits if another robot is standing on its nest. Items it banked on its nest are still there to pick up again.
 
 ## Scoring
 The tile where a robot starts becomes its **nest**. A robot's score is:
@@ -85,7 +87,7 @@ The tile where a robot starts becomes its **nest**. A robot's score is:
 
 Scores are shown live in each robot's panel. When time runs out, the winner (or a tie) is announced at the top of the screen.
 
-Robots always start on an empty tile, so nothing is on a nest at the start.
+Starting positions are spread out: each nest is placed as far as possible (by walking distance) from the others, out of their line of sight, and on an empty tile.
 
 ## Programming your robot
 A program file must define a class that extends `Program`, give it a `run` method that takes the robot's scan data and returns an action, and end with an expression that creates an instance of the class.
@@ -201,6 +203,15 @@ Arrays indexed by element use 0 = Kinetic, 1 = Thermal, 2 = ElectroMagnetic.
 | `name` | string | `Floor`, `Wall`, `Door` or `Nest`. |
 | `key` | string | The map character for the tile. |
 | `transparent` | boolean | True if scans and attacks can pass through. |
+
+## Tuning the game
+The late-game settings are on `WorldData` in `Code/src/hardware.ts`:
+
+| Setting | Default | What it does |
+| ------- | ------- | ------------ |
+| `startingItems` | 10 | Items on the map at the start. |
+| `itemSpawnInterval` | 500 | Turns between new random items. 0 turns this off. |
+| `respawnDelay` | 500 | Turns before a destroyed robot respawns. 0 turns respawning off. |
 
 ## Building from source
 The game is written in TypeScript in `Code/src/` and compiled to `Code/dist/`, which `index.html` loads directly. To rebuild after changing the source:

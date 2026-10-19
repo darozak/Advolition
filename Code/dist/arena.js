@@ -59,34 +59,87 @@ class Arena {
             }
         }
         // Place items
-        let totalItems = 10;
-        for (var i = 0; i < totalItems; i++) {
-            let x = 0;
-            let y = 0;
-            let keepLooking = true;
-            // Find a random floor tile to place the item.
-            while (keepLooking) {
-                x = rng.getUniformInt(0, this.world.size.x - 1);
-                y = rng.getUniformInt(0, this.world.size.y - 1);
-                let tileID = this.tileMap[x][y];
-                if (tileID >= 0) {
-                    keepLooking = this.world.tiles[tileID].key != '.';
+        for (var i = 0; i < this.world.startingItems; i++)
+            this.spawnItem();
+    }
+    // Places a random item on a random floor tile (never on a nest).
+    spawnItem() {
+        let x = 0;
+        let y = 0;
+        while (this.world.tiles[this.tileMap[x][y]].key != '.') {
+            x = rng.getUniformInt(0, this.world.size.x - 1);
+            y = rng.getUniformInt(0, this.world.size.y - 1);
+        }
+        let item = rng.getUniformInt(0, this.world.items.length - 1);
+        this.itemMap[x][y].push(structuredClone(this.world.items[item]));
+        return new Vector(x, y);
+    }
+    // Walking distance (in steps) from one tile to every other tile.
+    walkingDistances(from) {
+        let size = this.world.size;
+        let distance = [];
+        for (let i = 0; i < size.x; i++)
+            distance[i] = new Array(size.y).fill(Infinity);
+        distance[from.x][from.y] = 0;
+        let queue = [from];
+        for (let k = 0; k < queue.length; k++) {
+            let here = queue[k];
+            for (let dx = -1; dx <= 1; dx++) {
+                for (let dy = -1; dy <= 1; dy++) {
+                    let x = here.x + dx, y = here.y + dy;
+                    if (x < 0 || y < 0 || x >= size.x || y >= size.y)
+                        continue;
+                    if (this.world.tiles[this.tileMap[x][y]].key == '#')
+                        continue;
+                    if (distance[x][y] > distance[here.x][here.y] + 1) {
+                        distance[x][y] = distance[here.x][here.y] + 1;
+                        queue.push(new Vector(x, y));
+                    }
                 }
             }
-            // Place a random item at this location.
-            let item = (rng.getUniformInt(0, this.world.items.length - 1));
-            this.itemMap[x][y].push(structuredClone(this.world.items[item]));
         }
+        return distance;
     }
     placeRobot(robotID) {
         var x = 0;
         var y = 0;
         if (this.robots.length > robotID) {
-            // Pick an empty floor tile, so no items start on the robot's nest.
-            while (this.world.tiles[this.tileMap[x][y]].key != '.' || this.itemMap[x][y].length > 0) {
-                x = rng.getUniformInt(0, this.world.size.x - 1);
-                y = rng.getUniformInt(0, this.world.size.y - 1);
+            // Candidates are empty floor tiles, so no items start on a nest.
+            let candidates = [];
+            for (let i = 0; i < this.world.size.x; i++) {
+                for (let j = 0; j < this.world.size.y; j++) {
+                    if (this.world.tiles[this.tileMap[i][j]].key == '.' && this.itemMap[i][j].length == 0) {
+                        candidates.push(new Vector(i, j));
+                    }
+                }
             }
+            // Score each candidate by its walking distance to the nearest
+            // existing nest, and note whether any existing nest can see it.
+            let nests = this.robots.slice(0, robotID).map(r => r.nest);
+            let nearest = candidates.map(() => Infinity);
+            let seen = candidates.map(() => false);
+            nests.forEach(nest => {
+                let distance = this.walkingDistances(nest);
+                let visible = this.fov.compute(nest.x, nest.y, this.world.size.x + this.world.size.y, this.mask);
+                candidates.forEach((c, k) => {
+                    nearest[k] = Math.min(nearest[k], distance[c.x][c.y]);
+                    if (visible[c.x][c.y] > 0)
+                        seen[k] = true;
+                });
+            });
+            // Prefer tiles no other nest can see, then pick at random among
+            // those at least 75% as far away as the farthest one.
+            let hidden = candidates.map((c, k) => k).filter(k => !seen[k]);
+            let pool = hidden.length > 0 ? hidden : candidates.map((c, k) => k);
+            let reachable = pool.filter(k => nearest[k] < Infinity);
+            if (reachable.length > 0)
+                pool = reachable;
+            let farthest = Math.max(...pool.map(k => nearest[k]));
+            if (farthest < Infinity)
+                pool = pool.filter(k => nearest[k] >= 0.75 * farthest);
+            let pick = candidates[pool[rng.getUniformInt(0, pool.length - 1)]];
+            x = pick.x;
+            y = pick.y;
             this.robots[robotID].nest.x = x;
             this.robots[robotID].nest.y = y;
             let tileID = this.world.tiles.findLastIndex(d => d.key === '@');

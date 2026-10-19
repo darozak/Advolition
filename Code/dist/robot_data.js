@@ -6,6 +6,7 @@ class RobotData {
     lastScan = 0;
     robotID;
     isAlive = true;
+    deathTime = -1; // gameTime when the robot was destroyed
     name;
     isDisplayed;
     pos = new Vector(0, 0);
