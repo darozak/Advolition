@@ -87,7 +87,7 @@ class Arena {
                 y = rng.getUniformInt(0, this.world.size.y - 1);
             }
             this.robots[robotID].nest.x = x;
-            this.robots[robotID].nest.x = y;
+            this.robots[robotID].nest.y = y;
             let tileID = this.world.tiles.findLastIndex(d => d.key === '@');
             this.tileMap[x][y] = tileID;
         }
