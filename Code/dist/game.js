@@ -14,7 +14,6 @@ class Game {
     coreColor = [];
     scannerColor = [];
     batteryColor = [];
-    eventLog = document.getElementById("myTextarea");
     constructor(world, duration) {
         this.gameTime = duration;
         this.world = world;
@@ -54,6 +53,7 @@ class Game {
                     this.scanData[i].robots[i] = structuredClone(this.arena.robots[i]);
                     this.scanData[i].robots[i].lastScan = this.gameTime;
                     this.scanData[i].gameTime = this.gameTime;
+                    this.scanData[i].robotCount = this.programs.length;
                     // Let the robot run its code. If it throws, the robot does
                     // nothing this turn and the error goes in its log.
                     try {
@@ -208,8 +208,8 @@ class Game {
             let leftMapFrame = leftDisplayFrame + attributeDisplayWidth;
             let topMapFrame = topDisplayFrame;
             // Cycle through all the tiles in the scan display box.
-            for (var i = x0; i < x1; i++) {
-                for (var j = y0; j < y1; j++) {
+            for (var i = x0; i <= x1; i++) {
+                for (var j = y0; j <= y1; j++) {
                     var tileScanID = -1;
                     var itemScanCount = 0;
                     var robotScanID = -1;
