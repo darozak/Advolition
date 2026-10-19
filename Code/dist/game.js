@@ -316,51 +316,48 @@ class Game {
             // Abort attack if blocked by tile.
             if (!this.world.tiles[tileID].transparent)
                 break;
-            // Redirect attack if blocked by robot.
-            if (robotID >= 0) {
+            // Redirect attack if blocked by robot (other than the attacker).
+            if (robotID >= 0 && robotID != action.robotID) {
                 targetID = robotID;
                 break;
             }
         }
         // Inflict damage on robot if there is one in path.
         if (targetID >= 0) {
-            let damage = [];
             let attacker = this.arena.robots[action.robotID];
             let defender = this.arena.robots[targetID];
-            // Apply shields.
+            // Write to event log.
+            this.appendToLog(attacker, this.gameTime, `attacks ${defender.name}`);
+            // Shields block part of each element's attack.
+            let damage = [];
             for (let i = 0; i < defender.stats.elements.length; i++) {
-                if (attacker.stats.attack[i] > defender.stats.shield[i])
-                    damage.push(attacker.stats.attack[i] - defender.stats.shield[i]);
+                damage.push(Math.max(0, attacker.stats.attack[i] - defender.stats.shield[i]));
             }
-            for (var i = 0; i < defender.items.length; i++) {
-                if (defender.items[i].isEquipped) {
-                    for (var j = 0; j < defender.stats.elements.length; j++) {
-                        if (damage[j] <= defender.items[i].stats.armor[j]) {
-                            // Item absorbes all remaining damage.
-                            defender.items[i].stats.attack[j] -= damage[j];
-                            defender.stats.attack[j] -= damage[j];
-                            damage[j] = 0;
-                        }
-                        else {
-                            // Item only absorbes some of the remaining damage.
-                            damage[j] -= defender.items[i].stats.attack[j];
-                            defender.stats.attack[j] -= defender.items[i].stats.attack[j];
-                            defender.items[i].stats.attack[j] = 0;
-                        }
-                    }
-                    if (damage[j] > 0) {
-                        // Robot has taken excess damage and is dead.
-                        defender.isAlive = false;
-                        // Drop items
-                        while (defender.items.length > 0)
-                            this.dropItem(defender, 0);
-                        // Write to event log.
-                        this.appendToLog(defender, this.gameTime, `dies :(`);
-                    }
+            // Equipped armor absorbs the rest and wears down as it does.
+            for (let i = 0; i < defender.items.length; i++) {
+                let item = defender.items[i];
+                if (!item.isEquipped)
+                    continue;
+                for (let j = 0; j < defender.stats.elements.length; j++) {
+                    let absorbed = Math.min(damage[j], item.stats.armor[j]);
+                    item.stats.armor[j] -= absorbed;
+                    damage[j] -= absorbed;
                 }
             }
-            // Write to event log.
-            this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `attacks ${this.arena.robots[targetID].name}`);
+            // Recompute the defender's stats from its worn-down items.
+            this.equipItems(defender);
+            // Any damage the armor couldn't absorb kills the robot.
+            if (damage.some(d => d > 0)) {
+                defender.isAlive = false;
+                // Drop items and clear the robot from the map.
+                while (defender.items.length > 0)
+                    this.dropItem(defender, 0);
+                this.arena.robotMap[defender.pos.x][defender.pos.y] = -1;
+                // Cancel any actions it still had queued.
+                this.events = this.events.filter(e => e.robotID != targetID);
+                // Write to event log.
+                this.appendToLog(defender, this.gameTime, `dies :(`);
+            }
         }
     }
     requestMove(robotID, action) {

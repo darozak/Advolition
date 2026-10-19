@@ -71,7 +71,7 @@ class Arena {
         }
 
         // Place items
-        let totalItems = 1;
+        let totalItems = 10;
 
         for(var i = 0; i < totalItems; i ++) {
             let x = 0;
@@ -87,13 +87,12 @@ class Arena {
 
                 if(tileID >= 0) {
                     keepLooking = this.world.tiles[tileID].key != '.';
-                    console.log(tileID);
                 }
             }
 
             // Place a random item at this location.
             let item = (rng.getUniformInt(0, this.world.items.length - 1));
-            this.itemMap[x][y].push(structuredClone(this.world.items[i]));
+            this.itemMap[x][y].push(structuredClone(this.world.items[item]));
         }
     }
 
