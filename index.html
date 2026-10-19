@@ -22,6 +22,16 @@
   <button id="stop" onclick="stopGame()">Stop</button>
   <button id="logs" onclick="downloadLogs()">Download logs</button> <br>
 
+  <button id="pause" onclick="togglePause()">Pause</button>
+  <b>Speed: </b>
+  <select id="speed" onchange="setSpeed(this.value)">
+    <option value="1">1x</option>
+    <option value="2">2x</option>
+    <option value="5">5x</option>
+    <option value="20">20x</option>
+    <option value="100">100x</option>
+  </select> <br>
+
 
   
   <div style="display:none;">

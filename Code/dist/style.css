@@ -43,6 +43,17 @@ input[type=file]::file-selector-button {
     font-size: 12px;
   }
 
+  /* Buttons with longer labels size to fit. */
+  button#logs, button#pause {
+    width: auto;
+    padding: 1px 8px;
+    margin-right: 8px;
+  }
+
+  select {
+    font-size: 12px;
+  }
+
   button:hover {
     /* background-color: #688eb6; */
     /* border: 2px solid #00cec9; */

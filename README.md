@@ -14,7 +14,14 @@ You can play the most recent version of the game at https://darozak.github.io/Ad
 3. Click **Run** to start a new game, or **Stop** to end it. Stopping can't be undone: clicking **Run** again starts a new game.
 4. Click **Download logs** at any point to save every robot's full log from the current or last game as a text file.
 
-Each robot gets its own panel showing its stats, its event log, a map of what it has scanned, its inventory, and any items on the ground beneath it.
+5. Use **Pause** and **Speed** (1x to 100x) to control playback.
+
+The top of the screen is the spectator view:
+- **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit).
+- **A scoreboard**, sorted by score. It shows each robot's score, the worth banked on its nest, the worth it's carrying, its kills and deaths, and whether it's home, out exploring, or waiting to respawn.
+- **An events feed** of kills and respawns.
+
+Below that, each robot has its own panel showing its stats, its event log, a map of what it has scanned (the robot only knows what's on this map), its inventory, and any items on the ground beneath it.
 
 A sample robot is included at [`Samples/gatherer.js`](Samples/gatherer.js). It explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot. An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
