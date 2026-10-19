@@ -1,5 +1,6 @@
 class Game {
     gameTime: number;
+    duration: number;
     world: WorldData;
     arena: Arena;
     events: GameEvent[] = [];
@@ -18,6 +19,7 @@ class Game {
     
     constructor(world: WorldData, duration: number) {
         this.gameTime = duration;
+        this.duration = duration;
         this.world = world;
 
         this.arena = new Arena(this.world);
@@ -61,6 +63,10 @@ class Game {
 
             // Decrement game time
             this.gameTime --; 
+
+            // Late game: new items appear, and destroyed robots come back.
+            this.spawnItems();
+            this.respawnRobots();
 
             // Ask every robot that is alive and not busy for its next action.
             // Programs run in their own sandboxes, so they think in parallel.
@@ -466,6 +472,29 @@ class Game {
         return action;
     }
 
+    // Every itemSpawnInterval ticks, place a new random item on the map.
+    spawnItems() {
+        let interval = this.world.itemSpawnInterval;
+        let elapsed = this.duration - this.gameTime;
+        if(interval > 0 && elapsed > 0 && elapsed % interval == 0) this.arena.spawnItem();
+    }
+
+    // Bring destroyed robots back at their nest after respawnDelay ticks,
+    // with no items. They wait if another robot is standing on the nest.
+    respawnRobots() {
+        if(this.world.respawnDelay <= 0) return;
+        this.arena.robots.forEach((robot, i) => {
+            if(robot.isAlive || this.gameTime > robot.deathTime - this.world.respawnDelay) return;
+            if(this.arena.robotMap[robot.nest.x][robot.nest.y] >= 0) return;
+
+            robot.isAlive = true;
+            robot.pos = new Vector(robot.nest.x, robot.nest.y);
+            this.arena.robotMap[robot.pos.x][robot.pos.y] = i;
+            this.equipItems(robot);
+            this.appendToLog(robot, this.gameTime, 'Respawns at its nest');
+        });
+    }
+
     // Stops every robot's program.
     stop() {
         this.programs.forEach(program => program.stop());
@@ -533,6 +562,7 @@ class Game {
             // Any damage the armor couldn't absorb kills the robot.
             if(damage.some(d => d > 0)) {
                 defender.isAlive = false;
+                defender.deathTime = this.gameTime;
 
                 // Drop items and clear the robot from the map.
                 while(defender.items.length > 0) this.dropItem(defender, 0);
