@@ -10,15 +10,15 @@
   <p>ADVOLITION (<a href="https://github.com/darozak/Advolition">Learn how to play!</a>) </p>
 
   <b>Robot 1: </b>
-  <input type="file" onchange="loadFile(0)"/>
+  <input type="file" onchange="loadFile(0, this)"/>
   <b>Robot 3: </b>
-  <input type="file" onchange="loadFile(2)"/> 
+  <input type="file" onchange="loadFile(2, this)"/> 
   <button  id="run" onclick="runGame()">Run</button>  <br>
 
   <b>Robot 2: </b>
-  <input type="file" onchange="loadFile(1)"/>
+  <input type="file" onchange="loadFile(1, this)"/>
   <b>Robot 4: 
-  <input type="file" onchange="loadFile(3)"/>
+  <input type="file" onchange="loadFile(3, this)"/>
   <button id="stop" onclick="stopGame()">Stop</button> </br>
 
 
