@@ -56,10 +56,10 @@ A robot's stats are its base stats plus the stats of all its equipped items. Wor
 ## Items
 | Item | Worth | Bulk | Effect when equipped |
 | ---- | ----- | ---- | -------------------- |
-| Scanner | 10 | 9 | Scan range +4 |
-| Blaster | 20 | 6 | Thermal attack +4 |
-| Shield | 5 | 11 | Thermal shield +1 |
-| Armor | 6 | 4 | 60 armor against each element |
+| Scanner | 10 | 3 | Scan range +4 |
+| Blaster | 20 | 2 | Thermal attack +4 |
+| Shield | 5 | 4 | Thermal shield +1 |
+| Armor | 6 | 1 | 60 armor against each element |
 
 Without an equipped Scanner, a robot's scan range is 0.
 
