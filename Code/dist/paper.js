@@ -11,7 +11,7 @@ class Paper {
     constructor(lineSpacing) {
         this.canvas = document.getElementById('canvas');
         this.image = document.getElementById('sprites');
-        this.CANVAS_HEIGHT = this.canvas.height = 600;
+        this.CANVAS_HEIGHT = this.canvas.height = 960;
         this.CANVAS_WIDTH = this.canvas.width = 1500;
         this.ctx = this.canvas.getContext('2d');
         this.lineSpacing = lineSpacing;
@@ -80,9 +80,72 @@ class Paper {
         this.ctx.fillStyle = "black";
         this.ctx.fillRect(0, 0, this.CANVAS_WIDTH, this.CANVAS_HEIGHT);
     }
-    drawFrame(x, y, xsize, ysize) {
-        this.ctx.strokeStyle = "green";
+    drawFrame(x, y, xsize, ysize, rgb = [0, 128, 0]) {
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = this.rgbStringFromArray(rgb);
         this.ctx.strokeRect(x, y, xsize, ysize);
+    }
+    // Draws one sprite from the sprite sheet at any size.
+    drawSprite(left, top, sprite, size, alpha = 1) {
+        const s = this.spriteTileSize;
+        this.ctx.globalAlpha = alpha;
+        this.ctx.drawImage(this.image, s * sprite.x, s * sprite.y, s, s, left, top, size, size);
+        this.ctx.globalAlpha = 1.0;
+    }
+    drawText(x, y, text, rgb, align = 'left', font = '12px Arial', alpha = 1) {
+        this.ctx.globalAlpha = alpha;
+        this.ctx.font = font;
+        this.ctx.textAlign = align;
+        this.ctx.fillStyle = this.rgbStringFromArray(rgb);
+        this.ctx.fillText(text, x, y);
+        this.ctx.globalAlpha = 1.0;
+    }
+    // A robot: a filled circle in its colour with its number on it.
+    drawRobotDot(centerX, centerY, radius, rgb, label, alpha = 1) {
+        this.ctx.globalAlpha = alpha;
+        this.ctx.fillStyle = this.rgbStringFromArray(rgb);
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        this.ctx.fill();
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = 'black';
+        this.ctx.stroke();
+        this.ctx.fillStyle = 'black';
+        this.ctx.font = `bold ${Math.round(radius * 1.4)}px Arial`;
+        this.ctx.textAlign = 'center';
+        this.ctx.textBaseline = 'middle';
+        this.ctx.fillText(label, centerX, centerY + 0.5);
+        this.ctx.textBaseline = 'alphabetic';
+        this.ctx.globalAlpha = 1.0;
+    }
+    drawRing(centerX, centerY, radius, rgb, alpha = 1) {
+        this.ctx.globalAlpha = alpha;
+        this.ctx.strokeStyle = this.rgbStringFromArray(rgb);
+        this.ctx.lineWidth = 2;
+        this.ctx.beginPath();
+        this.ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        this.ctx.stroke();
+        this.ctx.lineWidth = 1;
+        this.ctx.globalAlpha = 1.0;
+    }
+    drawLine(x1, y1, x2, y2, rgb, alpha = 1, width = 2) {
+        this.ctx.globalAlpha = alpha;
+        this.ctx.strokeStyle = this.rgbStringFromArray(rgb);
+        this.ctx.lineWidth = width;
+        this.ctx.beginPath();
+        this.ctx.moveTo(x1, y1);
+        this.ctx.lineTo(x2, y2);
+        this.ctx.stroke();
+        this.ctx.lineWidth = 1;
+        this.ctx.globalAlpha = 1.0;
+    }
+    drawSquare(x, y, size, rgb, width = 2) {
+        this.ctx.globalAlpha = 1.0;
+        this.ctx.strokeStyle = this.rgbStringFromArray(rgb);
+        this.ctx.lineWidth = width;
+        this.ctx.strokeRect(x, y, size, size);
+        this.ctx.lineWidth = 1;
     }
     rgbStringFromArray(array) {
         while (array.length < 3)

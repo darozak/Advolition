@@ -8,6 +8,15 @@ class Game {
     // Every log entry for each robot, for downloading after a game.
     // Repeats in a row are collapsed into one line with a count.
     fullLogs: { start: number, end: number, entry: string, count: number }[][] = [];
+
+    // For the spectator view: each robot's colour, kills and deaths, recent
+    // events (kills and respawns), and recent shots to draw on the map.
+    static robotColours = [[235, 87, 87], [86, 156, 255], [96, 205, 110], [240, 200, 60]];
+    kills: number[] = [];
+    deaths: number[] = [];
+    events_feed: { time: number, text: string, rgb: number[] }[] = [];
+    shots: { from: Vector, to: Vector, time: number, rgb: number[], hit: boolean }[] = [];
+    panelTop = 370;     // where the robot panels start, below the spectator view
     programs: Bot[] = [];
     scanData: ScanData[] = [];
     paper: Paper;
@@ -51,6 +60,8 @@ class Game {
 
         // Equip items
         this.equipItems(this.arena.robots[robotID]);
+        this.kills.push(0);
+        this.deaths.push(0);
 
         this.powerColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
         this.hpsColor.push(new RampedArray([180, 180, 180], [235, 64, 52], [3, 3, 3]));
@@ -60,7 +71,9 @@ class Game {
         this.batteryColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
     }
 
-    async run() { 
+    // Plays one tick. Pass draw = false to skip redrawing the screen (used to
+    // play faster than one frame per tick); the final tick is always drawn.
+    async run(draw: boolean = true) { 
         
 
         if(this.gameTime > 0) {
@@ -193,11 +206,14 @@ class Game {
                 } 
             
 
-                // Every frame, redraw the game window.
-                this.paper.erasePaper();
-                for(var i = 0; i < this.arena.robots.length; i++) {
-                    this.displayRobotStats(i);
-            }
+                // Redraw the game window.
+                if(draw || this.gameTime == 0) {
+                    this.paper.erasePaper();
+                    this.displaySpectator();
+                    for(var i = 0; i < this.arena.robots.length; i++) {
+                        this.displayRobotStats(i);
+                    }
+                }
 
             // When time runs out, announce the result.
             if(this.gameTime == 0) this.showResult();
@@ -234,7 +250,7 @@ class Game {
                 if(this.arena.robots[i].isDisplayed) leftDisplayFrame += (robotDisplayWidth + 10);
             }
 
-            var topDisplayFrame = 35;
+            var topDisplayFrame = this.panelTop;
             var lineSpacing = 15;
             
             var x0 = this.arena.robots[robotID].pos.x - mapRadius;
@@ -250,14 +266,17 @@ class Game {
             let centerTextFrame = leftDisplayFrame + 120;
             let topTextFrame = topDisplayFrame + 10;
 
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Robot ID', robotID, statRGB, true);
+            // The robot's name, in its colour.
+            this.paper.drawText(leftDisplayFrame + 10, topTextFrame, this.arena.robots[robotID].name, this.colourOf(robotID), 'left', 'bold 14px Arial');
+            topTextFrame += lineSpacing;
 
             topTextFrame += lineSpacing * 0.5; 
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB, false);
 
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.arena.getScore(robotID), statRGB, true);
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Worth', this.arena.robots[robotID].stats.worth, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Banked', this.bankedWorth(robotID), statRGB, true);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Carrying', this.carriedWorth(robotID), statRGB, true);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.arena.robots[robotID].stats.bulk, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Action Time', this.arena.robots[robotID].stats.getActionTime(), statRGB, false);
 
@@ -351,37 +370,36 @@ class Game {
 
                     // Draw robot.
                     if(robotScanID >= 0) {
-                        this.paper.drawTile(
-                            leftMapFrame,
-                            topMapFrame,
-                            this.arena.robots[robotScanID].sprite,
-                            new Vector(i-x0, j-y0),
-                            robotAlpha,
-                            false);
+                        this.paper.drawRobotDot(
+                            leftMapFrame + (i - x0 + 0.5) * spriteWidth,
+                            topMapFrame + (j - y0 + 0.5) * spriteWidth,
+                            spriteWidth * 0.5,
+                            this.colourOf(robotScanID),
+                            `${robotScanID + 1}`,
+                            robotAlpha);
                     }
                 }
             }
         
             // Draw self in center of map.
             if(this.arena.robots[robotID].isAlive) {
-                this.paper.drawTile(
-                    leftMapFrame, 
-                    topMapFrame,
-                    this.arena.robots[robotID].sprite, 
-                    new Vector(mapRadius, mapRadius), 
-                    1,
-                    true);
+                this.paper.drawRobotDot(
+                    leftMapFrame + (mapRadius + 0.5) * spriteWidth,
+                    topMapFrame + (mapRadius + 0.5) * spriteWidth,
+                    spriteWidth * 0.6,
+                    this.colourOf(robotID),
+                    `${robotID + 1}`);
             } else {
                 
                 topTextFrame = topMapFrame + 20;
                 centerTextFrame = mapFrameSize / 2 + leftMapFrame;
 
-                this.paper.drawListItem(centerTextFrame, topTextFrame, 'DEAD', red);
+                this.paper.drawListItem(centerTextFrame, topTextFrame, 'DESTROYED', red);
 
             }
 
             // Draw a frame around the map.
-            this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize);        
+            this.paper.drawFrame(leftMapFrame, topMapFrame, mapFrameSize, mapFrameSize, this.colourOf(robotID));        
 
             // Display permissive terrain under map.
             topTextFrame = topDisplayFrame + mapFrameSize + 20;
@@ -429,6 +447,118 @@ class Game {
                 }
             }           
          } 
+    }
+
+    colourOf(robotID: number) {
+        return Game.robotColours[robotID % Game.robotColours.length];
+    }
+
+    // Worth of the items lying on a robot's nest.
+    bankedWorth(robotID: number) {
+        let nest = this.arena.robots[robotID].nest;
+        return this.arena.itemMap[nest.x][nest.y].reduce((sum, item) => sum + item.stats.worth, 0);
+    }
+
+    // Worth of the items a robot is carrying.
+    carriedWorth(robotID: number) {
+        return this.arena.robots[robotID].items.reduce((sum, item) => sum + item.stats.worth, 0);
+    }
+
+    addToFeed(text: string, rgb: number[]) {
+        this.events_feed.push({ time: this.gameTime, text: text, rgb: rgb });
+        if(this.events_feed.length > 12) this.events_feed.shift();
+    }
+
+    /**
+     * The spectator view across the top of the screen: the whole map as it
+     * really is, a scoreboard, and a feed of kills and respawns.
+     */
+    displaySpectator() {
+        const left = 10, top = 34, tile = 12;
+        const size = this.world.size;
+        const robots = this.arena.robots;
+
+        // (At the end, the game-over banner takes this spot.)
+        if(this.gameTime > 0) this.paper.drawText(left, top - 8, `Time left: ${this.gameTime}`, [180, 180, 180], 'left', 'bold 13px Arial');
+
+        // Tiles and items.
+        for(let x = 0; x < size.x; x++) {
+            for(let y = 0; y < size.y; y++) {
+                const tileID = this.arena.tileMap[x][y];
+                if(this.world.tiles[tileID].name != 'Wall' || this.isNextToFloor(x, y)) {
+                    this.paper.drawSprite(left + x * tile, top + y * tile, this.world.tiles[tileID].sprite, tile, 1);
+                }
+                const items = this.arena.itemMap[x][y];
+                if(items.length > 0) {
+                    this.paper.drawSprite(left + x * tile, top + y * tile, this.world.itemSprite, tile, 1);
+                    if(items.length > 1) this.paper.drawText(left + x * tile + tile, top + y * tile + tile, `${items.length}`, [255, 255, 255], 'right', 'bold 9px Arial');
+                }
+            }
+        }
+
+        // Nests, as squares in each robot's colour.
+        robots.forEach((robot, i) => this.paper.drawSquare(left + robot.nest.x * tile, top + robot.nest.y * tile, tile, this.colourOf(i), 2));
+
+        // Shots from the last 60 ticks, fading out.
+        const shotLife = 60;
+        this.shots = this.shots.filter(shot => shot.time - this.gameTime < shotLife);
+        this.shots.forEach(shot => {
+            const age = shot.time - this.gameTime;
+            this.paper.drawLine(left + (shot.from.x + 0.5) * tile, top + (shot.from.y + 0.5) * tile,
+                                left + (shot.to.x + 0.5) * tile, top + (shot.to.y + 0.5) * tile, shot.rgb, 1 - age / shotLife, 2);
+        });
+
+        // Robots, as numbered dots.
+        robots.forEach((robot, i) => {
+            if(robot.isAlive) this.paper.drawRobotDot(left + (robot.pos.x + 0.5) * tile, top + (robot.pos.y + 0.5) * tile, tile * 0.5, this.colourOf(i), `${i + 1}`);
+        });
+        // Where each shot landed: a ring in the shooter's colour, larger for a hit.
+        this.shots.forEach(shot => {
+            const age = shot.time - this.gameTime;
+            this.paper.drawRing(left + (shot.to.x + 0.5) * tile, top + (shot.to.y + 0.5) * tile,
+                                shot.hit ? tile * 0.75 : tile * 0.4, shot.hit ? [255, 255, 255] : shot.rgb, 1 - age / shotLife);
+        });
+        this.paper.drawFrame(left, top, size.x * tile, size.y * tile, [90, 90, 90]);
+
+        // Scoreboard.
+        const boardLeft = left + size.x * tile + 30;
+        const columns = [['Robot', 0, 'left'], ['Score', 210, 'right'], ['Banked', 280, 'right'], ['Carrying', 360, 'right'], ['Kills', 420, 'right'], ['Deaths', 485, 'right'], ['Status', 510, 'left']];
+        let row = top + 10;
+        columns.forEach(([title, x, align]) => this.paper.drawText(boardLeft + (x as number), row, title as string, [120, 120, 120], align as CanvasTextAlign, 'bold 13px Arial'));
+
+        const order = robots.map((r, i) => i).sort((a, b) => this.arena.getScore(b) - this.arena.getScore(a));
+        order.forEach(i => {
+            const robot = robots[i];
+            row += 26;
+            const atNest = robot.isAlive && robot.pos.x == robot.nest.x && robot.pos.y == robot.nest.y;
+            const status = !robot.isAlive ? `Destroyed (back in ${Math.max(0, this.gameTime - (robot.deathTime - this.world.respawnDelay))})`
+                         : atNest ? 'At its nest' : 'Out exploring';
+            this.paper.drawRobotDot(boardLeft + 8, row - 5, 8, this.colourOf(i), `${i + 1}`);
+            this.paper.drawText(boardLeft + 22, row, robot.name, this.colourOf(i), 'left', 'bold 14px Arial');
+            const values = [this.arena.getScore(i), this.bankedWorth(i), this.carriedWorth(i), this.kills[i], this.deaths[i]];
+            values.forEach((value, k) => this.paper.drawText(boardLeft + (columns[k + 1][1] as number), row, `${value}`, [220, 220, 220], 'right', '14px Arial'));
+            this.paper.drawText(boardLeft + 510, row, this.world.respawnDelay > 0 || robot.isAlive ? status : 'Destroyed', robot.isAlive ? [180, 180, 180] : [235, 87, 87], 'left', '13px Arial');
+        });
+        this.paper.drawText(boardLeft, top + 150, 'Score = items on the nest, plus the robot\'s own worth while it is home.', [120, 120, 120], 'left', '11px Arial');
+
+        // Feed of kills and respawns.
+        const feedLeft = boardLeft + 720;
+        this.paper.drawText(feedLeft, top + 10, 'Events', [120, 120, 120], 'left', 'bold 13px Arial');
+        this.events_feed.slice().reverse().forEach((event, k) => {
+            this.paper.drawText(feedLeft, top + 34 + k * 18, `${event.time}  ${event.text}`, event.rgb, 'left', '13px Arial', k < 4 ? 1 : 0.6);
+        });
+    }
+
+    // Walls are only drawn where they border open ground, so the map stays readable.
+    isNextToFloor(x: number, y: number) {
+        for(let dx = -1; dx <= 1; dx++) {
+            for(let dy = -1; dy <= 1; dy++) {
+                const nx = x + dx, ny = y + dy;
+                if(nx < 0 || ny < 0 || nx >= this.world.size.x || ny >= this.world.size.y) continue;
+                if(this.world.tiles[this.arena.tileMap[nx][ny]].name != 'Wall') return true;
+            }
+        }
+        return false;
     }
 
     decay(decayRate: number, decayFloor: number, elapsedTime: number) {
@@ -507,6 +637,7 @@ class Game {
             this.arena.robotMap[robot.pos.x][robot.pos.y] = i;
             this.equipItems(robot);
             this.appendToLog(robot, this.gameTime, 'Respawns at its nest');
+            this.addToFeed(`${robot.name} respawned`, this.colourOf(i));
         });
     }
 
@@ -549,11 +680,13 @@ class Game {
         // Map path to target.
         let path = this.arena.robots[action.robotID].pos.getPathTo(action.action.target);
         let targetID = -1;
+        let shotEnd = this.arena.robots[action.robotID].pos;
 
         // Follow path until it hits something.
         for(var i = 0; i < path.length; i ++) {
             // Stop at the edge of the map.
             if(path[i].x < 0 || path[i].x >= this.world.size.x || path[i].y < 0 || path[i].y >= this.world.size.y) break;
+            shotEnd = path[i];
 
             let tileID = this.arena.tileMap[path[i].x][path[i].y];
             let robotID = this.arena.robotMap[path[i].x][path[i].y];
@@ -568,6 +701,15 @@ class Game {
             // Otherwise stop if the tile blocks the shot.
             if(!this.world.tiles[tileID].transparent) break;
         }
+
+        // Remember the shot so the spectator view can draw it.
+        this.shots.push({
+            from: new Vector(this.arena.robots[action.robotID].pos.x, this.arena.robots[action.robotID].pos.y),
+            to: new Vector(shotEnd.x, shotEnd.y),
+            time: this.gameTime,
+            rgb: this.colourOf(action.robotID),
+            hit: targetID >= 0,
+        });
 
         // A shot that hits nobody is logged as a miss.
         if(targetID < 0) {
@@ -632,6 +774,9 @@ class Game {
 
                 // Write to event log.
                 this.appendToLog(defender, this.gameTime, `dies :( destroyed by ${attacker.name}`);
+                this.kills[action.robotID] ++;
+                this.deaths[targetID] ++;
+                this.addToFeed(`${attacker.name} destroyed ${defender.name}`, this.colourOf(action.robotID));
             }
         }
     }

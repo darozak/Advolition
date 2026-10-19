@@ -9,6 +9,9 @@ var currentGame = null;
 var lastGame = null; // kept after stopping, for downloading its logs
 var gameRunID = 0;
 var gameTimer = 0;
+// Playback controls: ticks played per frame, and whether the game is paused.
+var gameSpeed = 1;
+var isPaused = false;
 function loadFile(robotNumber, fileSelector) {
     // Read from the file input that triggered this call.
     const file = fileSelector.files;
@@ -48,13 +51,19 @@ async function runGame() {
     }
     currentGame = game;
     lastGame = game;
-    // Game loop: play one turn, then wait 10 ms before the next.
+    // Game loop: every 10 ms, play gameSpeed ticks and draw the last one.
     const step = async () => {
         if (runID != gameRunID)
             return;
-        await game.run();
-        if (runID != gameRunID)
+        if (isPaused) {
+            gameTimer = setTimeout(step, 50);
             return;
+        }
+        for (let tick = 0; tick < gameSpeed && game.gameTime > 0; tick++) {
+            await game.run(tick == gameSpeed - 1);
+            if (runID != gameRunID)
+                return;
+        }
         if (game.gameTime > 0) {
             gameTimer = setTimeout(step, 10);
         }
@@ -64,6 +73,15 @@ async function runGame() {
         }
     };
     step();
+}
+function togglePause() {
+    isPaused = !isPaused;
+    const button = document.getElementById('pause');
+    if (button)
+        button.textContent = isPaused ? 'Resume' : 'Pause';
+}
+function setSpeed(speed) {
+    gameSpeed = Math.max(1, parseInt(speed) || 1);
 }
 // Saves every robot's full log from the current or last game as a text file.
 function downloadLogs() {
