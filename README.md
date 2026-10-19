@@ -63,6 +63,8 @@ A robot's stats are its base stats plus the stats of all its equipped items. Wor
 
 Without an equipped Scanner, a robot's scan range is 0.
 
+Each item is defined as its own subclass of `Item` in [`Code/src/items.ts`](Code/src/items.ts). To add an item, create a new subclass there and add it to the item list in `Code/src/world_data.ts`.
+
 ## Fighting
 There are three damage elements: **Kinetic**, **Thermal** and **ElectroMagnetic**. Each robot has an attack, shield and armor value for each one.
 
