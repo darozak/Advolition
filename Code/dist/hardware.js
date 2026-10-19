@@ -75,7 +75,7 @@ class Robot {
         this.baseStats.maxEquip = 4;
         // Robots have an inherent worth and bulk
         this.baseStats.worth = 10;
-        this.baseStats.bulk = 10;
+        this.baseStats.bulk = 4;
         this.baseStats.permissiveTerrain = [
             'Floor',
             'Door',
