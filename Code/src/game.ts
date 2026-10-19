@@ -3,7 +3,7 @@ class Game {
     world: WorldData;
     arena: Arena;
     events: GameEvent[] = [];
-    programs: Program[] = [];
+    programs: Bot[] = [];
     scanData: ScanData[] = [];
     paper: Paper;
     sysTime = new Date();
@@ -25,8 +25,10 @@ class Game {
         this.paper = new Paper(14);   
     } 
 
-    addRobot(robot: Program, name: string, isDisplayed: boolean) {
-        this.programs.push(robot);
+    // Uploaded programs should be passed in as a SandboxedBot. A plain Program
+    // runs in the page without a sandbox (for built-in robots and tests).
+    addRobot(robot: Program | Bot, name: string, isDisplayed: boolean) {
+        this.programs.push('decide' in robot ? robot : new LocalBot(robot));
         let robotID = this.programs.length-1;
         this.arena.robots.push(new RobotData(this.world, robotID, name, isDisplayed));
         this.scanData.push(new ScanData(this.world, this.arena.robots[robotID]));
@@ -52,19 +54,20 @@ class Game {
         this.batteryColor.push(new RampedArray([180, 180, 180], [51, 110, 156], [3, 3, 3]));
     }
 
-    run() { 
+    async run() { 
         
 
         if(this.gameTime > 0) {
 
             // Decrement game time
             this.gameTime --; 
-            
-            for(var i = 0; i < this.programs.length; i++) {
 
-                // If the robot is still alive and isn't doing anything.
+            // Ask every robot that is alive and not busy for its next action.
+            // Programs run in their own sandboxes, so they think in parallel.
+            let deciding: number[] = [];
+            let decisions: Promise<BotDecision>[] = [];
+            for(var i = 0; i < this.programs.length; i++) {
                 if(this.arena.robots[i].isAlive && !this.events.some(d =>d.robotID == i)){
-                    var action: Action = new Action();
 
                     // Make sure the robot's personal data is up to date in scanData.
                     this.scanData[i].robots[i] = structuredClone(this.arena.robots[i]);
@@ -73,20 +76,28 @@ class Game {
                     this.scanData[i].gameTime = this.gameTime;
                     this.scanData[i].robotCount = this.programs.length;
 
-                    // Let the robot run its code. If it throws, the robot does
-                    // nothing this turn and the error goes in its log.
-                    try {
-                        action = this.programs[i].run(structuredClone(this.scanData[i]));
-                    } catch(error) {
-                        action = new Action();
-                        let entry = `Program error: ${error instanceof Error ? error.message : error}`;
+                    deciding.push(i);
+                    decisions.push(this.programs[i].decide(this.scanData[i]));
+                }
+            }
+            let results = await Promise.all(decisions);
+
+            for(var k = 0; k < deciding.length; k++) {
+                var i = deciding[k];
+                {
+                    // If the program threw, the robot does nothing this turn
+                    // and the error goes in its log.
+                    let result = results[k];
+                    if(result.error !== undefined) {
+                        let entry = result.error.startsWith('Program stopped') ? result.error : `Program error: ${result.error}`;
                         let robot = this.arena.robots[i];
                         if(robot.logEntry[robot.logEntry.length - 1] != entry) {
                             this.appendToLog(robot, this.gameTime, entry);
-                            console.error(`${robot.name}:`, error);
+                            console.error(`${robot.name}: ${result.error}`);
                         }
                     }
 
+                    let action = this.checkAction(i, result.action);
                         if(action) {
                             switch (action.command) {
                                 case "attack":
@@ -423,6 +434,43 @@ class Game {
         }
     }
 
+    /**
+     * Turns whatever a program returned into a safe action, or null. Programs
+     * run in a sandbox, so their actions arrive as plain data and can't be trusted.
+     */
+    checkAction(robotID: number, raw: any): Action | null {
+        if(!raw || typeof raw !== 'object' || typeof raw.command !== 'string') return null;
+
+        let action = new Action();
+        action.command = raw.command;
+        action.item = typeof raw.item === 'string' ? raw.item : '';
+        action.message = typeof raw.message === 'string' ? raw.message.slice(0, 200) : '';
+
+        if(action.command == 'move' || action.command == 'attack') {
+            if(!raw.target) return null;
+            let x = Number(raw.target.x), y = Number(raw.target.y);
+            if(!Number.isFinite(x) || !Number.isFinite(y)) return null;
+
+            // Bring very distant targets closer along the same line, so paths
+            // stay short. Aiming past a target still works.
+            let pos = this.arena.robots[robotID].pos;
+            let limit = 2 * Math.max(this.world.size.x, this.world.size.y);
+            let dx = x - pos.x, dy = y - pos.y;
+            let reach = Math.max(Math.abs(dx), Math.abs(dy));
+            if(reach > limit) {
+                dx *= limit / reach;
+                dy *= limit / reach;
+            }
+            action.target = new Vector(Math.round(pos.x + dx), Math.round(pos.y + dy));
+        }
+        return action;
+    }
+
+    // Stops every robot's program.
+    stop() {
+        this.programs.forEach(program => program.stop());
+    }
+
     requestAttack(robotID: number, action: Action) {
         let delay = this.arena.robots[robotID].stats.getActionTime();
         this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
@@ -436,17 +484,21 @@ class Game {
 
         // Follow path until it hits something.
         for(var i = 0; i < path.length; i ++) {
+            // Stop at the edge of the map.
+            if(path[i].x < 0 || path[i].x >= this.world.size.x || path[i].y < 0 || path[i].y >= this.world.size.y) break;
+
             let tileID = this.arena.tileMap[path[i].x][path[i].y];
             let robotID = this.arena.robotMap[path[i].x][path[i].y];
 
-            // Abort attack if blocked by tile.
-            if(!this.world.tiles[tileID].transparent) break;
-
-            // Redirect attack if blocked by robot (other than the attacker).
+            // Hit the first robot in the path (other than the attacker). This is
+            // checked before the tile, so a robot standing in a doorway can be hit.
             if(robotID >= 0 && robotID != action.robotID) {
                 targetID = robotID;
                 break;
             }
+
+            // Otherwise stop if the tile blocks the shot.
+            if(!this.world.tiles[tileID].transparent) break;
         }
 
         // Inflict damage on robot if there is one in path.

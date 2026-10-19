@@ -70,7 +70,7 @@ Each item is defined as its own subclass of `Item` in [`Code/src/items.ts`](Code
 ## Fighting
 There are three damage elements: **Kinetic**, **Thermal** and **ElectroMagnetic**. Each robot has an attack, shield and armor value for each one.
 
-An attack travels in a straight line toward the target position and hits the first robot in its path. Walls and doors block it. There is no range limit.
+An attack travels in a straight line toward the target position and hits the first robot in its path. Walls and doors block it, but a robot standing in a doorway can still be hit. There is no range limit.
 
 For each element:
 1. The defender's **shield** is subtracted from the attacker's **attack**.
@@ -119,6 +119,13 @@ new Starter();
 ```
 
 If a program throws an error, that robot does nothing for that turn and the error appears in its log. If a file has an error or doesn't end by creating the program, that robot is left out of the game and a message explains why.
+
+### The sandbox
+Each program runs in its own sandbox (a Web Worker), separate from the game and from the other robots' programs.
+- A program can use `Program`, `Vector` and the action classes below. It can't see the game, the page, or other programs. The only information it gets is the `myData` passed to `run`.
+- `console.log` output appears in the browser's developer console.
+- A program has 1 second to load and 1 second to choose each action. If it takes longer, it is stopped and its robot does nothing for the rest of the game.
+- Each turn waits until every program that is choosing an action has answered, so a slow program slows the whole game.
 
 ## Actions
 A program's `run` method returns one of these:
