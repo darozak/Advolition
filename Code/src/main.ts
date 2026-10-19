@@ -1,8 +1,13 @@
-var intervalID = 0;
 var robotCount = 4;
 
 var robotCodes: string[] = [];
 for(var i = 0; i < robotCount; i ++) robotCodes.push('Empty');
+
+// The game being played, and a counter that changes whenever a game starts
+// or stops, so an old game loop knows to quit.
+var currentGame: Game | null = null;
+var gameRunID = 0;
+var gameTimer = 0;
 
 function loadFile(robotNumber: number, fileSelector: HTMLInputElement) {
     // Read from the file input that triggered this call.
@@ -23,39 +28,58 @@ function loadFile(robotNumber: number, fileSelector: HTMLInputElement) {
     }
   }
   
-function runGame() {
+async function runGame() {
+
+    // End any game that is already running.
+    stopGame();
+    const runID = gameRunID;
 
     const game = new Game(new GaiaData(), 10000); 
 
-    // Stop the interval if a program is already running.
-    if(intervalID > 0) clearInterval(intervalID);
-
-    // Evaluate the robotCodes to create a new program object.
+    // Load each robot's program into its own sandbox. Skip a robot whose file
+    // has an error or doesn't end with `new MyProgram();`.
     for(var i = 0; i < robotCodes.length; i ++) {   
       if(robotCodes[i] != 'Empty') {
-        // Skip a robot whose file has an error or doesn't end with `new MyProgram();`.
-        let program: any;
+        let bot: SandboxedBot;
         try {
-          program = eval(robotCodes[i]);
+          bot = await SandboxedBot.load(robotCodes[i]);
         } catch(error) {
-          alert(`Robot ${i + 1} wasn't added because its program has an error:\n${error}`);
+          alert(`Robot ${i + 1} wasn't added because ${error instanceof Error ? error.message : error}`);
           continue;
         }
-        if(!program || typeof program.run !== 'function') {
-          alert(`Robot ${i + 1} wasn't added. Its program file must end by creating the program, for example: new MyProgram();`);
-          continue;
+
+        // Stop if Run or Stop was pressed while programs were loading.
+        if(runID != gameRunID) {
+          bot.stop();
+          game.stop();
+          return;
         }
-        game.addRobot(program as Program, `Robot ${i + 1}`, true); 
-      // } else {
-      //   game.addRobot(new Target(), `Robot ${i + 1}`, false);
+        game.addRobot(bot, `Robot ${i + 1}`, true); 
       } 
     }
+    currentGame = game;
 
-    // Game animation loop. The interval sets that animation frame rate in ms.
-    intervalID = setInterval(()=>game.run(), 10);
+    // Game loop: play one turn, then wait 10 ms before the next.
+    const step = async () => {
+      if(runID != gameRunID) return;
+      await game.run();
+      if(runID != gameRunID) return;
+
+      if(game.gameTime > 0) {
+        gameTimer = setTimeout(step, 10);
+      } else {
+        // Game over: the final screen stays up and the programs are stopped.
+        game.stop();
+      }
+    };
+    step();
 }
 
 function stopGame() {
-    // Stop the interval if a program is already running.
-    if(intervalID > 0) clearInterval(intervalID);
+    gameRunID ++;
+    clearTimeout(gameTimer);
+    if(currentGame) {
+      currentGame.stop();
+      currentGame = null;
+    }
 }
