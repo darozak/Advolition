@@ -3,6 +3,7 @@ class Drift {
     unscannedTileID = -1;
     floorTileID = 0;
     doorTileID = 0;
+    nestTileID = 0;
     waterDepth: number[][] = [];
 
     constructor() {}
@@ -10,12 +11,17 @@ class Drift {
     init(myData: ScanData) {
         this.doorTileID = myData.tiles.findLastIndex(d => d.name === 'Door');
         this.floorTileID = myData.tiles.findLastIndex(d => d.name === 'Floor');
+        this.nestTileID = myData.tiles.findLastIndex(d => d.name === 'Nest');
         for(let i = 0; i < myData.mapSize.x; i++) {
             this.waterDepth[i] = [];
             for(let j = 0; j < myData.mapSize.y; j ++) {
                 this.waterDepth[i][j] = 0;
             }
         }       
+    }
+
+    isPassable(tileID: number) {
+        return tileID == this.floorTileID || tileID == this.doorTileID || tileID == this.nestTileID;
     }
 
     followFlow(drainLocation: Vector, myData: ScanData) {
@@ -25,7 +31,7 @@ class Drift {
         // Drain water from edge tiles if drainLocation is invalid.
         if(drainLocation.x >= 0 && drainLocation.x < myData.mapSize.x &&
             drainLocation.y >= 0 && drainLocation.y < myData.mapSize.y &&
-            (drainTileID == this.doorTileID || drainTileID == this.floorTileID)) {
+            this.isPassable(drainTileID)) {
                 drainList.push(drainLocation);
             } else {
                 drainList = this.listBoarderTiles(myData);
@@ -44,7 +50,7 @@ class Drift {
             for(let j = currentPosition.y-1; j <= currentPosition.y+1; j ++) { 
                 if(i >= 0 && i < myData.mapSize.x && j >= 0 && j < myData.mapSize.y) {
                     let tileType = myData.tileMap[i][j];
-                    if(tileType === this.doorTileID || tileType === this.floorTileID) {
+                    if(this.isPassable(tileType)) {
                         // console.log(`(${i},${j}): ${this.waterDepth[i][j]}`); 
                         if(this.waterDepth[i][j] < minDepth) {
                             minX = i;
@@ -95,7 +101,7 @@ class Drift {
             for(let j = y-1; j <= y+1; j ++) { 
                 if(i >= 0 && i < myData.mapSize.x && j >= 0 && j < myData.mapSize.y) {
                     let tileType = myData.tileMap[i][j];
-                    if(tileType == this.doorTileID || tileType == this.floorTileID) {
+                    if(this.isPassable(tileType)) {
                         averageDepth += this.waterDepth[i][j];
                         tileCount += 1;
                     }
@@ -109,7 +115,7 @@ class Drift {
         let boarderTiles: Vector[] = [];
         for(let i = 0; i < myData.mapSize.x; i++) {
             for(let j = 0; j < myData.mapSize.y; j ++) {
-                if(myData.tileMap[i][j] == this.doorTileID || myData.tileMap[i][j] == this.floorTileID) {
+                if(this.isPassable(myData.tileMap[i][j])) {
                     let isBoarderTile = false;
                     for(let k = i-1; k <= i+1; k ++) {
                         for(let l = j-1; l <= j+1; l ++) { 

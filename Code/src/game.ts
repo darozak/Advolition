@@ -15,7 +15,6 @@ class Game {
     scannerColor: RampedArray[] = [];
     batteryColor: RampedArray[] = [];
 
-    eventLog = document.getElementById("myTextarea") as HTMLTextAreaElement;
     
     constructor(world: WorldData, duration: number) {
         this.gameTime = duration;
@@ -72,6 +71,7 @@ class Game {
                     
                     this.scanData[i].robots[i].lastScan = this.gameTime;
                     this.scanData[i].gameTime = this.gameTime;
+                    this.scanData[i].robotCount = this.programs.length;
 
                     // Let the robot run its code. If it throws, the robot does
                     // nothing this turn and the error goes in its log.
@@ -253,8 +253,8 @@ class Game {
             let topMapFrame = topDisplayFrame;
 
             // Cycle through all the tiles in the scan display box.
-            for(var i = x0; i < x1; i++) {
-                for(var j = y0; j < y1; j++) {
+            for(var i = x0; i <= x1; i++) {
+                for(var j = y0; j <= y1; j++) {
                     var tileScanID = -1;
                     var itemScanCount = 0;
                     var robotScanID = -1;

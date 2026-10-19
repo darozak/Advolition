@@ -143,8 +143,9 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 | `tiles[n]` | Tile | Details for tile ID `n`. |
 | `itemMap[x][y]` | Item[] | Items seen at x, y as of the last scan there. |
 | `robotMap[x][y]` | number | The ID of the robot seen at x, y, or -1 for none. |
-| `robots[n]` | RobotData | What this robot knows about robot `n`. Its own entry is always current; others are as of the last time they were scanned. |
-| `scanTime[x][y]` | number | The `gameTime` when x, y was last scanned. |
+| `robots[n]` | RobotData | What this robot knows about robot `n`. Its own entry is always current. Others are as of the last time they were scanned, and `undefined` until then. |
+| `robotCount` | number | How many robots are in the game. Robot IDs run from 0 to `robotCount - 1`. |
+| `scanTime[x][y]` | number | The `gameTime` when x, y was last scanned, or -1 if it hasn't been scanned. |
 
 ### RobotData
 | Field | Type | Description |

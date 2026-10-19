@@ -9,12 +9,13 @@ class ScanData {
     itemMap = [];
     robotMap = [];
     robots = [];
+    robotCount = 0;
     constructor(world, robot) {
         this.mapSize = new Vector(world.size.x, world.size.y);
         this.myID = robot.robotID;
-        for (var i = 0; i < world.maxRobotCount; i++) {
-            this.robots.push(structuredClone(robot));
-        }
+        // Only this robot's own entry is known at the start. Others are
+        // filled in when they are first scanned.
+        this.robots[robot.robotID] = structuredClone(robot);
         for (var i = 0; i < world.tiles.length; i++) {
             this.tiles.push(structuredClone(world.tiles[i]));
         }
@@ -29,7 +30,7 @@ class ScanData {
                 this.tileMap[i][j] = -1;
                 this.itemMap[i][j] = [];
                 this.robotMap[i][j] = -1;
-                this.scanTime[i][j] = 0;
+                this.scanTime[i][j] = -1;
             }
         }
     }

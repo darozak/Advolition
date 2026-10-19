@@ -79,7 +79,7 @@ class RampedArray {
             if(this.hold) this.currentFrame = this.endPoint[1] - 1;
         } else if(this.currentFrame < this.endPoint[2]) {
             for(var i = 0; i < this.restingArray.length; i++) {
-                output[i] = this.activatedArray[i] + Math.round((this.restingArray[i]-this.activatedArray[i]) * (this.currentFrame - this.endPoint[1]) / this.endPoint[2]);
+                output[i] = this.activatedArray[i] + Math.round((this.restingArray[i]-this.activatedArray[i]) * (this.currentFrame - this.endPoint[1]) / this.pulsePattern[2]);
             }
         } else {
             output = this.restingArray;
