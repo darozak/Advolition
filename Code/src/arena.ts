@@ -124,7 +124,7 @@ class Arena {
                 if(visible[i][j] > 0) {
                     scan.scanTime[i][j] = scanTime;
                     scan.tileMap[i][j] = this.tileMap[i][j];
-                    scan.itemMap[i][j] = this.itemMap[i][j];
+                    scan.itemMap[i][j] = structuredClone(this.itemMap[i][j]);
                     scan.robotMap[i][j] = this.robotMap[i][j];
 
                     if(this.robotMap[i][j] >= 0) {
@@ -165,9 +165,9 @@ class Arena {
         let score = 0;
         let nest = this.robots[robotID].nest;
 
-        // Add worth of local robot
-        if(this.robotMap[nest.x][nest.y] >= 0) {
-            score += this.robots[this.robotMap[nest.x][nest.y]].stats.worth;
+        // Add the robot's own worth if it is home. Other robots on the nest don't count.
+        if(this.robotMap[nest.x][nest.y] == robotID) {
+            score += this.robots[robotID].stats.worth;
         }
 
         // Add worth of local items
