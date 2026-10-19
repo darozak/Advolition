@@ -34,7 +34,7 @@ The game lasts 10,000 ticks. `gameTime` counts down from 10,000 to 0, and the ga
 
 A robot does one action at a time. When its current action is finished, the engine calls its program again to get the next one.
 
-Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. A bare robot has a bulk of 10, and each *equipped* item adds its own bulk. Diagonal moves take about 1.4 times as long.
+Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. A bare robot has a bulk of 10, and every item it carries (equipped or not) adds its own bulk. Diagonal moves take about 1.4 times as long.
 
 If a program returns an action that can't be started (for example, equipping an item it doesn't have), nothing is queued and the program is called again on the next tick.
 
@@ -51,7 +51,7 @@ Every robot starts with:
 
 Each robot also starts with a **Blaster**, **Scanner** and **Armor** in its inventory. These items are **not equipped** at the start, so a robot's program should equip them before it scans or fights.
 
-A robot's stats are its base stats plus the stats of all its equipped items. Carried items that aren't equipped add nothing, including no bulk and no worth.
+A robot's stats are its base stats plus the stats of all its equipped items. Worth and bulk are the exception: every carried item counts toward them, equipped or not.
 
 ## Items
 | Item | Worth | Bulk | Effect when equipped |
@@ -77,7 +77,7 @@ For each element:
 The tile where a robot starts becomes its **nest**. A robot's score is:
 
 - the worth of all items lying on its nest, plus
-- the robot's own worth (base worth plus equipped items), if it is standing on its nest.
+- the robot's own worth (base worth plus everything it's carrying), if it is standing on its nest.
 
 Scores are shown live in each robot's panel. The highest score when time runs out wins.
 
@@ -119,7 +119,7 @@ A program's `run` method returns one of these:
 
 | Action | What it does |
 | ------ | ------------ |
-| `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable, the robot bumps into it and stays put. |
+| `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable or another robot is standing on it, the robot stays put. |
 | `new Scan()` | Updates the robot's map within its scan range. Walls and doors block line of sight. |
 | `new Take(itemName)` | Picks up the named item from the robot's tile, if it has room. |
 | `new Drop(itemName)` | Drops the named item onto the robot's tile. |
@@ -154,7 +154,7 @@ Positions use the `Vector` class: `new Vector(x, y)`. It has helpers such as `ad
 | `isAlive` | boolean | False once the robot has been destroyed. |
 | `pos` | Vector | Current position. |
 | `nest` | Vector | Home tile position. |
-| `stats` | Stats | Current stats (base plus equipped items). |
+| `stats` | Stats | Current stats: base plus equipped items, with worth and bulk counting all carried items. |
 | `baseStats` | Stats | Stats with no items equipped. |
 | `items` | Item[] | Inventory. Equipped items come first. |
 | `lastScan` | number | The `gameTime` when this data was recorded. |

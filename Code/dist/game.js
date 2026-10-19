@@ -376,8 +376,11 @@ class Game {
         var tileID = this.arena.tileMap[destination.x][destination.y];
         var tileName = this.world.tiles[tileID].name;
         let permissiveTerrainIndex = this.arena.robots[action.robotID].stats.permissiveTerrain.findLastIndex(d => d === tileName);
+        // Is another robot already standing there?
+        let occupantID = this.arena.robotMap[destination.x][destination.y];
+        let isOccupied = occupantID >= 0 && occupantID != action.robotID;
         // Can the robot move into this tile?
-        if (permissiveTerrainIndex >= 0) {
+        if (permissiveTerrainIndex >= 0 && !isOccupied) {
             // Change position in arena.
             this.arena.robotMap[this.arena.robots[action.robotID].pos.x][this.arena.robots[action.robotID].pos.y] = -1;
             this.arena.robotMap[destination.x][destination.y] = action.robotID;
@@ -388,8 +391,13 @@ class Game {
         }
         else {
             // Take damage if you run into something.
-            // Wtite to event log.
-            this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Collides with obstical`);
+            // Write to event log.
+            if (isOccupied) {
+                this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Bumps into ${this.arena.robots[occupantID].name}`);
+            }
+            else {
+                this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Collides with obstacle`);
+            }
             // this.takeDamage(this.arena.robots[action.robotID], 10);
             this.hpsColor[action.robotID].pulse();
             this.chassisColor[action.robotID].pulse();
@@ -521,6 +529,11 @@ class Game {
         for (var i = 0; i < robot.items.length; i++) {
             if (robot.items[i].isEquipped) {
                 robot.stats.add(robot.items[i].stats);
+            }
+            else {
+                // Carried items still count toward worth and bulk.
+                robot.stats.worth += robot.items[i].stats.worth;
+                robot.stats.bulk += robot.items[i].stats.bulk;
             }
         }
     }
