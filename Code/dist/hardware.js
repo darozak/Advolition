@@ -77,7 +77,8 @@ class Robot {
         this.baseStats.bulk = 10;
         this.baseStats.permissiveTerrain = [
             'Floor',
-            'Door'
+            'Door',
+            'Nest'
         ];
         var ID;
         this.stats.copy(this.baseStats);

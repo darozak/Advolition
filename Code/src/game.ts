@@ -137,6 +137,7 @@ class Game {
                                 break;
                             case "say":
                                 this.resolveSay(this.events[0]);
+                                break;
                             case "scan":
                                 this.resolveScan(this.events[0]);
                                 break;

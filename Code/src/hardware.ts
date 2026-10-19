@@ -105,7 +105,8 @@ class Robot {
 
         this.baseStats.permissiveTerrain = [
             'Floor',
-            'Door'
+            'Door',
+            'Nest'
         ]
 
         var ID: number; 

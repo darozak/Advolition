@@ -4,14 +4,14 @@ var robotCount = 4;
 var robotCodes = [];
 for (var i = 0; i < robotCount; i++)
     robotCodes.push('Empty');
-function loadFile(robotNumber) {
-    const fileSelector = document.querySelector("input[type=file]");
-    const [file] = [fileSelector.files];
+function loadFile(robotNumber, fileSelector) {
+    // Read from the file input that triggered this call.
+    const file = fileSelector.files;
     const reader = new FileReader();
     reader.addEventListener("load", () => {
         robotCodes[robotNumber] = reader.result;
     }, false);
-    if (file) {
+    if (file && file.length > 0) {
         reader.readAsText(file[0]);
     }
 }
@@ -25,7 +25,7 @@ function runGame() {
     // Evaluate the robotCodes to create a new program object.
     for (var i = 0; i < robotCodes.length; i++) {
         if (robotCodes[i] != 'Empty') {
-            game.addRobot(eval(robotCodes[0]), `Robot ${i + 1}`, true);
+            game.addRobot(eval(robotCodes[i]), `Robot ${i + 1}`, true);
             // } else {
             //   game.addRobot(new Target(), `Robot ${i + 1}`, false);
         }
