@@ -42,6 +42,7 @@ A grid space can hold one robot and any number of items. Ten random items are sc
 - **Turns.** A robot does one action at a time. Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. The program is called again on the tick after the action finishes, so a robot with an action time of 10 gets a new turn every 11 ticks. `Say` finishes at once, so the program is called again on the next tick.
 - **Bulk.** A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 10.
 - **Moving.** `Move` takes one step toward its target, along a straight line. It doesn't find a way around walls: if the next tile on that line is a wall, the robot bumps into it and stays put. Use `findPath` (below) to get a route around obstacles. Diagonal steps take about 1.4 times as long.
+- **Meeting other robots.** If the next tile has a robot on it, the move fails (`lastAction` says which robot blocked it), unless that robot is stepping into your tile at the same time. Then the two robots swap places, so robots meeting head-on in a corridor can always get past each other.
 - **Ties.** Actions that finish on the same tick happen in a random order, so no robot always goes first.
 - **Failed actions.** If an action can't be started (for example, equipping an item you don't have), nothing is queued and the program is called again on the next tick. `lastAction` says why.
 - **Memory.** Your map only updates when you scan. Items you've picked up still show in your `itemMap` until you scan that spot again.
@@ -67,11 +68,11 @@ A robot's stats are its base stats plus the stats of all its equipped items. Wor
 | Scanner | 10 | 3 | Scan range +4 |
 | Blaster | 20 | 2 | Thermal attack +4 |
 | Railgun | 25 | 4 | Kinetic attack +6 |
-| Ion Gun | 15 | 1 | ElectroMagnetic attack +3 |
-| Thermal Shield | 8 | 2 | Thermal shield +2 |
-| Kinetic Shield | 8 | 2 | Kinetic shield +3 |
-| EM Shield | 8 | 2 | ElectroMagnetic shield +2 |
-| Armor | 6 | 1 | 60 armor against each element |
+| Ion Gun | 15 | 1 | ElectroMagnetic attack +3. Each hit also slows the target's current action. |
+| Thermal Shield | 8 | 1 | Thermal shield +2 |
+| Kinetic Shield | 8 | 1 | Kinetic shield +3 |
+| EM Shield | 8 | 1 | ElectroMagnetic shield +2 |
+| Armor | 6 | 1 | 60 armor points, which absorb damage of every element |
 
 Every robot starts with a Blaster, a Scanner and Armor. The other items are only found in the dungeon.
 
@@ -80,22 +81,30 @@ Without an equipped Scanner, a robot's scan range is 0.
 Each item is defined as its own subclass of `Item` in [`Code/src/items.ts`](Code/src/items.ts). To add an item, create a new subclass there and add it to the item list in `Code/src/world_data.ts`.
 
 ## Fighting
-There are three damage elements: **Kinetic**, **Thermal** and **ElectroMagnetic**. Each robot has an attack, shield and armor value for each one.
+There are three damage elements: **Kinetic**, **Thermal** and **ElectroMagnetic**. Each robot has an attack and a shield value for each element, and one pool of **armor** points that absorbs damage of every element.
 
 An attack travels in a straight line toward the target position and hits the first robot in its path. Walls and doors block it, but a robot standing in a doorway can still be hit. There is no range limit.
 
-An attack fires all of the attacker's equipped weapons at once. For each element:
-1. The defender's **shield** for that element blocks part of the attack, but never more than half of it. Every hit does some damage, and a second shield of the same element only helps against stronger attacks.
-2. The defender's equipped **armor** absorbs what's left. Armor wears down by the amount it absorbs, so it eventually runs out.
+An attack fires all of the attacker's equipped weapons at once:
+1. For each element, the defender's **shield** for that element blocks part of the attack, but never more than half of it. Every hit does some damage, and a second shield of the same element only helps against stronger attacks.
+2. The damage of all elements is added up, and the defender's equipped **armor** absorbs it. Armor wears down by the amount it absorbs, so it eventually runs out. With several Armor items, the first one wears out before the next is used.
 3. If any damage gets past the armor, the defender is destroyed. It drops all of its items where it stood and is removed from the map.
+4. **ElectroMagnetic** damage also slows the defender: its current action takes 2 ticks longer for each point of EM damage.
 
-Because shields only work against their own element, it pays to check an enemy's shields (they show up when you scan it) and fire a weapon they don't block. For example, it takes 16 Blaster hits to destroy a robot with Armor, 31 if that robot also has a Thermal Shield, or 11 Railgun hits either way.
+Because damage adds up, carrying two different weapons works. Because shields only work against their own element, it pays to check an enemy's shields (they show up when you scan it) and fire weapons they don't block. Some examples:
+
+| Attacker | vs Armor | vs Armor + Thermal Shield | vs Armor + Kinetic Shield |
+|---|---|---|---|
+| Blaster | 16 hits | 31 hits | 16 hits |
+| Railgun | 11 hits | 11 hits | 21 hits |
+| Blaster + Railgun | 7 hits | 8 hits | 9 hits |
+| Blaster + Blaster | 8 hits | 11 hits | 8 hits |
 
 Both robots are told about every hit:
 - The attacker's log shows the damage it did, and its missed shots.
 - The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired and from where, even if the attacker is outside its scan range.
 
-While a robot stands on its nest, its equipped armor repairs by 1 point per element every 15 ticks, up to the item's original armor.
+While a robot stands on its nest, each equipped Armor item repairs by 1 point every 15 ticks, up to its original 60.
 
 A destroyed robot respawns 500 ticks later at its nest. If another robot is standing on the nest, it appears on the nearest free tile instead. It comes back with a fresh starting kit (Blaster, Scanner and Armor), already equipped. The kit is worth 0 points, so destroying a respawned robot can't be farmed for score. Items it banked on its nest are still there to pick up again.
 
@@ -156,7 +165,7 @@ A program's `run` method returns one of these:
 
 | Action | What it does |
 | ------ | ------------ |
-| `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable or another robot is standing on it, the robot stays put. |
+| `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable or another robot is standing on it, the robot stays put, unless that robot is stepping into its tile, in which case they swap places. |
 | `new Scan()` | Updates the robot's map within its scan range. Walls and doors block line of sight. |
 | `new Take(itemName)` | Picks up the named item from the robot's tile, if it has room. |
 | `new Drop(itemName)` | Drops the named item onto the robot's tile. |
@@ -221,7 +230,7 @@ Arrays indexed by element use 0 = Kinetic, 1 = Thermal, 2 = ElectroMagnetic.
 | `bulk` | number | Weight. A robot's total bulk is its action time. |
 | `attack[e]` | number[] | Damage dealt per element. |
 | `shield[e]` | number[] | Damage blocked per element. |
-| `armor[e]` | number[] | Damage absorbed per element. Wears down when used. |
+| `armor` | number | Armor points, which absorb damage of every element. Wears down when used. |
 | `scanRange` | number | How far a scan reaches. |
 | `maxCarry` | number | Maximum items carried. |
 | `maxEquip` | number | Maximum items equipped. |
@@ -251,7 +260,8 @@ The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 | `respawnDelay` | 500 | Ticks before a destroyed robot respawns. 0 turns respawning off. |
 | `respawnProtection` | 100 | Ticks a respawned robot can't be damaged (unless it attacks first). 0 turns protection off. |
 | `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |
-| `nestRepairInterval` | 15 | Ticks per point of armor repaired on the nest. 0 turns repair off. |
+| `nestRepairInterval` | 15 | Ticks per point of armor repaired, per Armor item, on the nest. 0 turns repair off. |
+| `emSlowPerDamage` | 2 | Ticks each point of ElectroMagnetic damage adds to the target's current action. |
 
 ## Building from source
 The game is written in TypeScript in `Code/src/` and compiled to `Code/dist/`, which `index.html` loads directly. To rebuild after changing the source:

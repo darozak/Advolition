@@ -17,7 +17,8 @@ class Stats {
 
     elements: string[] = [];
 
-    armor: number[] = [];
+    // One shared pool of armor points. Damage of every element wears it down.
+    armor = 0;
 
     maxCarry = 0;
     maxEquip = 0;
@@ -37,7 +38,6 @@ class Stats {
         this.elements.push('ElectroMagnetic');
 
         for(var i = 0; i < this.elements.length ; i ++) {
-            this.armor.push(0);
             this.shield.push(0);
             this.attack.push(0);
         }
@@ -47,9 +47,9 @@ class Stats {
     add(stats: Stats) {
         this.worth += stats.worth;
         this.bulk += stats.bulk;
+        this.armor += stats.armor;
 
         for(var i = 0; i < this.elements.length; i ++) {
-            this.armor[i] += stats.armor[i];
             this.shield[i] += stats.shield[i];
             this.attack[i] += stats.attack[i];
         }
@@ -68,9 +68,9 @@ class Stats {
     copy(stats: Stats) {
         this.worth = stats.worth;
         this.bulk = stats.bulk;
+        this.armor = stats.armor;
 
         for(var i = 0; i < this.elements.length ; i ++) {
-            this.armor[i] = stats.armor[i];
             this.shield[i] = stats.shield[i];
             this.attack[i] = stats.attack[i];
         }
@@ -168,10 +168,14 @@ class WorldData {
 
     // Combat settings. A shield can block at most this fraction of each
     // element's damage per hit. While a robot stands on its nest, its
-    // equipped armor regains 1 point per element every nestRepairInterval
+    // each equipped armor item regains 1 point every nestRepairInterval
     // ticks, up to the item's original armor (0 turns repair off).
     maxShieldBlock = 0.5;
     nestRepairInterval = 15;
+
+    // Each point of ElectroMagnetic damage delays the target's current action
+    // by this many ticks.
+    emSlowPerDamage = 2;
 
     constructor() {
     }

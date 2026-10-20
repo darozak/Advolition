@@ -43,18 +43,19 @@ class IonGun extends Item {
         super('Ion Gun', new Stats());
         this.stats.worth = 15;
         this.stats.bulk = 1;
-        this.stats.attack[2] = 3;       // ElectroMagnetic
+        this.stats.attack[2] = 3;       // ElectroMagnetic: also slows the target's current action
     }
 }
 
 // Shields: one per element. A shield blocks part of every hit of its
 // element, but never more than half of it (see Game.resolveAttack).
+// Shields are light, so carrying the right one for the enemies you meet pays.
 
 class ThermalShield extends Item {
     constructor() {
         super('Thermal Shield', new Stats());
         this.stats.worth = 8;
-        this.stats.bulk = 2;
+        this.stats.bulk = 1;
         this.stats.shield[1] = 2;       // Thermal
     }
 }
@@ -63,7 +64,7 @@ class KineticShield extends Item {
     constructor() {
         super('Kinetic Shield', new Stats());
         this.stats.worth = 8;
-        this.stats.bulk = 2;
+        this.stats.bulk = 1;
         this.stats.shield[0] = 3;       // Kinetic
     }
 }
@@ -72,7 +73,7 @@ class EMShield extends Item {
     constructor() {
         super('EM Shield', new Stats());
         this.stats.worth = 8;
-        this.stats.bulk = 2;
+        this.stats.bulk = 1;
         this.stats.shield[2] = 2;       // ElectroMagnetic
     }
 }
@@ -82,8 +83,6 @@ class Armor extends Item {
         super('Armor', new Stats());
         this.stats.worth = 6;
         this.stats.bulk = 1;
-        this.stats.armor[0] = 60;       // Kinetic
-        this.stats.armor[1] = 60;       // Thermal
-        this.stats.armor[2] = 60;       // ElectroMagnetic
+        this.stats.armor = 60;          // absorbs damage of every element
     }
 }
