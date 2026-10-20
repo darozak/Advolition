@@ -49,14 +49,8 @@ class Game {
         this.scanData.push(new ScanData(this.world, this.arena.robots[robotID]));
          
 
-        // Locate robot
-        this.arena.robots[robotID].pos = this.arena.placeRobot(robotID);
-
-        // Record robot on map
-        this.arena.robotMap[this.arena.robots[robotID].pos.x][this.arena.robots[robotID].pos.y] = robotID;
-
-        // Create nest
-        this.arena.robots[robotID].nest.setEqualTo(this.arena.robots[robotID].pos);
+        // Choose nests for all robots so far (they start on their nests).
+        this.arena.placeNests();
 
         // Equip items
         this.equipItems(this.arena.robots[robotID]);
