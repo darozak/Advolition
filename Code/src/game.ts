@@ -532,6 +532,7 @@ class Game {
             row += 26;
             const atNest = robot.isAlive && robot.pos.x == robot.nest.x && robot.pos.y == robot.nest.y;
             const status = !robot.isAlive ? `Destroyed (back in ${Math.max(0, this.gameTime - (robot.deathTime - this.world.respawnDelay))})`
+                         : this.isProtected(robot) ? `Protected (${this.gameTime - robot.protectedUntil})`
                          : atNest ? 'At its nest' : 'Out exploring';
             this.paper.drawRobotDot(boardLeft + 8, row - 5, 8, this.colourOf(i), `${i + 1}`);
             this.paper.drawText(boardLeft + 22, row, robot.name, this.colourOf(i), 'left', 'bold 14px Arial');
@@ -624,19 +625,30 @@ class Game {
         if(interval > 0 && elapsed > 0 && elapsed % interval == 0) this.arena.spawnItem();
     }
 
-    // Bring destroyed robots back at their nest after respawnDelay ticks,
-    // with no items. They wait if another robot is standing on the nest.
+    // Bring destroyed robots back respawnDelay ticks after they died, at their
+    // nest (or the nearest free tile if another robot is on it). They come back
+    // with a fresh, equipped starting kit that is worth 0 points, so destroying
+    // a respawned robot can't be farmed for score, and they are briefly protected.
     respawnRobots() {
         if(this.world.respawnDelay <= 0) return;
         this.arena.robots.forEach((robot, i) => {
             if(robot.isAlive || this.gameTime > robot.deathTime - this.world.respawnDelay) return;
-            if(this.arena.robotMap[robot.nest.x][robot.nest.y] >= 0) return;
+
+            let spot = this.freeTileNear(robot, robot.nest);
+            if(!spot) return;
+
+            robot.items = structuredClone(this.world.robots[0].items);
+            robot.items.forEach(item => {
+                item.stats.worth = 0;
+                item.isEquipped = true;
+            });
 
             robot.isAlive = true;
-            robot.pos = new Vector(robot.nest.x, robot.nest.y);
+            robot.pos = spot;
+            robot.protectedUntil = this.gameTime - this.world.respawnProtection;
             this.arena.robotMap[robot.pos.x][robot.pos.y] = i;
             this.equipItems(robot);
-            this.appendToLog(robot, this.gameTime, 'Respawns at its nest');
+            this.appendToLog(robot, this.gameTime, spot.isEqualTo(robot.nest) ? 'Respawns at its nest' : 'Respawns next to its occupied nest');
             this.addToFeed(`${robot.name} respawned`, this.colourOf(i));
         });
     }
@@ -663,6 +675,25 @@ class Game {
             });
             if(repaired) this.equipItems(robot);
         });
+    }
+
+    // The nearest tile to `place` (by walking distance) that the robot can stand
+    // on and that no other robot is on, or null if there isn't one.
+    freeTileNear(robot: RobotData, place: Vector): Vector | null {
+        let distance = this.arena.walkingDistances(place);
+        let best: Vector | null = null;
+        for(let x = 0; x < this.world.size.x; x++) {
+            for(let y = 0; y < this.world.size.y; y++) {
+                if(distance[x][y] == Infinity || this.arena.robotMap[x][y] >= 0) continue;
+                if(!robot.stats.permissiveTerrain.includes(this.world.tiles[this.arena.tileMap[x][y]].name)) continue;
+                if(!best || distance[x][y] < distance[best.x][best.y]) best = new Vector(x, y);
+            }
+        }
+        return best;
+    }
+
+    isProtected(robot: RobotData) {
+        return robot.isAlive && this.gameTime > robot.protectedUntil;
     }
 
     // Stops every robot's program.
@@ -712,12 +743,32 @@ class Game {
         });
 
         // A shot that hits nobody is logged as a miss.
-        if(targetID < 0) {
+        if(targetID == -1) {
             this.appendToLog(this.arena.robots[action.robotID], this.gameTime, `Misses its shot at ${new Vector(action.action.target.x, action.action.target.y).print()}`);
             this.setActionResult(action.robotID, 'attack', 'missed');
         }
 
         // Inflict damage on robot if there is one in path.
+        // Attacking ends the attacker's own spawn protection.
+        this.arena.robots[action.robotID].protectedUntil = Infinity;
+
+        // A robot that has just respawned can't be damaged.
+        if(targetID >= 0 && this.isProtected(this.arena.robots[targetID])) {
+            let attacker = this.arena.robots[action.robotID];
+            let defender = this.arena.robots[targetID];
+            this.appendToLog(attacker, this.gameTime, `attacks ${defender.name}, but it is protected`);
+            this.appendToLog(defender, this.gameTime, `Shot by ${attacker.name} while protected`);
+            this.setActionResult(action.robotID, 'attack', 'target is protected');
+            defender.lastHit = {
+                attackerID: action.robotID,
+                attackerName: attacker.name,
+                from: new Vector(attacker.pos.x, attacker.pos.y),
+                time: this.gameTime,
+                damage: [0, 0, 0],
+            };
+            targetID = -2;
+        }
+
         if(targetID >= 0) {
             let attacker = this.arena.robots[action.robotID];
             let defender = this.arena.robots[targetID];
@@ -774,6 +825,7 @@ class Game {
 
                 // Write to event log.
                 this.appendToLog(defender, this.gameTime, `dies :( destroyed by ${attacker.name}`);
+                this.appendToLog(attacker, this.gameTime, `Destroys ${defender.name}`);
                 this.kills[action.robotID] ++;
                 this.deaths[targetID] ++;
                 this.addToFeed(`${attacker.name} destroyed ${defender.name}`, this.colourOf(action.robotID));

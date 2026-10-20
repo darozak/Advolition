@@ -42,7 +42,10 @@ class PreciseShadowcasting extends FOV {
      * range from 0-1 and indicate the degree to which the tile is visible in the scan.
      */
     compute(x, y, R, mask) {
-        // Current position is automatically transparent.
+        // The observer's own tile is transparent for this scan. Work on a copy so
+        // the shared map isn't changed (otherwise a door scanned from would stay
+        // see-through for everyone for the rest of the game).
+        mask = mask.map(column => column.slice());
         mask[x][y] = true;
         // Create a results array that is the same size as the input mask.
         var scanResult = [];

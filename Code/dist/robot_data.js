@@ -7,6 +7,9 @@ class RobotData {
     robotID;
     isAlive = true;
     deathTime = -1; // gameTime when the robot was destroyed
+    // After respawning, the robot can't be damaged while gameTime is above
+    // this (gameTime counts down). Infinity means it isn't protected.
+    protectedUntil = Infinity;
     // The last time this robot was hit: who fired, from where, and the
     // damage per element after shields. Null until it is first hit.
     lastHit = null;

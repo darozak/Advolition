@@ -97,7 +97,9 @@ Both robots are told about every hit:
 
 While a robot stands on its nest, its equipped armor repairs by 1 point per element every 5 turns, up to the item's original armor.
 
-A destroyed robot respawns at its nest 500 turns later, with no items. It waits if another robot is standing on its nest. Items it banked on its nest are still there to pick up again.
+A destroyed robot respawns 500 ticks later at its nest. If another robot is standing on the nest, it appears on the nearest free tile instead. It comes back with a fresh starting kit (Blaster, Scanner and Armor), already equipped. The kit is worth 0 points, so destroying a respawned robot can't be farmed for score. Items it banked on its nest are still there to pick up again.
+
+For 100 ticks after respawning, a robot is **protected**: shots still hit it but do no damage. The protection ends early if the robot attacks.
 
 ## Scoring
 The tile where a robot starts becomes its **nest**. A robot's score is:
@@ -246,7 +248,8 @@ The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 | ------- | ------- | ------------ |
 | `startingItems` | 10 | Items on the map at the start. |
 | `itemSpawnInterval` | 500 | Turns between new random items. 0 turns this off. |
-| `respawnDelay` | 500 | Turns before a destroyed robot respawns. 0 turns respawning off. |
+| `respawnDelay` | 500 | Ticks before a destroyed robot respawns. 0 turns respawning off. |
+| `respawnProtection` | 100 | Ticks a respawned robot can't be damaged (unless it attacks first). 0 turns protection off. |
 | `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |
 | `nestRepairInterval` | 5 | Turns per point of armor repaired on the nest. 0 turns repair off. |
 
