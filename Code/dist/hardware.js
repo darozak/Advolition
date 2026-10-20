@@ -124,6 +124,9 @@ class WorldData {
     startingItems = 10;
     itemSpawnInterval = 500;
     respawnDelay = 500;
+    // A respawned robot can't be damaged for this many ticks, unless it
+    // attacks first. 0 turns protection off.
+    respawnProtection = 100;
     // Combat settings. A shield can block at most this fraction of each
     // element's damage per hit. While a robot stands on its nest, its
     // equipped armor regains 1 point per element every nestRepairInterval
