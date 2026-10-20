@@ -194,7 +194,7 @@ class Arena {
                     scan.itemMap[i][j] = structuredClone(this.itemMap[i][j]);
                     scan.robotMap[i][j] = this.robotMap[i][j];
                     if (this.robotMap[i][j] >= 0) {
-                        scan.robots[this.robotMap[i][j]] = structuredClone(this.robots[this.robotMap[i][j]]);
+                        scan.robots[this.robotMap[i][j]] = this.publicView(this.robots[this.robotMap[i][j]]);
                         scan.robots[this.robotMap[i][j]].lastScan = scanTime;
                     }
                 }
@@ -203,6 +203,17 @@ class Arena {
         // Erase self from robot scan.
         scan.robotMap[pov.x][pov.y] = -1;
         return scan;
+    }
+    // What a scan reveals about another robot: everything except its private
+    // log, lastAction and lastHit (those fields are left empty).
+    publicView(robot) {
+        let view = structuredClone(robot);
+        view.logTime = [];
+        view.logEntry = [];
+        view.logRepeat = [];
+        view.lastAction = null;
+        view.lastHit = null;
+        return view;
     }
     getTileSpeed(pos) {
         return this.world.tiles[this.tileMap[pos.x][pos.y]].speed;

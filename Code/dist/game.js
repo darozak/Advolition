@@ -15,7 +15,9 @@ class Game {
     deaths = [];
     events_feed = [];
     shots = [];
-    panelTop = 370; // where the robot panels start, below the spectator view
+    scoreHistory = []; // each robot's score, every scoreSampleTicks ticks
+    scoreSampleTicks = 100;
+    panelTop = 480; // where the robot panels start, below the spectator view
     programs = [];
     scanData = [];
     paper;
@@ -63,6 +65,7 @@ class Game {
             // Late game: new items appear, and destroyed robots come back.
             this.spawnItems();
             this.respawnRobots();
+            this.recordScores();
             this.repairAtNests();
             // Ask every robot that is alive and not busy for its next action.
             // Programs run in their own sandboxes, so they think in parallel.
@@ -337,13 +340,16 @@ class Game {
             if (this.arena.itemMap[loc.x][loc.y].length > 0) {
                 topTextFrame += lineSpacing * 2;
                 this.paper.drawListItem(centerTextFrame, topTextFrame, 'On Ground', [120, 120, 120]);
-                for (var i = 0; i < this.arena.itemMap[loc.x][loc.y].length; i++) {
-                    var color = [180, 180, 180];
-                    var text;
+                // Group items with the same name ("Armor ×3"), and show at most 6 lines.
+                let counts = new Map();
+                this.arena.itemMap[loc.x][loc.y].forEach(item => counts.set(item.name, (counts.get(item.name) || 0) + 1));
+                let lines = [...counts].map(([name, count]) => count > 1 ? `${name} ×${count}` : name);
+                if (lines.length > 6)
+                    lines = lines.slice(0, 5).concat([`+${lines.length - 5} more`]);
+                lines.forEach(text => {
                     topTextFrame += lineSpacing;
-                    text = this.arena.itemMap[loc.x][loc.y][i].name;
-                    this.paper.drawListItem(centerTextFrame, topTextFrame, text, color);
-                }
+                    this.paper.drawListItem(centerTextFrame, topTextFrame, text, [180, 180, 180]);
+                });
             }
         }
     }
@@ -369,7 +375,7 @@ class Game {
      * really is, a scoreboard, and a feed of kills and respawns.
      */
     displaySpectator() {
-        const left = 10, top = 34, tile = 12;
+        const left = 10, top = 34, tile = 16;
         const size = this.world.size;
         const robots = this.arena.robots;
         // (At the end, the game-over banner takes this spot.)
@@ -392,12 +398,13 @@ class Game {
         }
         // Nests, as squares in each robot's colour.
         robots.forEach((robot, i) => this.paper.drawSquare(left + robot.nest.x * tile, top + robot.nest.y * tile, tile, this.colourOf(i), 2));
-        // Shots from the last 60 ticks, fading out.
+        // Shots from the last 60 ticks, fading out. At high speed a frame can
+        // cover many ticks, so every shot is also shown for at least 3 frames.
         const shotLife = 60;
-        this.shots = this.shots.filter(shot => shot.time - this.gameTime < shotLife);
+        const shotAlpha = (shot) => Math.max(1 - (shot.time - this.gameTime) / shotLife, shot.drawn < 3 ? 0.7 : 0);
+        this.shots = this.shots.filter(shot => shot.time - this.gameTime < shotLife || shot.drawn < 3);
         this.shots.forEach(shot => {
-            const age = shot.time - this.gameTime;
-            this.paper.drawLine(left + (shot.from.x + 0.5) * tile, top + (shot.from.y + 0.5) * tile, left + (shot.to.x + 0.5) * tile, top + (shot.to.y + 0.5) * tile, shot.rgb, 1 - age / shotLife, 2);
+            this.paper.drawLine(left + (shot.from.x + 0.5) * tile, top + (shot.from.y + 0.5) * tile, left + (shot.to.x + 0.5) * tile, top + (shot.to.y + 0.5) * tile, shot.rgb, shotAlpha(shot), 2);
         });
         // Robots, as numbered dots.
         robots.forEach((robot, i) => {
@@ -406,8 +413,8 @@ class Game {
         });
         // Where each shot landed: a ring in the shooter's colour, larger for a hit.
         this.shots.forEach(shot => {
-            const age = shot.time - this.gameTime;
-            this.paper.drawRing(left + (shot.to.x + 0.5) * tile, top + (shot.to.y + 0.5) * tile, shot.hit ? tile * 0.75 : tile * 0.4, shot.hit ? [255, 255, 255] : shot.rgb, 1 - age / shotLife);
+            this.paper.drawRing(left + (shot.to.x + 0.5) * tile, top + (shot.to.y + 0.5) * tile, shot.hit ? tile * 0.75 : tile * 0.4, shot.hit ? [255, 255, 255] : shot.rgb, shotAlpha(shot));
+            shot.drawn++;
         });
         this.paper.drawFrame(left, top, size.x * tile, size.y * tile, [90, 90, 90]);
         // Scoreboard.
@@ -430,11 +437,45 @@ class Game {
             this.paper.drawText(boardLeft + 510, row, this.world.respawnDelay > 0 || robot.isAlive ? status : 'Destroyed', robot.isAlive ? [180, 180, 180] : [235, 87, 87], 'left', '13px Arial');
         });
         this.paper.drawText(boardLeft, top + 150, 'Score = items on the nest, plus the robot\'s own worth while it is home.', [120, 120, 120], 'left', '11px Arial');
+        // Score over time.
+        this.drawScoreChart(boardLeft, top + 180, 680, size.y * tile - 185);
         // Feed of kills and respawns.
         const feedLeft = boardLeft + 720;
-        this.paper.drawText(feedLeft, top + 10, 'Events', [120, 120, 120], 'left', 'bold 13px Arial');
+        this.paper.drawText(feedLeft, top + 10, 'Events (tick, newest first)', [120, 120, 120], 'left', 'bold 13px Arial');
         this.events_feed.slice().reverse().forEach((event, k) => {
-            this.paper.drawText(feedLeft, top + 34 + k * 18, `${event.time}  ${event.text}`, event.rgb, 'left', '13px Arial', k < 4 ? 1 : 0.6);
+            this.paper.drawText(feedLeft, top + 34 + k * 18, `${this.duration - event.time}  ${event.text}`, event.rgb, 'left', '13px Arial', k < 4 ? 1 : 0.6);
+        });
+    }
+    // Samples every robot's score for the score chart.
+    recordScores() {
+        let elapsed = this.duration - this.gameTime;
+        if (elapsed % this.scoreSampleTicks != 0)
+            return;
+        this.arena.robots.forEach((robot, i) => {
+            if (!this.scoreHistory[i])
+                this.scoreHistory[i] = [];
+            this.scoreHistory[i].push(this.arena.getScore(i));
+        });
+    }
+    // A line chart of each robot's score over the game so far.
+    drawScoreChart(left, top, width, height) {
+        const grey = [120, 120, 120];
+        this.paper.drawText(left, top, 'Score over time', grey, 'left', 'bold 13px Arial');
+        const chartTop = top + 10, chartBottom = top + height - 14;
+        const samples = Math.max(2, Math.ceil(this.duration / this.scoreSampleTicks) + 1);
+        const best = Math.max(10, ...this.scoreHistory.flat());
+        const x = (k) => left + 30 + (width - 40) * k / (samples - 1);
+        const y = (score) => chartBottom - (chartBottom - chartTop) * score / best;
+        this.paper.drawLine(left + 30, chartBottom, left + width - 10, chartBottom, grey, 1, 1);
+        this.paper.drawLine(left + 30, chartTop, left + 30, chartBottom, grey, 1, 1);
+        this.paper.drawText(left + 26, chartTop + 8, `${best}`, grey, 'right', '10px Arial');
+        this.paper.drawText(left + 26, chartBottom, '0', grey, 'right', '10px Arial');
+        this.paper.drawText(left + 30, chartBottom + 12, 'start', grey, 'left', '10px Arial');
+        this.paper.drawText(left + width - 10, chartBottom + 12, `tick ${this.duration}`, grey, 'right', '10px Arial');
+        this.scoreHistory.forEach((history, i) => {
+            for (let k = 1; k < history.length; k++) {
+                this.paper.drawLine(x(k - 1), y(history[k - 1]), x(k), y(history[k]), this.colourOf(i), 1, 2);
+            }
         });
     }
     // Walls are only drawn where they border open ground, so the map stays readable.
@@ -619,6 +660,7 @@ class Game {
             time: this.gameTime,
             rgb: this.colourOf(action.robotID),
             hit: targetID >= 0,
+            drawn: 0,
         });
         // A shot that hits nobody is logged as a miss.
         if (targetID == -1) {

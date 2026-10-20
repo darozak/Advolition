@@ -17,9 +17,10 @@ You can play the most recent version of the game at https://darozak.github.io/Ad
 5. Use **Pause** and **Speed** (1x to 100x) to control playback.
 
 The top of the screen is the spectator view:
-- **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit).
+- **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit). At high speeds every shot stays on screen for at least 3 frames.
 - **A scoreboard**, sorted by score. It shows each robot's score, the worth banked on its nest, the worth it's carrying, its kills and deaths, and whether it's home, out exploring, or waiting to respawn.
-- **An events feed** of kills and respawns.
+- **A score chart** showing every robot's score over the game so far, so you can see when the lead changed.
+- **An events feed** of kills and respawns, newest first, each with the tick it happened (counting up from the start of the game).
 
 Below that, each robot has its own panel showing its stats, its event log, a map of what it has scanned (the robot only knows what's on this map), its inventory, and any items on the ground beneath it.
 
@@ -35,7 +36,7 @@ Each game builds a new 25×25 dungeon of rooms and corridors. Every grid space i
 | Door | `+` | Yes | No |
 | Nest | `@` | Yes | Yes |
 
-A grid space can hold one robot and any number of items. Ten random items are scattered on floor tiles at the start of each game, and a new random item appears somewhere on the floor every 500 turns.
+A grid space can hold one robot and any number of items. Ten random items are scattered on floor tiles at the start of each game, and a new random item appears somewhere on the floor every 500 ticks.
 
 ## Time and movement rules
 - **Game length.** The game lasts 10,000 ticks. `gameTime` **counts down** from 10,000 to 0, so `myData.gameTime` is also the time you have left. A bigger `gameTime` means earlier, not later.
@@ -84,6 +85,8 @@ Each item is defined as its own subclass of `Item` in [`Code/src/items.ts`](Code
 There are three damage elements: **Kinetic**, **Thermal** and **ElectroMagnetic**. Each robot has an attack and a shield value for each element, and one pool of **armor** points that absorbs damage of every element.
 
 An attack travels in a straight line toward the target position and hits the first robot in its path. Walls and doors block it, but a robot standing in a doorway can still be hit. There is no range limit.
+
+**When shots land.** Like every action, an attack takes the attacker's action time. The shot is fired when the action *finishes*, along the line from where the attacker is then to the target position you gave. A target that has moved away by then is missed, so a moving robot is harder to hit than one standing still. Aim where a robot will be, or fire at robots that are busy with a long action.
 
 An attack fires all of the attacker's equipped weapons at once:
 1. For each element, the defender's **shield** for that element blocks part of the attack, but never more than half of it. Every hit does some damage, and a second shield of the same element only helps against stronger attacks.
@@ -158,7 +161,7 @@ Each program runs in its own sandbox (a Web Worker), separate from the game and 
 - A program can use `Program`, `Vector` and the action classes below. It can't see the game, the page, or other programs. The only information it gets is the `myData` passed to `run`.
 - `console.log` output appears in the browser's developer console.
 - A program has 1 second to load and 1 second to choose each action. If it takes longer, it is stopped and its robot does nothing for the rest of the game.
-- Each turn waits until every program that is choosing an action has answered, so a slow program slows the whole game.
+- Each tick waits until every program that is choosing an action has answered, so a slow program slows the whole game.
 
 ## Actions
 A program's `run` method returns one of these:
@@ -186,6 +189,15 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 - **The on-screen log** shows each robot's last 10 events. The same event repeated in a row is shown once with a count, such as `Scans the area ×12`.
 - **Download logs** saves every robot's complete log for the game, with tick numbers, as a text file.
 - **`lastAction`**, in your own `myData.robots[myData.myID]`, tells your program how its last action turned out. For example: `{ command: 'take', status: 'failed', reason: 'inventory full' }`. Failed actions and invalid return values show up here too, so check it when your robot seems stuck.
+  Possible failure reasons:
+
+  | Command | Reasons |
+  |---|---|
+  | `move` | `blocked by Wall` (or another tile name), `blocked by <robot name>` |
+  | `attack` | `missed`, `target is protected` |
+  | `take` | `no <item> here`, `inventory full` |
+  | `drop`, `equip`, `unequip` | `has no <item>` |
+  | any | `unknown command "<command>"`, `not a valid action`, or the error message if `run` threw an error |
 - **`lastHit`** tells you who last shot you and from where.
 - **`console.log`** works inside your program. Its output appears in the browser's developer console (usually opened with F12).
 
@@ -205,6 +217,9 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 | `robots[n]` | RobotData | What this robot knows about robot `n`. Its own entry is always current. Others are as of the last time they were scanned, and `undefined` until then. |
 | `robotCount` | number | How many robots are in the game. Robot IDs run from 0 to `robotCount - 1`. |
 | `scanTime[x][y]` | number | The `gameTime` when x, y was last scanned, or -1 if it hasn't been scanned. |
+
+### What you can see about other robots
+Scanning a robot shows its current position, nest, name, ID, whether it's alive, its stats (including its attack, shields and armor left), its inventory, and when it was destroyed or last respawned. You don't see its log, `lastAction` or `lastHit`: in another robot's data those are always empty. Your own entry, `myData.robots[myData.myID]`, always has everything.
 
 ### RobotData
 | Field | Type | Description |
@@ -256,7 +271,7 @@ The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 | Setting | Default | What it does |
 | ------- | ------- | ------------ |
 | `startingItems` | 10 | Items on the map at the start. |
-| `itemSpawnInterval` | 500 | Turns between new random items. 0 turns this off. |
+| `itemSpawnInterval` | 500 | Ticks between new random items. 0 turns this off. |
 | `respawnDelay` | 500 | Ticks before a destroyed robot respawns. 0 turns respawning off. |
 | `respawnProtection` | 100 | Ticks a respawned robot can't be damaged (unless it attacks first). 0 turns protection off. |
 | `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |
