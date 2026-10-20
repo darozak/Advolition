@@ -113,56 +113,89 @@ class Arena {
         return distance;
     }
 
-    placeRobot(robotID: number) {
-        var x = 0;
-        var y = 0;
+    /**
+     * Chooses a nest for every robot at once, then hands them out in a random
+     * order, so no seat gets a better spot than another. Called each time a
+     * robot is added, before the game starts.
+     *
+     * Nests go on empty floor tiles, out of each other's line of sight where
+     * possible, and as far apart (by walking distance) as possible: of many
+     * randomly started layouts, it keeps the one whose two closest nests are
+     * farthest apart.
+     */
+    placeNests() {
+        const nestTile = this.world.tiles.findLastIndex(d => d.key === '@');
+        const floorTile = this.world.tiles.findLastIndex(d => d.key === '.');
 
-        if(this.robots.length > robotID) {
-            // Candidates are empty floor tiles, so no items start on a nest.
-            let candidates: Vector[] = [];
-            for(let i = 0; i < this.world.size.x; i++) {
-                for(let j = 0; j < this.world.size.y; j++) {
-                    if(this.world.tiles[this.tileMap[i][j]].key == '.' && this.itemMap[i][j].length == 0) {
-                        candidates.push(new Vector(i, j));
-                    }
-                }
+        // Undo any earlier placement.
+        this.robots.forEach((robot, i) => {
+            if(this.tileMap[robot.nest.x][robot.nest.y] == nestTile) this.tileMap[robot.nest.x][robot.nest.y] = floorTile;
+            if(this.robotMap[robot.pos.x][robot.pos.y] == i) this.robotMap[robot.pos.x][robot.pos.y] = -1;
+        });
+
+        // Candidates are empty floor tiles, so no items start on a nest.
+        let candidates: Vector[] = [];
+        for(let x = 0; x < this.world.size.x; x++) {
+            for(let y = 0; y < this.world.size.y; y++) {
+                if(this.tileMap[x][y] == floorTile && this.itemMap[x][y].length == 0) candidates.push(new Vector(x, y));
+            }
+        }
+        const distance = candidates.map(c => this.walkingDistances(c));
+        const range = this.world.size.x + this.world.size.y;
+        const visible = candidates.map(c => this.fov.compute(c.x, c.y, range, this.mask));
+        const steps = (a: number, b: number) => distance[a][candidates[b].x][candidates[b].y];
+        const sees = (a: number, b: number) => visible[a][candidates[b].x][candidates[b].y] > 0;
+
+        let best: number[] = [];
+        let bestScore = -Infinity;
+        for(let trial = 0; trial < 200; trial++) {
+            // Start from a random tile, then keep adding a tile that is out of
+            // sight of the chosen ones and far from all of them.
+            let chosen = [rng.getUniformInt(0, candidates.length - 1)];
+            while(chosen.length < this.robots.length) {
+                let options = candidates.map((c, k) => k).filter(k => !chosen.includes(k));
+                let nearest = (k: number) => Math.min(...chosen.map(j => steps(j, k)));
+                let hidden = options.filter(k => !chosen.some(j => sees(j, k)));
+                if(hidden.length > 0) options = hidden;
+                let reachable = options.filter(k => nearest(k) < Infinity);
+                if(reachable.length > 0) options = reachable;
+                let farthest = Math.max(...options.map(nearest));
+                if(farthest < Infinity) options = options.filter(k => nearest(k) >= 0.9 * farthest);
+                chosen.push(options[rng.getUniformInt(0, options.length - 1)]);
             }
 
-            // Score each candidate by its walking distance to the nearest
-            // existing nest, and note whether any existing nest can see it.
-            let nests = this.robots.slice(0, robotID).map(r => r.nest);
-            let nearest = candidates.map(() => Infinity);
-            let seen = candidates.map(() => false);
-            nests.forEach(nest => {
-                let distance = this.walkingDistances(nest);
-                let visible = this.fov.compute(nest.x, nest.y, this.world.size.x + this.world.size.y, this.mask);
-                candidates.forEach((c, k) => {
-                    nearest[k] = Math.min(nearest[k], distance[c.x][c.y]);
-                    if(visible[c.x][c.y] > 0) seen[k] = true;
-                });
-            });
-
-            // Prefer tiles no other nest can see, then pick at random among
-            // those at least 75% as far away as the farthest one.
-            let hidden = candidates.map((c, k) => k).filter(k => !seen[k]);
-            let pool = hidden.length > 0 ? hidden : candidates.map((c, k) => k);
-            let reachable = pool.filter(k => nearest[k] < Infinity);
-            if(reachable.length > 0) pool = reachable;
-            let farthest = Math.max(...pool.map(k => nearest[k]));
-            if(farthest < Infinity) pool = pool.filter(k => nearest[k] >= 0.75 * farthest);
-            let pick = candidates[pool[rng.getUniformInt(0, pool.length - 1)]];
-            x = pick.x;
-            y = pick.y;
-
-            this.robots[robotID].nest.x = x;
-            this.robots[robotID].nest.y = y;
-
-            let tileID = this.world.tiles.findLastIndex(d => d.key === '@');
-            this.tileMap[x][y] = tileID;
+            // Score the layout: no nest may see another, then the closest pair
+            // should be as far apart as possible, then the total spread.
+            let closest = Infinity, total = 0, seen = false;
+            for(let a = 0; a < chosen.length; a++) {
+                for(let b = a + 1; b < chosen.length; b++) {
+                    let d = steps(chosen[a], chosen[b]);
+                    closest = Math.min(closest, d);
+                    total += Math.min(d, 1000);
+                    if(sees(chosen[a], chosen[b])) seen = true;
+                }
+            }
+            let score = (seen ? -1e9 : 0) + Math.min(closest, 1000) * 1e4 + total;
+            if(score > bestScore) {
+                bestScore = score;
+                best = chosen;
+            }
         }
-        return new Vector(x, y);
+
+        // Hand the nests out in a random order.
+        for(let i = best.length - 1; i > 0; i--) {
+            let j = rng.getUniformInt(0, i);
+            [best[i], best[j]] = [best[j], best[i]];
+        }
+        this.robots.forEach((robot, i) => {
+            let spot = candidates[best[i]];
+            robot.nest = new Vector(spot.x, spot.y);
+            robot.pos = new Vector(spot.x, spot.y);
+            this.tileMap[spot.x][spot.y] = nestTile;
+            this.robotMap[spot.x][spot.y] = i;
+        });
     }
-  
+
     scan(pov: Vector, scanRadius: number, scan: ScanData, scanTime: number) {
         var visible: number[][] = this.fov.compute(pov.x, pov.y, scanRadius, this.mask);
 

@@ -95,7 +95,7 @@ Both robots are told about every hit:
 - The attacker's log shows the damage it did, and its missed shots.
 - The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired and from where, even if the attacker is outside its scan range.
 
-While a robot stands on its nest, its equipped armor repairs by 1 point per element every 5 turns, up to the item's original armor.
+While a robot stands on its nest, its equipped armor repairs by 1 point per element every 15 ticks, up to the item's original armor.
 
 A destroyed robot respawns 500 ticks later at its nest. If another robot is standing on the nest, it appears on the nearest free tile instead. It comes back with a fresh starting kit (Blaster, Scanner and Armor), already equipped. The kit is worth 0 points, so destroying a respawned robot can't be farmed for score. Items it banked on its nest are still there to pick up again.
 
@@ -109,7 +109,7 @@ The tile where a robot starts becomes its **nest**. A robot's score is:
 
 Scores are shown live in each robot's panel. When time runs out, the winner (or a tie) is announced at the top of the screen.
 
-Starting positions are spread out: each nest is placed as far as possible (by walking distance) from the others, out of their line of sight, and on an empty tile.
+Starting positions are fair. All nests are chosen together, as far apart as possible (by walking distance), out of each other's line of sight, and on empty tiles. They're then handed out to the robots in random order, so no seat gets a better spot.
 
 ## Programming your robot
 A program file must define a class that extends `Program`, give it a `run` method that takes the robot's scan data and returns an action, and end with an expression that creates an instance of the class.
@@ -251,7 +251,7 @@ The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 | `respawnDelay` | 500 | Ticks before a destroyed robot respawns. 0 turns respawning off. |
 | `respawnProtection` | 100 | Ticks a respawned robot can't be damaged (unless it attacks first). 0 turns protection off. |
 | `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |
-| `nestRepairInterval` | 5 | Turns per point of armor repaired on the nest. 0 turns repair off. |
+| `nestRepairInterval` | 15 | Ticks per point of armor repaired on the nest. 0 turns repair off. |
 
 ## Building from source
 The game is written in TypeScript in `Code/src/` and compiled to `Code/dist/`, which `index.html` loads directly. To rebuild after changing the source:
