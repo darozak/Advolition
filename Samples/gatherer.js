@@ -38,6 +38,13 @@ class Gatherer extends Program {
         const last = me.lastAction;
         if (last && last.command === 'take' && last.status === 'failed') this.gone.add(key(here));
 
+        // If another robot blocked our last step, step aside to a random free
+        // tile so we don't keep bumping into each other.
+        if (last && last.command === 'move' && last.status === 'failed' && !last.reason.includes('Wall')) {
+            const sidestep = this.freeNeighbour(myData, me, here);
+            if (sidestep) return new Move(sidestep);
+        }
+
         // 1. Equip any gear we're carrying but haven't equipped.
         for (const name of this.gear) {
             const item = me.items.find(i => i.name === name);
@@ -97,6 +104,22 @@ class Gatherer extends Program {
         // Nothing left to find: go home and keep watch.
         if (!atHome) return this.step(routeHome, home);
         return new Scan();
+    }
+
+    // A random neighbouring tile we can walk on, with no robot seen on it.
+    freeNeighbour(myData, me, here) {
+        const options = [];
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const x = here.x + dx, y = here.y + dy;
+                if ((dx === 0 && dy === 0) || x < 0 || y < 0 || x >= myData.mapSize.x || y >= myData.mapSize.y) continue;
+                const tile = myData.tileMap[x][y];
+                if (tile < 0 || !me.stats.permissiveTerrain.includes(myData.tiles[tile].name)) continue;
+                if (myData.robotMap[x][y] >= 0) continue;
+                options.push(new Vector(x, y));
+            }
+        }
+        return options.length > 0 ? options[Math.floor(Math.random() * options.length)] : null;
     }
 
     // The first item of each gear type counts as gear; extras are loot.

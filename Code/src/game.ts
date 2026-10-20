@@ -303,11 +303,7 @@ class Game {
                 topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Shield", shield, this.hpsColor[robotID].value(), false);
             }
             
-            for(var i = 0; i < this.arena.robots[robotID].stats.elements.length; i ++) {
-                let armor = this.arena.robots[robotID].stats.armor[i];
-                let element = this.arena.robots[robotID].stats.elements[i];
-                topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, element + " Armor", armor, this.hpsColor[robotID].value(), false);
-            }
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, "Armor", this.arena.robots[robotID].stats.armor, this.hpsColor[robotID].value(), false);
             // Print log.
             topTextFrame += lineSpacing * 2;
             this.paper.printLog(this.arena.robots[robotID], leftDisplayFrame + 40, topTextFrame);
@@ -660,11 +656,9 @@ class Game {
                 if(!item.isEquipped) return;
                 let original = this.world.items.find(d => d.name === item.name);
                 if(!original) return;
-                for(let e = 0; e < item.stats.armor.length; e++) {
-                    if(item.stats.armor[e] < original.stats.armor[e]) {
-                        item.stats.armor[e] ++;
-                        repaired = true;
-                    }
+                if(item.stats.armor < original.stats.armor) {
+                    item.stats.armor ++;
+                    repaired = true;
                 }
             });
             if(repaired) this.equipItems(robot);
@@ -790,23 +784,29 @@ class Game {
                 damage: damage.slice(),
             };
 
-            // Equipped armor absorbs the rest and wears down as it does.
-            for(let i = 0; i < defender.items.length; i ++) {
+            // Equipped armor absorbs the damage of every element from one
+            // shared pool, and wears down as it does.
+            let remaining = total;
+            for(let i = 0; i < defender.items.length && remaining > 0; i ++) {
                 let item = defender.items[i];
                 if(!item.isEquipped) continue;
+                let absorbed = Math.min(remaining, item.stats.armor);
+                item.stats.armor -= absorbed;
+                remaining -= absorbed;
+            }
 
-                for(let j = 0; j < defender.stats.elements.length; j ++) {
-                    let absorbed = Math.min(damage[j], item.stats.armor[j]);
-                    item.stats.armor[j] -= absorbed;
-                    damage[j] -= absorbed;
-                }
+            // ElectroMagnetic damage also slows the target's current action.
+            let emDamage = damage[2];
+            if(emDamage > 0 && this.world.emSlowPerDamage > 0) {
+                let pending = this.events.find(e => e.robotID == targetID);
+                if(pending) pending.duration -= emDamage * this.world.emSlowPerDamage;
             }
 
             // Recompute the defender's stats from its worn-down items.
             this.equipItems(defender);
 
             // Any damage the armor couldn't absorb kills the robot.
-            if(damage.some(d => d > 0)) {
+            if(remaining > 0) {
                 defender.isAlive = false;
                 defender.deathTime = this.gameTime;
 
@@ -853,6 +853,35 @@ class Game {
         // Is another robot already standing there?
         let occupantID = this.arena.robotMap[destination.x][destination.y];
         let isOccupied = occupantID >= 0 && occupantID != action.robotID;
+
+        // Two robots stepping into each other's tiles swap places, so robots
+        // meeting head-on in a corridor can't block each other forever.
+        if(isOccupied && permissiveTerrainIndex >= 0) {
+            let mover = this.arena.robots[action.robotID];
+            let other = this.arena.robots[occupantID];
+            let otherMove = this.events.find(e => e.robotID == occupantID && e.action.command == 'move');
+            if(otherMove) {
+                let otherStep = other.pos.getPathTo(otherMove.action.target)[0];
+                if(otherStep.isEqualTo(mover.pos)) {
+                    let moverFrom = mover.pos;
+                    mover.pos = destination;
+                    other.pos = moverFrom;
+                    this.arena.robotMap[mover.pos.x][mover.pos.y] = action.robotID;
+                    this.arena.robotMap[other.pos.x][other.pos.y] = occupantID;
+
+                    // The other robot's move is done too.
+                    this.events = this.events.filter(e => e !== otherMove);
+                    this.appendToLog(mover, this.gameTime, `Swaps places with ${other.name}`);
+                    this.appendToLog(other, this.gameTime, `Swaps places with ${mover.name}`);
+                    this.setActionResult(action.robotID, 'move');
+                    this.setActionResult(occupantID, 'move');
+                    this.coreColor[action.robotID].deactivate();
+                    this.batteryColor[action.robotID].deactivate();
+                    this.powerColor[action.robotID].deactivate();
+                    return;
+                }
+            }
+        }
 
         // Can the robot move into this tile?
         if (permissiveTerrainIndex >= 0 && !isOccupied) {
