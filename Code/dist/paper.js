@@ -11,7 +11,7 @@ class Paper {
     constructor(lineSpacing) {
         this.canvas = document.getElementById('canvas');
         this.image = document.getElementById('sprites');
-        this.CANVAS_HEIGHT = this.canvas.height = 960;
+        this.CANVAS_HEIGHT = this.canvas.height = 1080;
         this.CANVAS_WIDTH = this.canvas.width = 1500;
         this.ctx = this.canvas.getContext('2d');
         this.lineSpacing = lineSpacing;
@@ -31,9 +31,17 @@ class Paper {
             this.ctx.fillText(`${robot.logTime[i]}`, centerFrame - 10, topFrame);
             this.ctx.textAlign = 'left';
             let repeat = robot.logRepeat[i] > 1 ? ` ×${robot.logRepeat[i]}` : '';
-            this.ctx.fillText(robot.logEntry[i] + repeat, centerFrame + 10, topFrame);
+            this.ctx.fillText(this.fitText(robot.logEntry[i] + repeat, 280), centerFrame + 10, topFrame);
             topFrame += this.lineSpacing;
         }
+    }
+    // Shortens text with "…" so it fits in maxWidth pixels in the current font.
+    fitText(text, maxWidth) {
+        if (this.ctx.measureText(text).width <= maxWidth)
+            return text;
+        while (text.length > 1 && this.ctx.measureText(text + '…').width > maxWidth)
+            text = text.slice(0, -1);
+        return text + '…';
     }
     drawTile(leftFrame, topFrame, spriteCoord, gridCoord, alpha, frame) {
         const sx = this.spriteTileSize * spriteCoord.x;
