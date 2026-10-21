@@ -70,10 +70,10 @@ A robot's stats are its base stats plus the stats of all its equipped items. Wor
 | Blaster | 20 | 2 | Thermal attack +4 |
 | Railgun | 25 | 4 | Kinetic attack +6 |
 | Ion Gun | 15 | 1 | ElectroMagnetic attack +3. Each hit also slows the target's current action. |
-| Thermal Shield | 8 | 1 | Thermal shield +2 |
-| Kinetic Shield | 8 | 1 | Kinetic shield +3 |
-| EM Shield | 8 | 1 | ElectroMagnetic shield +2 |
-| Armor | 6 | 1 | 60 armor points, which absorb damage of every element |
+| Thermal Shield | 8 | 1 | Thermal shield +4 |
+| Kinetic Shield | 8 | 1 | Kinetic shield +4 |
+| EM Shield | 8 | 1 | ElectroMagnetic shield +3. Also makes the robot immune to the Ion Gun's slow. |
+| Armor | 6 | 2 | 60 armor points, which absorb damage of every element |
 
 Every robot starts with a Blaster, a Scanner and Armor. The other items are only found in the dungeon.
 
@@ -89,19 +89,19 @@ An attack travels in a straight line toward the target position and hits the fir
 **When shots land.** Like every action, an attack takes the attacker's action time. The shot is fired when the action *finishes*, along the line from where the attacker is then to the target position you gave. A target that has moved away by then is missed, so a moving robot is harder to hit than one standing still. Aim where a robot will be, or fire at robots that are busy with a long action.
 
 An attack fires all of the attacker's equipped weapons at once:
-1. For each element, the defender's **shield** for that element blocks part of the attack, but never more than half of it. Every hit does some damage, and a second shield of the same element only helps against stronger attacks.
+1. For each element, the defender's **shield** for that element blocks part of the attack, but never more than half of it (rounded up). Every hit does some damage, and a second shield of the same element only helps against stronger attacks.
 2. The damage of all elements is added up, and the defender's equipped **armor** absorbs it. Armor wears down by the amount it absorbs, so it eventually runs out. With several Armor items, the first one wears out before the next is used.
 3. If any damage gets past the armor, the defender is destroyed. It drops all of its items where it stood and is removed from the map.
-4. **ElectroMagnetic** damage also slows the defender: its current action takes 2 ticks longer for each point of EM damage.
+4. **ElectroMagnetic** damage also slows the defender: its current action takes 1 tick longer for each point of EM damage. Each action can only be slowed once, however many EM hits land during it, and a robot with an EM Shield equipped can't be slowed at all.
 
-Because damage adds up, carrying two different weapons works. Because shields only work against their own element, it pays to check an enemy's shields (they show up when you scan it) and fire weapons they don't block. Some examples:
+Because damage adds up, carrying two different weapons works. Because shields only work against their own element, it pays to check an enemy's shields (they show up when you scan it) and fire weapons they don't block. Shields, in turn, are the counter to an enemy that doubles up on one weapon type: a Thermal Shield halves the damage of two Blasters, and an EM Shield also stops the Ion Gun's slow. Some examples:
 
 | Attacker | vs Armor | vs Armor + Thermal Shield | vs Armor + Kinetic Shield |
 |---|---|---|---|
 | Blaster | 16 hits | 31 hits | 16 hits |
 | Railgun | 11 hits | 11 hits | 21 hits |
 | Blaster + Railgun | 7 hits | 8 hits | 9 hits |
-| Blaster + Blaster | 8 hits | 11 hits | 8 hits |
+| Blaster + Blaster | 8 hits | 16 hits | 8 hits |
 
 Both robots are told about every hit:
 - The attacker's log shows the damage it did, and its missed shots.
@@ -276,7 +276,7 @@ The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 | `respawnProtection` | 100 | Ticks a respawned robot can't be damaged (unless it attacks first). 0 turns protection off. |
 | `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |
 | `nestRepairInterval` | 15 | Ticks per point of armor repaired, per Armor item, on the nest. 0 turns repair off. |
-| `emSlowPerDamage` | 2 | Ticks each point of ElectroMagnetic damage adds to the target's current action. |
+| `emSlowPerDamage` | 1 | Ticks each point of ElectroMagnetic damage adds to the target's current action (once per action). |
 
 ## Building from source
 The game is written in TypeScript in `Code/src/` and compiled to `Code/dist/`, which `index.html` loads directly. To rebuild after changing the source:

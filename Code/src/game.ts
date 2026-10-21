@@ -809,7 +809,7 @@ class Game {
             let damage: number[] = [];
             for(let i = 0; i < defender.stats.elements.length; i ++) {
                 let attack = attacker.stats.attack[i];
-                let blocked = Math.min(defender.stats.shield[i], Math.floor(attack * this.world.maxShieldBlock));
+                let blocked = Math.min(defender.stats.shield[i], Math.ceil(attack * this.world.maxShieldBlock));
                 damage.push(Math.max(0, attack - blocked));
             }
             let total = damage.reduce((a, b) => a + b, 0);
@@ -838,11 +838,16 @@ class Game {
                 remaining -= absorbed;
             }
 
-            // ElectroMagnetic damage also slows the target's current action.
+            // ElectroMagnetic damage also slows the target's current action,
+            // but only once per action, so a robot can't be stun-locked. An
+            // equipped EM Shield prevents the slow altogether.
             let emDamage = damage[2];
-            if(emDamage > 0 && this.world.emSlowPerDamage > 0) {
+            if(emDamage > 0 && this.world.emSlowPerDamage > 0 && defender.stats.shield[2] == 0) {
                 let pending = this.events.find(e => e.robotID == targetID);
-                if(pending) pending.duration -= emDamage * this.world.emSlowPerDamage;
+                if(pending && !pending.slowed) {
+                    pending.duration -= emDamage * this.world.emSlowPerDamage;
+                    pending.slowed = true;
+                }
             }
 
             // Recompute the defender's stats from its worn-down items.

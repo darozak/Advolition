@@ -56,7 +56,7 @@ class ThermalShield extends Item {
         super('Thermal Shield', new Stats());
         this.stats.worth = 8;
         this.stats.bulk = 1;
-        this.stats.shield[1] = 2;       // Thermal
+        this.stats.shield[1] = 4;       // Thermal
     }
 }
 
@@ -65,7 +65,7 @@ class KineticShield extends Item {
         super('Kinetic Shield', new Stats());
         this.stats.worth = 8;
         this.stats.bulk = 1;
-        this.stats.shield[0] = 3;       // Kinetic
+        this.stats.shield[0] = 4;       // Kinetic
     }
 }
 
@@ -74,7 +74,7 @@ class EMShield extends Item {
         super('EM Shield', new Stats());
         this.stats.worth = 8;
         this.stats.bulk = 1;
-        this.stats.shield[2] = 2;       // ElectroMagnetic
+        this.stats.shield[2] = 3;       // ElectroMagnetic; also stops the Ion Gun's slow
     }
 }
 
@@ -82,7 +82,7 @@ class Armor extends Item {
     constructor() {
         super('Armor', new Stats());
         this.stats.worth = 6;
-        this.stats.bulk = 1;
+        this.stats.bulk = 2;
         this.stats.armor = 60;          // absorbs damage of every element
     }
 }

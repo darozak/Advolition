@@ -174,8 +174,9 @@ class WorldData {
     nestRepairInterval = 15;
 
     // Each point of ElectroMagnetic damage delays the target's current action
-    // by this many ticks.
-    emSlowPerDamage = 2;
+    // by this many ticks. Each action can only be slowed once, so repeated EM
+    // hits can't stop a robot from ever acting.
+    emSlowPerDamage = 1;
 
     constructor() {
     }
