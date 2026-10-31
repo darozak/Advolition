@@ -19,14 +19,15 @@ class Paper {
         this.lineSpacing = lineSpacing;
     }
 
-    printLog(robot: RobotData, centerFrame: number, topFrame: number) {
+    // Log times are shown as ticks since the start of the game.
+    printLog(robot: RobotData, centerFrame: number, topFrame: number, duration: number) {
         this.ctx.font = '12px Arial';   
 
         // Print header
         this.ctx.fillStyle = this.rgbStringFromArray([120, 120, 120]);
 
         this.ctx.textAlign = 'right'; 
-        this.ctx.fillText("Time", centerFrame - 10, topFrame);
+        this.ctx.fillText("Tick", centerFrame - 10, topFrame);
 
         this.ctx.textAlign = 'left';
         this.ctx.fillText("Action", centerFrame + 10, topFrame);
@@ -37,7 +38,7 @@ class Paper {
         for(var i = 0; i < robot.logTime.length; i ++) {
             
             this.ctx.textAlign = 'right';
-            this.ctx.fillText(`${robot.logTime[i]}`, centerFrame - 10, topFrame);
+            this.ctx.fillText(`${duration - robot.logTime[i]}`, centerFrame - 10, topFrame);
 
             this.ctx.textAlign = 'left';
             let repeat = robot.logRepeat[i] > 1 ? ` ×${robot.logRepeat[i]}` : '';
