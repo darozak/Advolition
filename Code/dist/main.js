@@ -89,7 +89,7 @@ function downloadLogs() {
         alert('Run a game first, then download its logs.');
         return;
     }
-    const text = `Advolition game logs (gameTime counts down from ${lastGame.duration})\n\n` + lastGame.fullLogText();
+    const text = `Advolition game logs (times are ticks since the start of the game, out of ${lastGame.duration})\n\n` + lastGame.fullLogText();
     const link = document.createElement('a');
     link.href = URL.createObjectURL(new Blob([text], { type: 'text/plain' }));
     link.download = 'advolition-logs.txt';

@@ -16,19 +16,20 @@ class Paper {
         this.ctx = this.canvas.getContext('2d');
         this.lineSpacing = lineSpacing;
     }
-    printLog(robot, centerFrame, topFrame) {
+    // Log times are shown as ticks since the start of the game.
+    printLog(robot, centerFrame, topFrame, duration) {
         this.ctx.font = '12px Arial';
         // Print header
         this.ctx.fillStyle = this.rgbStringFromArray([120, 120, 120]);
         this.ctx.textAlign = 'right';
-        this.ctx.fillText("Time", centerFrame - 10, topFrame);
+        this.ctx.fillText("Tick", centerFrame - 10, topFrame);
         this.ctx.textAlign = 'left';
         this.ctx.fillText("Action", centerFrame + 10, topFrame);
         topFrame += this.lineSpacing;
         this.ctx.fillStyle = this.rgbStringFromArray([180, 180, 180]);
         for (var i = 0; i < robot.logTime.length; i++) {
             this.ctx.textAlign = 'right';
-            this.ctx.fillText(`${robot.logTime[i]}`, centerFrame - 10, topFrame);
+            this.ctx.fillText(`${duration - robot.logTime[i]}`, centerFrame - 10, topFrame);
             this.ctx.textAlign = 'left';
             let repeat = robot.logRepeat[i] > 1 ? ` ×${robot.logRepeat[i]}` : '';
             this.ctx.fillText(this.fitText(robot.logEntry[i] + repeat, 280), centerFrame + 10, topFrame);

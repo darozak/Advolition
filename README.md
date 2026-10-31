@@ -17,10 +17,10 @@ You can play the most recent version of the game at https://darozak.github.io/Ad
 5. Use **Pause** and **Speed** (1x to 100x) to control playback.
 
 The top of the screen is the spectator view:
-- **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit). At high speeds every shot stays on screen for at least 3 frames.
+- **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit). At high speeds every shot stays on screen for at least 3 frames. Piles that hold only respawn kit, which is worth nothing, are drawn faded, and the "On Ground" list marks such items "(no value)".
 - **A scoreboard**, sorted by score. It shows each robot's score, the worth banked on its nest, the worth it's carrying, its kills and deaths, and whether it's home, out exploring, or waiting to respawn.
-- **A score chart** showing every robot's score over the game so far, so you can see when the lead changed.
-- **An events feed** of kills and respawns, newest first, each with the tick it happened (counting up from the start of the game).
+- **A worth chart** showing, for each robot, the score it would have if it were home: banked items plus everything it's carrying. Unlike the score itself, this doesn't drop every time a robot leaves its nest, so changes in the lead are real.
+- **A feed of kills and raids**, newest first, each with the tick it happened. A raid is a robot taking valuable items from another robot's nest; several items taken in a row are combined into one line.
 
 Below that, each robot has its own panel showing its stats, its event log, a map of what it has scanned (the robot only knows what's on this map), its inventory, and any items on the ground beneath it.
 
@@ -187,7 +187,8 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 
 ## Debugging your robot
 - **The on-screen log** shows each robot's last 10 events. The same event repeated in a row is shown once with a count, such as `Scans the area ×12`.
-- **Download logs** saves every robot's complete log for the game, with tick numbers, as a text file.
+- **Download logs** saves every robot's complete log for the game as a text file.
+- **One clock.** Everything on screen and in the downloaded logs shows ticks counted up from the start of the game. Only the "Time left" label at the top counts down. (In your program, `gameTime` and the times in your own log still count down.)
 - **`lastAction`**, in your own `myData.robots[myData.myID]`, tells your program how its last action turned out. For example: `{ command: 'take', status: 'failed', reason: 'inventory full' }`. Failed actions and invalid return values show up here too, so check it when your robot seems stuck.
   Possible failure reasons:
 

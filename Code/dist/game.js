@@ -231,7 +231,7 @@ class Game {
             this.paper.drawText(leftDisplayFrame + 10, topTextFrame, this.arena.robots[robotID].name, this.colourOf(robotID), 'left', 'bold 14px Arial');
             topTextFrame += lineSpacing;
             topTextFrame += lineSpacing * 0.5;
-            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Game Time', this.gameTime, statRGB, false);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Tick', this.duration - this.gameTime, statRGB, false);
             topTextFrame += lineSpacing * 0.5;
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.arena.getScore(robotID), statRGB, true);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Banked', this.bankedWorth(robotID), statRGB, true);
@@ -262,7 +262,7 @@ class Game {
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, "Armor", this.arena.robots[robotID].stats.armor, this.hpsColor[robotID].value(), false);
             // Print log.
             topTextFrame += lineSpacing * 2;
-            this.paper.printLog(this.arena.robots[robotID], leftDisplayFrame + 40, topTextFrame);
+            this.paper.printLog(this.arena.robots[robotID], leftDisplayFrame + 40, topTextFrame, this.duration);
             // Display scan view
             let leftMapFrame = leftDisplayFrame + attributeDisplayWidth;
             let topMapFrame = topDisplayFrame;
@@ -271,6 +271,7 @@ class Game {
                 for (var j = y0; j <= y1; j++) {
                     var tileScanID = -1;
                     var itemScanCount = 0;
+                    var itemsValuable = false;
                     var robotScanID = -1;
                     var tileAlpha = 0;
                     var robotAlpha = 0;
@@ -278,6 +279,7 @@ class Game {
                     if (i >= 0 && i < this.world.size.x && j >= 0 && j < this.world.size.y) {
                         tileScanID = this.scanData[robotID].tileMap[i][j];
                         itemScanCount = this.scanData[robotID].itemMap[i][j].length;
+                        itemsValuable = this.scanData[robotID].itemMap[i][j].some(item => item.stats.worth > 0);
                         robotScanID = this.scanData[robotID].robotMap[i][j];
                         // Scan will fade as data ages.
                         let decayRate = 0.02;
@@ -293,7 +295,7 @@ class Game {
                     }
                     // Draw items.
                     if (itemScanCount > 0) {
-                        this.paper.drawTile(leftMapFrame, topMapFrame, this.world.itemSprite, new Vector(i - x0, j - y0), tileAlpha, false);
+                        this.paper.drawTile(leftMapFrame, topMapFrame, this.world.itemSprite, new Vector(i - x0, j - y0), itemsValuable ? tileAlpha : tileAlpha * 0.3, false);
                     }
                     // Draw robot.
                     if (robotScanID >= 0) {
@@ -342,7 +344,10 @@ class Game {
                 this.paper.drawListItem(centerTextFrame, topTextFrame, 'On Ground', [120, 120, 120]);
                 // Group items with the same name ("Armor ×3"), and show at most 6 lines.
                 let counts = new Map();
-                this.arena.itemMap[loc.x][loc.y].forEach(item => counts.set(item.name, (counts.get(item.name) || 0) + 1));
+                this.arena.itemMap[loc.x][loc.y].forEach(item => {
+                    let label = item.stats.worth > 0 ? item.name : `${item.name} (no value)`;
+                    counts.set(label, (counts.get(label) || 0) + 1);
+                });
                 let lines = [...counts].map(([name, count]) => count > 1 ? `${name} ×${count}` : name);
                 if (lines.length > 6)
                     lines = lines.slice(0, 5).concat([`+${lines.length - 5} more`]);
@@ -370,6 +375,24 @@ class Game {
         if (this.events_feed.length > 12)
             this.events_feed.shift();
     }
+    // Reports a raid in the feed. Several items taken from the same nest by the
+    // same robot within 200 ticks are combined into one line.
+    addRaidToFeed(raiderID, ownerID, worth) {
+        let raider = this.arena.robots[raiderID], owner = this.arena.robots[ownerID];
+        let last = this.events_feed[this.events_feed.length - 1];
+        if (last && last.raid && last.raid.raider == raiderID && last.raid.owner == ownerID && last.time - this.gameTime < 200) {
+            last.raid.items++;
+            last.raid.worth += worth;
+            last.time = this.gameTime;
+        }
+        else {
+            this.addToFeed('', this.colourOf(raiderID));
+            last = this.events_feed[this.events_feed.length - 1];
+            last.raid = { raider: raiderID, owner: ownerID, items: 1, worth: worth };
+        }
+        let r = last.raid;
+        last.text = `${raider.name} raided ${owner.name}'s nest (${r.items} item${r.items > 1 ? 's' : ''}, worth ${r.worth})`;
+    }
     /**
      * The spectator view across the top of the screen: the whole map as it
      * really is, a scoreboard, and a feed of kills and respawns.
@@ -390,7 +413,9 @@ class Game {
                 }
                 const items = this.arena.itemMap[x][y];
                 if (items.length > 0) {
-                    this.paper.drawSprite(left + x * tile, top + y * tile, this.world.itemSprite, tile, 1);
+                    // A pile of only worthless items (respawn kit) is drawn faded.
+                    const valuable = items.some(item => item.stats.worth > 0);
+                    this.paper.drawSprite(left + x * tile, top + y * tile, this.world.itemSprite, tile, valuable ? 1 : 0.3);
                     if (items.length > 1)
                         this.paper.drawText(left + x * tile + tile, top + y * tile + tile, `${items.length}`, [255, 255, 255], 'right', 'bold 9px Arial');
                 }
@@ -441,12 +466,17 @@ class Game {
         this.drawScoreChart(boardLeft, top + 180, 680, size.y * tile - 185);
         // Feed of kills and respawns.
         const feedLeft = boardLeft + 720;
-        this.paper.drawText(feedLeft, top + 10, 'Events (tick, newest first)', [120, 120, 120], 'left', 'bold 13px Arial');
+        this.paper.drawText(feedLeft, top + 10, 'Kills and raids (tick, newest first)', [120, 120, 120], 'left', 'bold 13px Arial');
         this.events_feed.slice().reverse().forEach((event, k) => {
-            this.paper.drawText(feedLeft, top + 34 + k * 18, `${this.duration - event.time}  ${event.text}`, event.rgb, 'left', '13px Arial', k < 4 ? 1 : 0.6);
+            this.paper.ctx.font = '13px Arial';
+            const line = this.paper.fitText(`${this.duration - event.time}  ${event.text}`, this.paper.CANVAS_WIDTH - feedLeft - 8);
+            this.paper.drawText(feedLeft, top + 34 + k * 18, line, event.rgb, 'left', '13px Arial', k < 4 ? 1 : 0.6);
         });
     }
-    // Samples every robot's score for the score chart.
+    // Samples every robot's worth for the chart: what it would score if it
+    // were home right now (banked items, plus its own worth and everything it
+    // carries while it's alive). Unlike the score, this doesn't drop to the
+    // banked amount every time a robot leaves its nest.
     recordScores() {
         let elapsed = this.duration - this.gameTime;
         if (elapsed % this.scoreSampleTicks != 0)
@@ -454,13 +484,17 @@ class Game {
         this.arena.robots.forEach((robot, i) => {
             if (!this.scoreHistory[i])
                 this.scoreHistory[i] = [];
-            this.scoreHistory[i].push(this.arena.getScore(i));
+            this.scoreHistory[i].push(this.worthIfHome(i));
         });
+    }
+    worthIfHome(robotID) {
+        let robot = this.arena.robots[robotID];
+        return this.bankedWorth(robotID) + (robot.isAlive ? robot.stats.worth : 0);
     }
     // A line chart of each robot's score over the game so far.
     drawScoreChart(left, top, width, height) {
         const grey = [120, 120, 120];
-        this.paper.drawText(left, top, 'Score over time', grey, 'left', 'bold 13px Arial');
+        this.paper.drawText(left, top, 'Worth over time (banked + carried: the score each robot would have if it were home)', grey, 'left', 'bold 13px Arial');
         const chartTop = top + 10, chartBottom = top + height - 14;
         const samples = Math.max(2, Math.ceil(this.duration / this.scoreSampleTicks) + 1);
         const best = Math.max(10, ...this.scoreHistory.flat());
@@ -575,7 +609,6 @@ class Game {
             this.arena.robotMap[robot.pos.x][robot.pos.y] = i;
             this.equipItems(robot);
             this.appendToLog(robot, this.gameTime, spot.isEqualTo(robot.nest) ? 'Respawns at its nest' : 'Respawns next to its occupied nest');
-            this.addToFeed(`${robot.name} respawned`, this.colourOf(i));
         });
     }
     // Equipped armor slowly repairs while its robot stands on its nest.
@@ -940,9 +973,14 @@ class Game {
         let location = this.arena.robots[event.robotID].pos;
         let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === event.action.item);
         if (itemID >= 0) {
-            this.arena.robots[event.robotID].items.push(this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0]);
+            let item = this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0];
+            this.arena.robots[event.robotID].items.push(item);
             // Write to event log.
             this.appendToLog(this.arena.robots[event.robotID], this.gameTime, `Takes the ${event.action.item}`);
+            // Taking something of value from another robot's nest is a raid.
+            let ownerID = this.arena.robots.findIndex((r, i) => i != event.robotID && r.nest.isEqualTo(location));
+            if (ownerID >= 0 && item.stats.worth > 0)
+                this.addRaidToFeed(event.robotID, ownerID, item.stats.worth);
             this.setActionResult(event.robotID, 'take');
         }
         else {
@@ -1055,7 +1093,9 @@ class Game {
         this.arena.robots.forEach((robot, i) => {
             lines.push(`=== ${robot.name} ===`);
             (this.fullLogs[i] || []).forEach(line => {
-                let when = line.count > 1 ? `${line.start}-${line.end}` : `${line.start}`;
+                // Ticks since the start of the game (logs store gameTime, which counts down).
+                let start = this.duration - line.start, end = this.duration - line.end;
+                let when = line.count > 1 ? `${start}-${end}` : `${start}`;
                 let repeat = line.count > 1 ? ` (x${line.count})` : '';
                 lines.push(`${when}\t${line.entry}${repeat}`);
             });
