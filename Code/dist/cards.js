@@ -1,8 +1,10 @@
 "use strict";
 /**
  * Robot cards: a trading-card image of a robot with its full source code stored
- * in a visible "code strip" of small shaded blocks along the bottom. Cards can
- * be shared as images; loading one in the shop reads the code back out.
+ * in a visible "code strip" of small shaded blocks. The image shows both sides
+ * of the card next to each other: the front (name, art, description) and the
+ * back (a listing of the code above the code strip, which grows to fit). Cards
+ * can be shared as images; loading one in the shop reads the code back out.
  *
  * How the code strip works:
  * - The code is compressed, followed by a checksum, and split into Reed-Solomon
@@ -14,32 +16,39 @@
  * - The bottom row of the strip is a calibration row of all four shades, and the
  *   strip sits at a fixed place on the card, so it is found and read correctly
  *   even after the image is resized.
+ * - Older cards (front only, 750 x 1050, with a smaller strip on the front) can
+ *   still be read.
  */
 var Cards;
 (function (Cards) {
     // ------------------------------------------------------------------------
-    // Card geometry. The card is 750 x 1050 (2.5 x 3.5 inches at 300 dpi).
+    // Card geometry. Each side of the card is 750 x 1050 (2.5 x 3.5 inches at
+    // 300 dpi); the image shows the front and the back side by side.
     // ------------------------------------------------------------------------
-    Cards.WIDTH = 750, Cards.HEIGHT = 1050;
+    Cards.SIDE = 750;
+    Cards.WIDTH = 2 * Cards.SIDE, Cards.HEIGHT = 1050;
     Cards.LOAD_URL = 'https://darozak.github.io/Advolition/';
     const CELL = 3; // size of one strip block, in pixels
-    // The strip is anchored at its bottom edge and grows upwards only as far as the
-    // code needs. Row 0 (the bottom row) is calibration; data rows stack above it.
-    const STRIP = { x: 30, bottom: 966, w: 690, maxH: 180 };
-    const COLS = Math.floor(STRIP.w / CELL), ROWS = Math.floor(STRIP.maxH / CELL);
     const MIN_DATA_ROWS = 8;
-    const rowTop = (row) => STRIP.bottom - (row + 1) * CELL;
+    const layout = (width, x, bottom, maxHeight) => {
+        const cols = Math.floor(690 / CELL), rows = Math.floor(maxHeight / CELL);
+        const capacity = Math.floor((cols * (rows - 1)) / 4);
+        return { width, height: Cards.HEIGHT, x, bottom, cols, rows, maxBlocks: Math.floor((capacity - META_DATA - META_PARITY) / (RS_DATA + RS_PARITY)) };
+    };
     const RS_DATA = 223, RS_PARITY = 32; // Reed-Solomon (255, 223): fixes 16 bad bytes per block
     const META_DATA = 8, META_PARITY = 16; // a small, heavily protected header
+    /** Cards made now: the strip fills the back, up to just under the title bar. */
+    const CARD = layout(Cards.WIDTH, Cards.SIDE + 30, 966, 864);
+    /** The first cards: front only, with a small strip at the bottom. Read only. */
+    const OLD_CARD = layout(Cards.SIDE, 30, 966, 180);
+    const rowTop = (L, row) => L.bottom - (row + 1) * CELL;
     const MAGIC = [65, 68, 86, 1]; // "ADV" + format version 1
     // Four brightness levels (luma). Symbols use a Gray code, so mixing up two
     // neighbouring shades only flips one bit.
     const LEVEL_LUMA = [18, 92, 166, 240];
     const GRAY = [0, 1, 3, 2]; // 2-bit value -> level index
     const UNGRAY = [0, 1, 3, 2]; // level index -> 2-bit value
-    const CAPACITY_BYTES = Math.floor((COLS * (ROWS - 1)) / 4);
-    const MAX_BLOCKS = Math.floor((CAPACITY_BYTES - META_DATA - META_PARITY) / (RS_DATA + RS_PARITY));
-    const MAX_PAYLOAD = MAX_BLOCKS * RS_DATA;
+    const MAX_PAYLOAD = CARD.maxBlocks * RS_DATA;
     /** The most compressed code a card can hold, in bytes. */
     Cards.MAX_PACKED = MAX_PAYLOAD - 4;
     // ------------------------------------------------------------------------
@@ -219,12 +228,12 @@ var Cards;
         return { bytes: out, blocks, packed: packed.length, raw: text.length };
     }
     Cards.pack = pack;
-    async function unpack(bytes) {
+    async function unpack(bytes, maxBlocks) {
         const meta = rsDecode(bytes.slice(0, META_DATA + META_PARITY), META_PARITY);
         if (!meta || MAGIC.some((m, i) => meta.data[i] !== m))
             return { ok: false, reason: 'No Advolition code strip was found on this image.' };
         const blocks = meta.data[4], length = (meta.data[5] << 8) | meta.data[6];
-        if (!blocks || blocks > MAX_BLOCKS)
+        if (!blocks || blocks > maxBlocks)
             return { ok: false, reason: "The card's code strip is damaged." };
         const body = bytes.slice(META_DATA + META_PARITY);
         let packed = [], fixed = meta.fixed;
@@ -498,44 +507,71 @@ var Cards;
         canvas.height = Cards.HEIGHT;
         const info = describe(code);
         const seed = hashString(code), hue = seed % 360;
-        // Frame
+        const cardID = crc32(new TextEncoder().encode(code)).toString(16).toUpperCase().padStart(8, '0');
         ctx.fillStyle = '#000';
         ctx.fillRect(0, 0, Cards.WIDTH, Cards.HEIGHT);
+        drawFront(ctx, info, packed, seed, hue, cardID);
+        ctx.save();
+        ctx.translate(Cards.SIDE, 0);
+        const stripTop = drawBackFrame(ctx, info, packed, hue, cardID, code);
+        ctx.restore();
+        drawStrip(ctx, packed, seed, hue, stripTop);
+        return { info, packed, hue };
+    }
+    Cards.draw = draw;
+    // A card side's frame, background and footer (where to load the card).
+    function drawSideFrame(ctx, hue) {
         ctx.beginPath();
-        ctx.roundRect(6, 6, Cards.WIDTH - 12, Cards.HEIGHT - 12, 34);
-        const frame = ctx.createLinearGradient(0, 0, Cards.WIDTH, Cards.HEIGHT);
+        ctx.roundRect(6, 6, Cards.SIDE - 12, Cards.HEIGHT - 12, 34);
+        const frame = ctx.createLinearGradient(0, 0, Cards.SIDE, Cards.HEIGHT);
         frame.addColorStop(0, hsl(hue, 55, 45));
         frame.addColorStop(1, hsl((hue + 40) % 360, 55, 28));
         ctx.fillStyle = frame;
         ctx.fill();
         ctx.beginPath();
-        ctx.roundRect(22, 22, Cards.WIDTH - 44, Cards.HEIGHT - 44, 22);
+        ctx.roundRect(22, 22, Cards.SIDE - 44, Cards.HEIGHT - 44, 22);
         ctx.fillStyle = '#141414';
         ctx.fill();
+        const y = CARD.bottom + 12;
+        ctx.fillStyle = hsl(hue, 45, 22);
+        ctx.beginPath();
+        ctx.roundRect(30, y, Cards.SIDE - 60, 38, 10);
+        ctx.fill();
+        ctx.font = 'bold 19px Arial';
+        ctx.textAlign = 'left';
+        const lead = 'Load this card at ';
+        const startX = Cards.SIDE / 2 - (ctx.measureText(lead).width + ctx.measureText(Cards.LOAD_URL).width) / 2;
+        ctx.fillStyle = '#fff';
+        ctx.fillText(lead, startX, y + 26);
+        ctx.fillStyle = hsl(hue, 85, 78);
+        ctx.fillText(Cards.LOAD_URL, startX + ctx.measureText(lead).width, y + 26);
+    }
+    function drawFront(ctx, info, packed, seed, hue, cardID) {
+        drawSideFrame(ctx, hue);
         // Title bar
         ctx.fillStyle = hsl(hue, 45, 22);
         ctx.beginPath();
-        ctx.roundRect(30, 30, Cards.WIDTH - 60, 74, 14);
+        ctx.roundRect(30, 30, Cards.SIDE - 60, 74, 14);
         ctx.fill();
         ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'right';
         ctx.fillStyle = hsl(hue, 80, 80);
-        ctx.fillText('ADVOLITION', Cards.WIDTH - 48, 74);
-        const nameSpace = Cards.WIDTH - 96 - ctx.measureText('ADVOLITION').width - 24;
+        ctx.fillText('ADVOLITION', Cards.SIDE - 48, 74);
+        const nameSpace = Cards.SIDE - 96 - ctx.measureText('ADVOLITION').width - 24;
         ctx.textAlign = 'left';
         ctx.fillStyle = '#fff';
         fitText(ctx, info.name, 48, 80, nameSpace, size => `bold ${size}px Arial`, 40, 24);
         // Art window
         ctx.save();
         ctx.beginPath();
-        ctx.roundRect(30, 114, Cards.WIDTH - 60, 380, 14);
+        ctx.roundRect(30, 114, Cards.SIDE - 60, 380, 14);
         ctx.clip();
-        drawRobotArt(ctx, 30, 114, Cards.WIDTH - 60, 380, seed, hue);
+        drawRobotArt(ctx, 30, 114, Cards.SIDE - 60, 380, seed, hue);
         ctx.restore();
         ctx.lineWidth = 3;
         ctx.strokeStyle = hsl(hue, 50, 40);
         ctx.beginPath();
-        ctx.roundRect(30, 114, Cards.WIDTH - 60, 380, 14);
+        ctx.roundRect(30, 114, Cards.SIDE - 60, 380, 14);
         ctx.stroke();
         // Trait badges
         let tx = 30;
@@ -543,7 +579,7 @@ var Cards;
         ctx.textAlign = 'left';
         for (const t of info.traits) {
             const w = ctx.measureText(t).width + 26;
-            if (tx + w > Cards.WIDTH - 30)
+            if (tx + w > Cards.SIDE - 30)
                 break;
             ctx.fillStyle = hsl(hue, 50, 28);
             ctx.beginPath();
@@ -553,18 +589,11 @@ var Cards;
             ctx.fillText(t, tx + 13, 534);
             tx += w + 8;
         }
-        // How tall the strip needs to be for this code.
-        const symbols = [];
-        for (const byte of scramble(packed.bytes))
-            for (let s = 6; s >= 0; s -= 2)
-                symbols.push(GRAY[(byte >> s) & 3]);
-        const rows = 1 + Math.max(MIN_DATA_ROWS, Math.ceil(symbols.length / COLS));
-        const stripTop = rowTop(rows - 1);
-        // Text box, filling the space down to the strip.
-        const boxBottom = stripTop - 34;
+        // Text box
+        const boxBottom = 880;
         ctx.fillStyle = '#1e1e1e';
         ctx.beginPath();
-        ctx.roundRect(30, 556, Cards.WIDTH - 60, boxBottom - 556, 12);
+        ctx.roundRect(30, 556, Cards.SIDE - 60, boxBottom - 556, 12);
         ctx.fill();
         let y = 588;
         const f = info.fields;
@@ -576,7 +605,7 @@ var Cards;
             if (f.description) {
                 ctx.fillStyle = '#eee';
                 ctx.font = 'italic 20px Georgia, serif';
-                y = wrapText(ctx, f.description, 48, y, Cards.WIDTH - 96, 26, Math.max(1, Math.floor((boxBottom - y - detailSpace) / 26))) + 8;
+                y = wrapText(ctx, f.description, 48, y, Cards.SIDE - 96, 26, Math.max(1, Math.floor((boxBottom - y - detailSpace) / 26))) + 8;
             }
             for (const [label, value] of details) {
                 ctx.font = 'bold 17px Arial';
@@ -584,7 +613,7 @@ var Cards;
                 ctx.fillText(label, 48, y);
                 const lw = ctx.measureText(label + '  ').width;
                 ctx.fillStyle = '#e6e6e6';
-                fitText(ctx, value, 48 + lw, y, Cards.WIDTH - 96 - lw, size => `${size}px Arial`, 17, 13);
+                fitText(ctx, value, 48 + lw, y, Cards.SIDE - 96 - lw, size => `${size}px Arial`, 17, 13);
                 y += 26;
             }
         }
@@ -593,7 +622,7 @@ var Cards;
             ctx.fillStyle = '#eee';
             ctx.font = 'italic 19px Georgia, serif';
             if (info.tagline)
-                y = wrapText(ctx, info.tagline, 48, y, Cards.WIDTH - 96, 24, 2) + 6;
+                y = wrapText(ctx, info.tagline, 48, y, Cards.SIDE - 96, 24, 2) + 6;
             ctx.font = '17px Arial';
             for (const a of info.abilities) {
                 if (y + 22 > boxBottom)
@@ -601,26 +630,94 @@ var Cards;
                 ctx.fillStyle = hsl(hue, 70, 65);
                 ctx.fillText('◆', 48, y);
                 ctx.fillStyle = '#cfcfcf';
-                y = wrapText(ctx, a, 72, y, Cards.WIDTH - 120, 22, Math.floor((boxBottom - y) / 22) > 3 ? 2 : 1);
+                y = wrapText(ctx, a, 72, y, Cards.SIDE - 120, 22, Math.floor((boxBottom - y) / 22) > 3 ? 2 : 1);
             }
         }
+        // Stats panel
+        ctx.fillStyle = hsl(hue, 30, 15);
+        ctx.beginPath();
+        ctx.roundRect(30, 892, Cards.SIDE - 60, 66, 12);
+        ctx.fill();
+        ctx.font = 'bold 14px Arial';
+        ctx.fillStyle = hsl(hue, 60, 70);
+        ctx.textAlign = 'left';
+        ctx.fillText(`CARD ID ${cardID}`, 48, 918);
+        ctx.textAlign = 'right';
+        ctx.fillStyle = '#bdbdbd';
+        ctx.fillText('Full code on the back ▸', Cards.SIDE - 48, 918);
+        ctx.textAlign = 'left';
+        ctx.font = '15px Arial';
+        ctx.fillStyle = '#d8d8d8';
+        ctx.fillText(`${info.lines.toLocaleString()} lines · ${packed.raw.toLocaleString()} bytes of code · uses ${Math.max(1, Math.round(100 * packed.packed / Cards.MAX_PACKED))}% of the card`, 48, 944);
+    }
+    // The back: frame, title bar and a listing of the code above the strip.
+    // Returns the top of the strip.
+    function drawBackFrame(ctx, info, packed, hue, cardID, code) {
+        drawSideFrame(ctx, hue);
+        ctx.fillStyle = hsl(hue, 45, 22);
+        ctx.beginPath();
+        ctx.roundRect(30, 30, Cards.SIDE - 60, 54, 14);
+        ctx.fill();
+        ctx.font = 'bold 15px Arial';
+        ctx.textAlign = 'right';
+        ctx.fillStyle = hsl(hue, 80, 80);
+        ctx.fillText(`CARD ID ${cardID}`, Cards.SIDE - 48, 63);
+        const idWidth = ctx.measureText(`CARD ID ${cardID}`).width;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#fff';
+        fitText(ctx, `${info.name} · source code`, 48, 64, Cards.SIDE - 120 - idWidth, size => `bold ${size}px Arial`, 22, 14);
+        const rows = stripRows(packed);
+        const stripTop = rowTop(CARD, rows - 1);
+        // The code itself, as far as it fits above the strip.
+        const listTop = 100, listBottom = stripTop - 40;
+        if (listBottom - listTop > 40) {
+            ctx.fillStyle = '#0d0d0d';
+            ctx.beginPath();
+            ctx.roundRect(30, listTop, Cards.SIDE - 60, listBottom - listTop, 10);
+            ctx.fill();
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(30, listTop, Cards.SIDE - 60, listBottom - listTop);
+            ctx.clip();
+            const lineH = 13, lines = code.replace(/\t/g, '    ').split('\n');
+            const fits = Math.floor((listBottom - listTop - 16) / lineH);
+            ctx.font = '11px ui-monospace, Menlo, Consolas, monospace';
+            ctx.textAlign = 'left';
+            for (let n = 0; n < Math.min(fits, lines.length); n++) {
+                const line = (n === fits - 1 && lines.length > fits) ? `… ${(lines.length - n).toLocaleString()} more lines in the code strip` : lines[n];
+                ctx.fillStyle = /^\s*\/\//.test(line) ? '#6a9955' : '#c8c8c8';
+                ctx.fillText(line, 44, listTop + 18 + n * lineH);
+            }
+            ctx.restore();
+        }
         // Strip caption
-        const cardID = crc32(new TextEncoder().encode(code)).toString(16).toUpperCase().padStart(8, '0');
         ctx.font = 'bold 13px Arial';
         ctx.fillStyle = '#9a9a9a';
         ctx.textAlign = 'left';
-        ctx.fillText(`CODE STRIP · CARD ID ${cardID}`, STRIP.x, stripTop - 10);
+        ctx.fillText('CODE STRIP', 30, stripTop - 10);
         ctx.textAlign = 'right';
-        ctx.fillText(`${info.lines} lines · ${packed.raw.toLocaleString()} bytes · packed ${packed.packed.toLocaleString()} of ${Cards.MAX_PACKED.toLocaleString()}`, STRIP.x + STRIP.w, stripTop - 10);
-        // Code strip: calibration row at the bottom, data rows stacked upwards,
-        // then random shades to fill out the last row.
+        ctx.fillText(`${info.lines.toLocaleString()} lines · ${packed.raw.toLocaleString()} bytes · packed ${packed.packed.toLocaleString()} of ${Cards.MAX_PACKED.toLocaleString()}`, Cards.SIDE - 30, stripTop - 10);
+        return stripTop;
+    }
+    // How many strip rows (calibration included) a packed code needs.
+    function stripRows(packed) {
+        return 1 + Math.max(MIN_DATA_ROWS, Math.ceil(packed.bytes.length * 4 / CARD.cols));
+    }
+    // The code strip: calibration row at the bottom, data rows stacked upwards,
+    // then random shades to fill out the last row.
+    function drawStrip(ctx, packed, seed, hue, stripTop) {
+        const symbols = [];
+        for (const byte of scramble(packed.bytes))
+            for (let s = 6; s >= 0; s -= 2)
+                symbols.push(GRAY[(byte >> s) & 3]);
+        const rows = stripRows(packed), cols = CARD.cols;
         const levels = LEVEL_LUMA.map(l => stripColour(hue, l));
-        const img = ctx.createImageData(COLS * CELL, rows * CELL);
+        const img = ctx.createImageData(cols * CELL, rows * CELL);
         const fill = (col, row, level) => {
             const [r, g, b] = levels[level], top = (rows - 1 - row) * CELL;
             for (let dy = 0; dy < CELL; dy++)
                 for (let dx = 0; dx < CELL; dx++) {
-                    const p = ((top + dy) * COLS * CELL + col * CELL + dx) * 4;
+                    const p = ((top + dy) * cols * CELL + col * CELL + dx) * 4;
                     img.data[p] = r;
                     img.data[p + 1] = g;
                     img.data[p + 2] = b;
@@ -635,7 +732,7 @@ var Cards;
             return ((t ^ (t >>> 14)) >>> 0) % 4;
         };
         for (let row = 0; row < rows; row++)
-            for (let col = 0; col < COLS; col++) {
+            for (let col = 0; col < cols; col++) {
                 if (row === 0)
                     fill(col, row, Math.floor(col / 2) % 4);
                 else if (k < symbols.length)
@@ -643,26 +740,11 @@ var Cards;
                 else
                     fill(col, row, nextFiller());
             }
-        ctx.putImageData(img, STRIP.x, stripTop);
+        ctx.putImageData(img, CARD.x, stripTop);
         ctx.lineWidth = 2;
         ctx.strokeStyle = hsl(hue, 50, 40);
-        ctx.strokeRect(STRIP.x - 3, stripTop - 3, COLS * CELL + 6, rows * CELL + 6);
-        // Footer: where to load the card.
-        ctx.fillStyle = hsl(hue, 45, 22);
-        ctx.beginPath();
-        ctx.roundRect(30, STRIP.bottom + 12, Cards.WIDTH - 60, 38, 10);
-        ctx.fill();
-        ctx.font = 'bold 19px Arial';
-        ctx.textAlign = 'left';
-        const lead = 'Load this card at ';
-        const startX = Cards.WIDTH / 2 - (ctx.measureText(lead).width + ctx.measureText(Cards.LOAD_URL).width) / 2;
-        ctx.fillStyle = '#fff';
-        ctx.fillText(lead, startX, STRIP.bottom + 38);
-        ctx.fillStyle = hsl(hue, 85, 78);
-        ctx.fillText(Cards.LOAD_URL, startX + ctx.measureText(lead).width, STRIP.bottom + 38);
-        return { info, packed, hue };
+        ctx.strokeRect(CARD.x - 3, stripTop - 3, cols * CELL + 6, rows * CELL + 6);
     }
-    Cards.draw = draw;
     /**
      * Reads the code back out of a card image (an <img>, ImageBitmap or canvas).
      * The strip is found by scaling its position to the image's size. If that
@@ -679,10 +761,13 @@ var Cards;
         const ctx = c.getContext('2d');
         ctx.drawImage(source, 0, 0);
         const data = ctx.getImageData(0, 0, w, h).data;
-        const framings = () => {
+        // Two-sided cards are landscape; the first, front-only cards are portrait.
+        // Try the layout that matches the image's shape first.
+        const layouts = Math.abs(w / h - CARD.width / CARD.height) < Math.abs(w / h - OLD_CARD.width / OLD_CARD.height) ? [CARD, OLD_CARD] : [OLD_CARD, CARD];
+        const framings = (L) => {
             // [left, top, card width, card height] in image pixels.
             const list = [[0, 0, w, h]];
-            const unit = w / Cards.WIDTH; // one card pixel
+            const unit = w / L.width; // one card pixel
             const reach = Math.max(1, Math.round(16 * unit));
             const steps = [];
             for (let d = 1; d <= reach; d++)
@@ -702,25 +787,26 @@ var Cards;
         // A framing that is nearly right can find the strip's header but misread
         // the rows further down, so keep looking until the whole code checks out.
         let found = null;
-        for (const [left, top, cw, ch] of framings()) {
-            if (cw < Cards.WIDTH / 4 || ch < Cards.HEIGHT / 4)
-                continue;
-            const result = await readAt(data, w, h, left, top, cw / Cards.WIDTH, ch / Cards.HEIGHT);
-            if (result && result.ok)
-                return result;
-            if (result && !found)
-                found = result;
-        }
+        for (const L of layouts)
+            for (const [left, top, cw, ch] of framings(L)) {
+                if (cw < L.width / 4 || ch < L.height / 4)
+                    continue;
+                const result = await readAt(L, data, w, h, left, top, cw / L.width, ch / L.height);
+                if (result && result.ok)
+                    return result;
+                if (result && !found)
+                    found = result;
+            }
         return found || { ok: false, reason: 'No Advolition code strip was found on this image.' };
     }
     Cards.read = read;
     // Reads the strip, taking the card to sit at (left, top) in the image at the
     // given scale. Returns null if no strip header is found there.
-    async function readAt(data, w, h, left, top, sx, sy) {
+    async function readAt(L, data, w, h, left, top, sx, sy) {
         // Brightness at the centre of a block, averaged over a small patch.
         const r = Math.max(0, Math.floor(Math.min(sx, sy) * CELL / 2 - 0.5));
         const luma = (col, row) => {
-            const cx = left + (STRIP.x + (col + 0.5) * CELL) * sx, cy = top + (rowTop(row) + 0.5 * CELL) * sy;
+            const cx = left + (L.x + (col + 0.5) * CELL) * sx, cy = top + (rowTop(L, row) + 0.5 * CELL) * sy;
             let sum = 0, n = 0;
             for (let dy = -r; dy <= r; dy++)
                 for (let dx = -r; dx <= r; dx++) {
@@ -734,7 +820,7 @@ var Cards;
         };
         // Calibrate: the measured brightness of each of the four shades.
         const seen = [[], [], [], []];
-        for (let col = 0; col < COLS; col++)
+        for (let col = 0; col < L.cols; col++)
             seen[Math.floor(col / 2) % 4].push(luma(col, 0));
         const ref = seen.map(v => { v.sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; });
         if (!(ref[0] < ref[1] && ref[1] < ref[2] && ref[2] < ref[3]))
@@ -745,7 +831,7 @@ var Cards;
         // Read upwards. The first data row holds the protected header, which says
         // how many blocks follow, so only the rows actually used are read.
         const symbols = [];
-        const readRow = (row) => { for (let col = 0; col < COLS; col++)
+        const readRow = (row) => { for (let col = 0; col < L.cols; col++)
             symbols.push(UNGRAY[nearest(luma(col, row))]); };
         const toBytes = () => {
             const out = [];
@@ -757,9 +843,9 @@ var Cards;
         const meta = rsDecode(toBytes().slice(0, META_DATA + META_PARITY), META_PARITY);
         if (!meta || MAGIC.some((m, i) => meta.data[i] !== m))
             return null;
-        const needed = (META_DATA + META_PARITY + Math.min(meta.data[4], MAX_BLOCKS) * (RS_DATA + RS_PARITY)) * 4;
-        for (let row = 2; symbols.length < needed && row < ROWS; row++)
+        const needed = (META_DATA + META_PARITY + Math.min(meta.data[4], L.maxBlocks) * (RS_DATA + RS_PARITY)) * 4;
+        for (let row = 2; symbols.length < needed && row < L.rows; row++)
             readRow(row);
-        return unpack(toBytes());
+        return unpack(toBytes(), L.maxBlocks);
     }
 })(Cards || (Cards = {}));

@@ -45,14 +45,18 @@ An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor
 ## Robot cards
 A robot card is a trading-card image of a robot that carries the robot's complete code. Save one from the shop with **Save as card**, share the image, and anyone can load it into their shop.
 
-The card shows:
+A card has two sides, saved side by side in one image.
+
+The **front** shows:
 - the robot's name (its `Program` class);
 - a robot picture and colours generated from its code, so every robot looks different;
 - trait badges guessed from the actions it uses;
 - a description;
-- the **code strip**.
+- the card ID and how much of the card the code uses.
 
-The code strip is the band of small shaded blocks along the bottom. It holds the code, compressed and protected by error correction, so a card still loads after normal JPEG re-compression or resizing. If it's damaged too badly, the shop says so rather than loading broken code. A card holds about 2,900 bytes of compressed code, which is roughly 9–10 KB of JavaScript; bigger robots can still battle, they just can't be saved as cards. Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
+The **back** shows the start of the code as text, above the **code strip**: the band of small shaded blocks that holds the complete code. It is compressed and protected by error correction, so a card still loads after normal JPEG re-compression, resizing, or a thin border or crop. If it's damaged too badly, the shop says so rather than loading broken code. The strip grows to fit the code, and a card holds about 14,000 bytes of compressed code, roughly 45–50 KB of JavaScript, so even large, competitive robots fit with room to spare. (Bigger robots can still battle; they just can't be saved as cards.) In the shop, click a card to turn it over. Cards made before the two-sided design still load.
+
+Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
 
 **Card fields.** Add these lines to the comment block at the top of your robot's code, and the card shows them in place of the comment summary:
 ```javascript

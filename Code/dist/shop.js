@@ -97,9 +97,17 @@ new MyRobot();
         head.append(number, name, source);
         const body = el('div', 'slot-body');
         const cardBox = el('div', 'slot-card-box');
+        // The card image shows both sides; the slot shows one at a time, and
+        // clicking turns the card over.
+        const cardView = el('button', 'card-view');
+        cardView.type = 'button';
+        cardView.title = 'Turn the card over';
+        cardView.setAttribute('aria-label', `Turn over the card in slot ${i + 1}`);
         const card = el('canvas', 'slot-card');
+        cardView.append(card);
+        cardView.onclick = () => cardView.classList.toggle('back');
         const placeholder = el('div', 'slot-placeholder', 'Drop a card image or a .js script here, or use Load.');
-        cardBox.append(card, placeholder);
+        cardBox.append(cardView, placeholder);
         const side = el('div', 'slot-side');
         const status = el('div', 'slot-status');
         const actions = el('div', 'slot-actions');
@@ -235,7 +243,7 @@ new MyRobot();
         if (!slot.code) {
             v.name.textContent = 'Empty slot';
             v.source.textContent = '';
-            v.card.hidden = true;
+            v.card.parentElement.hidden = true;
             v.placeholder.hidden = false;
             v.placeholder.textContent = 'Drop a card image or a .js script here, or use Load.';
             v.review.hidden = true;
@@ -250,13 +258,13 @@ new MyRobot();
         showCode(v, slot.code, true); // new code replaces the editor's
         try {
             await Cards.draw(v.card, slot.code);
-            v.card.hidden = false;
+            v.card.parentElement.hidden = false;
             v.placeholder.hidden = true;
             v.saveCard.disabled = false;
         }
         catch (e) {
             // Too big for a card: it can still battle, it just can't be saved as one.
-            v.card.hidden = true;
+            v.card.parentElement.hidden = true;
             v.placeholder.hidden = false;
             v.placeholder.textContent = e instanceof Error ? e.message : String(e);
             v.saveCard.disabled = true;
