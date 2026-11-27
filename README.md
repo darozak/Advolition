@@ -81,7 +81,7 @@ A grid space can hold one robot and any number of items. Ten random items are sc
 ## Time and movement rules
 - **Game length.** The game lasts 10,000 ticks. `gameTime` **counts down** from 10,000 to 0, so `myData.gameTime` is also the time you have left. A bigger `gameTime` means earlier, not later.
 - **Turns.** A robot does one action at a time. Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. The program is called again on the tick after the action finishes, so a robot with an action time of 10 gets a new turn every 11 ticks. `Say` finishes at once, so the program is called again on the next tick.
-- **Bulk.** A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 10.
+- **Bulk.** A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 11, so it gets a new turn every 12 ticks.
 - **Moving.** `Move` takes one step toward its target, along a straight line. It doesn't find a way around walls: if the next tile on that line is a wall, the robot bumps into it and stays put. Use `findPath` (below) to get a route around obstacles. Diagonal steps take about 1.4 times as long.
 - **Meeting other robots.** If the next tile has a robot on it, the move fails (`lastAction` says which robot blocked it), unless that robot is stepping into your tile at the same time. Then the two robots swap places, so robots meeting head-on in a corridor can always get past each other.
 - **Ties.** Actions that finish on the same tick happen in a random order, so no robot always goes first.

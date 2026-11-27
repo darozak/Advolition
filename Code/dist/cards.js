@@ -249,7 +249,7 @@ var Cards;
         }
         if (crc32(text) !== crc)
             return { ok: false, reason: "The card's code failed its checksum, so it wasn't loaded." };
-        return { ok: true, code: new TextDecoder().decode(text), fixed };
+        return { ok: true, code: new TextDecoder('utf-8', { ignoreBOM: true }).decode(text), fixed };
     }
     /**
      * Reads a robot's name (its Program class), and from the comment block at the

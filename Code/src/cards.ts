@@ -215,7 +215,7 @@ namespace Cards {
         try { text = await inflate(new Uint8Array(packed.slice(0, length))); }
         catch (e) { return { ok: false, reason: "The card's code could not be unpacked." }; }
         if (crc32(text) !== crc) return { ok: false, reason: "The card's code failed its checksum, so it wasn't loaded." };
-        return { ok: true, code: new TextDecoder().decode(text), fixed };
+        return { ok: true, code: new TextDecoder('utf-8', { ignoreBOM: true }).decode(text), fixed };
     }
 
     // ------------------------------------------------------------------------

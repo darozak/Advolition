@@ -165,8 +165,11 @@ class Game {
                 // Then resolve and remove any actions that are occuring now.
                 if(this.events.length > 0) {
 
-                    // Sort the events in reverse chronological order. Ties go in random order.
-                    this.events.sort((a,b) => (b.duration - a.duration) || (a.tieBreak - b.tieBreak));
+                    // Sort the events in reverse chronological order, by the tick
+                    // each resolves on (a diagonal move can end part-way through a
+                    // tick). Events on the same tick go in random order.
+                    const order = (a: GameEvent, b: GameEvent) => (Math.floor(b.duration) - Math.floor(a.duration)) || (a.tieBreak - b.tieBreak);
+                    this.events.sort(order);
 
                     // Evaluate any events that should have occurred by now.
                     while(this.events[0].duration >= this.gameTime) {
@@ -197,9 +200,13 @@ class Game {
                                 break;
                         }
 
-                        // Remove the processed event break if this was the last event.
+                        // Remove the processed event, and stop if it was the last one.
                         this.events.shift();
                         if(this.events.length == 0) break;
+
+                        // Resolving can change other events' times (an Ion Gun
+                        // hit slows its target), so sort again.
+                        this.events.sort(order);
                     }
                 } 
             
