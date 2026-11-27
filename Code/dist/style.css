@@ -129,6 +129,7 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .tok-tag { color: #569cd6; font-style: normal; font-weight: 600; }
 .tok-string { color: #ce9178; }
 .tok-number { color: #b5cea8; }
+.tok-regex { color: #d16969; }
 .tok-keyword { color: #569cd6; }
 .tok-control { color: #c586c0; }
 .tok-literal { color: #569cd6; }

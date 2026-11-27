@@ -27,7 +27,29 @@ namespace CodeEditor {
         /('(?:\\[\s\S]|[^'\\\n])*'?|"(?:\\[\s\S]|[^"\\\n])*"?|`(?:\\[\s\S]|[^`\\])*`?)/.source, // 2 string
         /(\b(?:0[xXbBoO][\da-fA-F_]+|\d[\d_]*(?:\.\d*)?(?:[eE][+-]?\d+)?)n?\b|\.\d+\b)/.source, // 3 number
         /([A-Za-z_$][\w$]*)/.source,                                                           // 4 word
+        /(\/(?![*\/])(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^\/\\\n\[])+\/[dgimsuyv]*)/.source,              // 5 regex (or division)
     ].join('|'), 'g');
+
+    // Words after which a "/" starts a regular expression rather than a division.
+    const BEFORE_REGEX = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
+
+    // The last non-space character before position i, and the word ending there.
+    function previous(code: string, i: number): { char: string, word: string } {
+        let j = i - 1;
+        while (j >= 0 && /\s/.test(code[j])) j--;
+        if (j < 0) return { char: '', word: '' };
+        let k = j;
+        while (k >= 0 && /[\w$]/.test(code[k])) k--;
+        return { char: code[j], word: code.slice(k + 1, j + 1) };
+    }
+
+    // Whether a "/" at position i begins a regular expression: it does unless
+    // it follows something that ends a value (a name, number, or closing bracket).
+    function startsRegex(code: string, i: number): boolean {
+        const { char, word } = previous(code, i);
+        if (word) return BEFORE_REGEX.has(word) || (CONTROL.has(word) && word !== 'default');
+        return !/[)\]}'"`]/.test(char);
+    }
 
     const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     const span = (cls: string, text: string) => `<span class="tok-${cls}">${escape(text)}</span>`;
@@ -42,12 +64,18 @@ namespace CodeEditor {
             if (m[1]) {
                 // Comments, with the card's @fields picked out.
                 html += `<span class="tok-comment">${escape(m[1]).replace(/@(description|designer|version)\b/g, '<span class="tok-tag">@$1</span>')}</span>`;
+            } else if (m[5]) {
+                if (startsRegex(code, m.index)) html += span('regex', m[5]);
+                else {
+                    // A division sign: leave it plain and read on from the next character.
+                    html += '/';
+                    TOKENS.lastIndex = last = m.index + 1;
+                }
             } else if (m[2]) html += span('string', m[2]);
             else if (m[3]) html += span('number', m[3]);
             else {
                 const word = m[4];
-                const before = code.slice(0, m.index).match(/(\S)\s*$/);
-                const isProperty = !!before && before[1] === '.';
+                const isProperty = previous(code, m.index).char === '.';
                 const next = code.slice(last).match(/^\s*(\S)/);
                 if (!isProperty && CONTROL.has(word)) html += span('control', word);
                 else if (!isProperty && KEYWORDS.has(word)) html += span('keyword', word);
