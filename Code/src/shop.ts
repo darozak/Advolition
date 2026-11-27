@@ -1,9 +1,9 @@
 /**
- * The pit: the staging area where players load up to four robots (from card
+ * The shop: the staging area where players load up to four robots (from card
  * images or script files), review and edit their code, save them as new cards,
  * and then start a battle in the arena.
  */
-namespace Pit {
+namespace Shop {
 
     export const SLOT_COUNT = 4;
 
@@ -12,7 +12,8 @@ namespace Pit {
         source: string;          // where it came from, e.g. "Card: gatherer.png"
     }
 
-    const STORAGE_KEY = 'advolition-pit-v1';
+    const STORAGE_KEY = 'advolition-shop-v1';
+    const OLD_STORAGE_KEY = 'advolition-pit-v1';   // from when the shop was called the pit
     let slots: Slot[] = [];
 
     // A minimal robot to start from.
@@ -53,7 +54,7 @@ new MyRobot();
         slots = [];
         for (let i = 0; i < SLOT_COUNT; i++) slots.push({ code: null, source: '' });
         try {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY) || '[]');
             if (Array.isArray(saved)) saved.slice(0, SLOT_COUNT).forEach((s: Slot, i: number) => {
                 if (s && typeof s.code === 'string') slots[i] = { code: s.code, source: String(s.source || '') };
             });
@@ -152,7 +153,7 @@ new MyRobot();
             if (!code) return;
             download(new Blob([code], { type: 'text/javascript' }), `${fileName(code)}.js`);
         };
-        clear.onclick = () => { if (confirm('Remove this robot from the pit?')) clearSlot(i); };
+        clear.onclick = () => { if (confirm('Remove this robot from the shop?')) clearSlot(i); };
 
         return { root, name, source, status, card, placeholder, review, editor, reviewButton, saveCard, saveScript, clear };
     }
@@ -250,7 +251,7 @@ new MyRobot();
     export async function loadSamples() {
         const samples = ['Samples/gatherer.js', 'Samples/sentinel.js'];
         const empty = slots.map((s, i) => s.code ? -1 : i).filter(i => i >= 0);
-        const message = document.getElementById('pit-message');
+        const message = document.getElementById('shop-message');
         if (empty.length === 0) { if (message) message.textContent = 'All four slots are full. Clear one to add a sample robot.'; return; }
         let loaded = 0;
         for (const path of samples) {
@@ -315,7 +316,7 @@ new MyRobot();
 
     function updateBattleButton() {
         const count = slots.filter(s => s.code).length;
-        const button = document.getElementById('pit-battle') as HTMLButtonElement | null;
+        const button = document.getElementById('shop-battle') as HTMLButtonElement | null;
         if (button) {
             button.disabled = count === 0;
             button.textContent = count ? `Start battle with ${count} robot${count > 1 ? 's' : ''}` : 'Start battle';

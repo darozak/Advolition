@@ -18,7 +18,7 @@
 // It scans every few steps so its map stays fresh.
 //
 // Copy this file and change it to make your own robot. Load it into a slot in
-// the pit, where you can also save it as a card to share.
+// the shop, where you can also save it as a card to share.
 
 class Gatherer extends Program {
     constructor() {
