@@ -13,6 +13,8 @@
 
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
+.visually-hidden { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; border: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+label.button:focus-within { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 body {
   margin: 0;
@@ -87,7 +89,7 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .slot.drop { outline: 2px dashed var(--accent); outline-offset: 4px; }
 .slot-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; min-width: 0; }
 .slot-number { display: inline-grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; background: var(--panel-2); border: 1px solid var(--line); font-weight: 700; font-size: 14px; flex: none; align-self: center; }
-.slot-name { font-size: 20px; font-weight: 700; }
+.slot-name { font-size: 20px; font-weight: 700; min-width: 0; overflow-wrap: anywhere; }
 .slot.empty .slot-name { color: var(--muted); font-weight: 400; }
 .slot-source { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .slot-body { display: flex; gap: 14px; align-items: flex-start; }

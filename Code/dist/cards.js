@@ -257,8 +257,21 @@ var Cards;
      * "// @author") and "// @version", a tagline (the first comment line) and a
      * numbered list of abilities. Traits are guessed from the actions it uses.
      */
+    // The robot's name: the class that extends Program. Only classes declared at
+    // the start of a line count (not ones mentioned in comments); if there are
+    // several, the one the file creates at the end (`new Name();`) wins.
+    function robotName(code) {
+        const id = '[\\p{L}\\p{N}_$]+';
+        const declared = [...code.matchAll(new RegExp(`^[ \\t]*(?:export\\s+)?class\\s+(${id})\\s+extends\\s+Program\\b`, 'gmu'))].map(m => m[1]);
+        const created = (code.match(new RegExp(`new\\s+(${id})\\s*\\(\\s*\\)\\s*;?\\s*$`, 'u')) || [])[1];
+        if (created && declared.includes(created))
+            return created;
+        if (declared.length)
+            return declared[0];
+        return (code.match(new RegExp(`class\\s+(${id})\\s+extends\\s+Program\\b`, 'u')) || [])[1] || 'Unnamed Robot';
+    }
     function describe(code) {
-        const name = (code.match(/class\s+(\w+)\s+extends\s+Program/) || [])[1] || 'Unnamed Robot';
+        const name = robotName(code);
         const header = [];
         for (const line of code.split('\n')) {
             const t = line.trim();
@@ -284,7 +297,8 @@ var Cards;
         if (!fields.designer && fields.author)
             fields.designer = fields.author;
         const plain = header.filter(l => !/^@\w+/.test(l));
-        let tagline = (plain[0] || '').replace(new RegExp('^' + name + ':\\s*', 'i'), '');
+        const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        let tagline = (plain[0] || '').replace(new RegExp('^' + escapedName + ':\\s*', 'iu'), '');
         tagline = tagline.charAt(0).toUpperCase() + tagline.slice(1);
         const abilities = [];
         let inAbility = false;
@@ -342,6 +356,19 @@ var Cards;
         k = (luma - base) / (255 - base);
         return [r + (255 - r) * k, g + (255 - g) * k, b + (255 - b) * k].map(Math.round);
     }
+    // Draws one line of text no wider than maxW: the font shrinks down to
+    // minSize, and then the text is cut short with "…".
+    function fitText(ctx, text, x, y, maxW, font, size, minSize) {
+        ctx.font = font(size);
+        while (size > minSize && ctx.measureText(text).width > maxW)
+            ctx.font = font(--size);
+        if (ctx.measureText(text).width > maxW) {
+            while (text && ctx.measureText(text + '…').width > maxW)
+                text = text.slice(0, -1);
+            text += '…';
+        }
+        ctx.fillText(text, x, y);
+    }
     function wrapText(ctx, text, x, y, maxW, lineH, maxLines) {
         const words = text.split(/\s+/);
         let line = '', lines = 0;
@@ -354,7 +381,7 @@ var Cards;
                     ctx.fillText(line + '…', x, y);
                     return y + lineH;
                 }
-                ctx.fillText(line, x, y);
+                ctx.fillText(line, x, y, maxW);
                 y += lineH;
                 lines++;
                 line = words[i];
@@ -363,7 +390,7 @@ var Cards;
                 line = test;
         }
         if (line) {
-            ctx.fillText(line, x, y);
+            ctx.fillText(line, x, y, maxW);
             y += lineH;
         }
         return y;
@@ -490,14 +517,14 @@ var Cards;
         ctx.beginPath();
         ctx.roundRect(30, 30, Cards.WIDTH - 60, 74, 14);
         ctx.fill();
-        ctx.textAlign = 'left';
-        ctx.fillStyle = '#fff';
-        ctx.font = 'bold 40px Arial';
-        ctx.fillText(info.name, 48, 80);
         ctx.font = 'bold 20px Arial';
         ctx.textAlign = 'right';
         ctx.fillStyle = hsl(hue, 80, 80);
         ctx.fillText('ADVOLITION', Cards.WIDTH - 48, 74);
+        const nameSpace = Cards.WIDTH - 96 - ctx.measureText('ADVOLITION').width - 24;
+        ctx.textAlign = 'left';
+        ctx.fillStyle = '#fff';
+        fitText(ctx, info.name, 48, 80, nameSpace, size => `bold ${size}px Arial`, 40, 24);
         // Art window
         ctx.save();
         ctx.beginPath();
@@ -556,9 +583,8 @@ var Cards;
                 ctx.fillStyle = hsl(hue, 70, 65);
                 ctx.fillText(label, 48, y);
                 const lw = ctx.measureText(label + '  ').width;
-                ctx.font = '17px Arial';
                 ctx.fillStyle = '#e6e6e6';
-                ctx.fillText(value, 48 + lw, y);
+                fitText(ctx, value, 48 + lw, y, Cards.WIDTH - 96 - lw, size => `${size}px Arial`, 17, 13);
                 y += 26;
             }
         }
@@ -639,7 +665,9 @@ var Cards;
     Cards.draw = draw;
     /**
      * Reads the code back out of a card image (an <img>, ImageBitmap or canvas).
-     * The strip is found by scaling its position to the image's size.
+     * The strip is found by scaling its position to the image's size. If that
+     * fails, nearby framings are tried too, so a card with a thin border around
+     * it, or slightly cropped or shifted, still loads.
      */
     async function read(source) {
         const w = source.width, h = source.height;
@@ -651,11 +679,48 @@ var Cards;
         const ctx = c.getContext('2d');
         ctx.drawImage(source, 0, 0);
         const data = ctx.getImageData(0, 0, w, h).data;
-        const sx = w / Cards.WIDTH, sy = h / Cards.HEIGHT;
+        const framings = () => {
+            // [left, top, card width, card height] in image pixels.
+            const list = [[0, 0, w, h]];
+            const unit = w / Cards.WIDTH; // one card pixel
+            const reach = Math.max(1, Math.round(16 * unit));
+            const steps = [];
+            for (let d = 1; d <= reach; d++)
+                steps.push(d, -d);
+            const pairs = [];
+            for (const a of [0, ...steps])
+                for (const b of [0, ...steps])
+                    if (a || b)
+                        pairs.push([a, b]);
+            pairs.sort((p, q) => Math.abs(p[0]) + Math.abs(p[1]) - Math.abs(q[0]) - Math.abs(q[1]));
+            for (const [a, b] of pairs) {
+                list.push([a, b, w - 2 * a, h - 2 * b]); // a border (or crop) on every side
+                list.push([a, b, w, h]); // the card shifted
+            }
+            return list;
+        };
+        // A framing that is nearly right can find the strip's header but misread
+        // the rows further down, so keep looking until the whole code checks out.
+        let found = null;
+        for (const [left, top, cw, ch] of framings()) {
+            if (cw < Cards.WIDTH / 4 || ch < Cards.HEIGHT / 4)
+                continue;
+            const result = await readAt(data, w, h, left, top, cw / Cards.WIDTH, ch / Cards.HEIGHT);
+            if (result && result.ok)
+                return result;
+            if (result && !found)
+                found = result;
+        }
+        return found || { ok: false, reason: 'No Advolition code strip was found on this image.' };
+    }
+    Cards.read = read;
+    // Reads the strip, taking the card to sit at (left, top) in the image at the
+    // given scale. Returns null if no strip header is found there.
+    async function readAt(data, w, h, left, top, sx, sy) {
         // Brightness at the centre of a block, averaged over a small patch.
+        const r = Math.max(0, Math.floor(Math.min(sx, sy) * CELL / 2 - 0.5));
         const luma = (col, row) => {
-            const cx = (STRIP.x + (col + 0.5) * CELL) * sx, cy = (rowTop(row) + 0.5 * CELL) * sy;
-            const r = Math.max(0, Math.floor(Math.min(sx, sy) * CELL / 2 - 0.5));
+            const cx = left + (STRIP.x + (col + 0.5) * CELL) * sx, cy = top + (rowTop(row) + 0.5 * CELL) * sy;
             let sum = 0, n = 0;
             for (let dy = -r; dy <= r; dy++)
                 for (let dx = -r; dx <= r; dx++) {
@@ -672,6 +737,8 @@ var Cards;
         for (let col = 0; col < COLS; col++)
             seen[Math.floor(col / 2) % 4].push(luma(col, 0));
         const ref = seen.map(v => { v.sort((a, b) => a - b); return v[Math.floor(v.length / 2)]; });
+        if (!(ref[0] < ref[1] && ref[1] < ref[2] && ref[2] < ref[3]))
+            return null; // not a calibration row
         const nearest = (v) => { let best = 0; for (let i = 1; i < 4; i++)
             if (Math.abs(v - ref[i]) < Math.abs(v - ref[best]))
                 best = i; return best; };
@@ -689,11 +756,10 @@ var Cards;
         readRow(1);
         const meta = rsDecode(toBytes().slice(0, META_DATA + META_PARITY), META_PARITY);
         if (!meta || MAGIC.some((m, i) => meta.data[i] !== m))
-            return { ok: false, reason: 'No Advolition code strip was found on this image.' };
+            return null;
         const needed = (META_DATA + META_PARITY + Math.min(meta.data[4], MAX_BLOCKS) * (RS_DATA + RS_PARITY)) * 4;
         for (let row = 2; symbols.length < needed && row < ROWS; row++)
             readRow(row);
         return unpack(toBytes());
     }
-    Cards.read = read;
 })(Cards || (Cards = {}));
