@@ -239,6 +239,20 @@ var CodeEditor;
             textarea.dispatchEvent(new Event('input'));
         }
     }
+    /** Selects a line (counting from 1) and scrolls it into view. */
+    function goToLine(textarea, line) {
+        const lines = textarea.value.split('\n');
+        const n = Math.max(1, Math.min(line, lines.length));
+        let start = 0;
+        for (let k = 0; k < n - 1; k++)
+            start += lines[k].length + 1;
+        textarea.focus();
+        textarea.setSelectionRange(start, start + lines[n - 1].length);
+        const lineHeight = parseFloat(getComputedStyle(textarea).lineHeight) || 19;
+        textarea.scrollTop = Math.max(0, (n - 1) * lineHeight - textarea.clientHeight / 3);
+        syncScroll(textarea);
+    }
+    CodeEditor.goToLine = goToLine;
     /** Redraws the colors and line numbers. Call after setting the value in code. */
     function refresh(textarea) {
         const parts = editors.get(textarea);

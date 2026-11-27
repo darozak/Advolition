@@ -32,8 +32,8 @@
           </div>
         </div>
         <div class="hero-cards">
-          <a href="Samples/cards/Gatherer-v1.0.png" download><img src="Samples/cards/Gatherer-v1.0.png" alt="Gatherer robot card"></a>
-          <a href="Samples/cards/Sentinel-v1.1.png" download><img src="Samples/cards/Sentinel-v1.1.png" alt="Sentinel robot card"></a>
+          <a href="Samples/cards/Gatherer-v1.1.png" download><img src="Samples/cards/Gatherer-v1.1.png" alt="Gatherer robot card"></a>
+          <a href="Samples/cards/Sentinel-v1.2.png" download><img src="Samples/cards/Sentinel-v1.2.png" alt="Sentinel robot card"></a>
         </div>
       </div>
 
@@ -91,10 +91,12 @@
           </select>
         </label>
         <button id="logs" onclick="downloadLogs()">Download logs</button>
+        <button id="bench-run" onclick="runBench(10)" title="Play 10 battles on new maps without animation, and compare the robots">Run 10 battles</button>
       </div>
       <div id="arena-empty" class="message big" hidden>
         No battle yet. <a href="#shop">Load robots in the shop</a>, then press Start battle.
       </div>
+      <div id="bench" class="bench" hidden></div>
       <canvas id="canvas"></canvas>
     </section>
   </main>

@@ -25,6 +25,7 @@ When you're ready, press **Start battle**. **The arena** then runs the battle wi
 - **Restart battle** starts a new battle with the same robots, and **Stop** ends it.
 - **Pause** and **Speed** (1x to 100x) control playback.
 - **Download logs** saves every robot's full log from the current or last battle as a text file.
+- **Run 10 battles** plays ten full battles on new random maps without animating them, then shows each robot's wins, average score, score range, kills and deaths. One battle is mostly luck (the map and where the nests are), so use this to tell whether a change really made your robot better.
 - **Back to the shop** ends the battle and returns to the shop.
 
 In the arena, the top of the screen is the spectator view:
@@ -36,8 +37,8 @@ In the arena, the top of the screen is the spectator view:
 Below that, each robot has its own panel showing its stats, its event log, a map of what it has scanned (the robot only knows what's on this map), its inventory, and any items on the ground beneath it.
 
 Two sample robots are included, as scripts and as cards:
-- **Gatherer** ([script](Samples/gatherer.js), [card](Samples/cards/Gatherer-v1.0.png)) explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot.
-- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.1.png)) stays home and shoots any robot that comes close.
+- **Gatherer** ([script](Samples/gatherer.js), [card](Samples/cards/Gatherer-v1.1.png)) explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot.
+- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.2.png)) stays home, scans, and shoots any robot its latest scan found, scanning again after every shot.
 
 An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
@@ -83,7 +84,7 @@ A grid space can hold one robot and any number of items. Ten random items are sc
 - **Turns.** A robot does one action at a time. Most actions take a number of ticks equal to the robot's **action time**, which is its total **bulk**. The program is called again on the tick after the action finishes, so a robot with an action time of 10 gets a new turn every 11 ticks. `Say` finishes at once, so the program is called again on the next tick.
 - **Bulk.** A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 11, so it gets a new turn every 12 ticks.
 - **Moving.** `Move` takes one step toward its target, along a straight line. It doesn't find a way around walls: if the next tile on that line is a wall, the robot bumps into it and stays put. Use `findPath` (below) to get a route around obstacles. Diagonal steps take about 1.4 times as long.
-- **Meeting other robots.** If the next tile has a robot on it, the move fails (`lastAction` says which robot blocked it), unless that robot is stepping into your tile at the same time. Then the two robots swap places, so robots meeting head-on in a corridor can always get past each other.
+- **Meeting other robots.** If the next tile has a robot on it, the move fails (`lastAction` says which robot blocked it), unless that robot is stepping into your tile at the same time. Then the two robots swap places, so robots meeting head-on in a corridor can always get past each other. The swap happens when the slower of the two moves finishes.
 - **Ties.** Actions that finish on the same tick happen in a random order, so no robot always goes first.
 - **Failed actions.** If an action can't be started (for example, equipping an item you don't have), nothing is queued and the program is called again on the next tick. `lastAction` says why.
 - **Memory.** Your map only updates when you scan. Items you've picked up still show in your `itemMap` until you scan that spot again.
@@ -145,13 +146,13 @@ Because damage adds up, carrying two different weapons works. Because shields on
 
 Both robots are told about every hit:
 - The attacker's log shows the damage it did, and its missed shots.
-- The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired and from where, even if the attacker is outside its scan range.
+- The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired. It also says where from, but only if the attacker was within the defender's scan range; otherwise `from` is `null`. (A robot without a Scanner can't see where shots come from.)
 
 While a robot stands on its nest, each equipped Armor item repairs by 1 point every 15 ticks, up to its original 60.
 
 A destroyed robot respawns 500 ticks later at its nest. If another robot is standing on the nest, it appears on the nearest free tile instead. It comes back with a fresh starting kit (Blaster, Scanner and Armor), already equipped. The kit is worth 0 points, so destroying a respawned robot can't be farmed for score. Items it banked on its nest are still there to pick up again.
 
-For 100 ticks after respawning, a robot is **protected**: shots still hit it but do no damage. The protection ends early if the robot attacks.
+For 100 ticks after respawning, a robot is **protected**: a shot aimed at it does no damage and doesn't set its `lastHit`, and shots aimed past it fly straight through. The protection ends early if the robot attacks.
 
 ## Scoring
 The tile where a robot starts becomes its **nest**. A robot's score is:
@@ -231,6 +232,8 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 - **The on-screen log** shows each robot's last 10 events. The same event repeated in a row is shown once with a count, such as `Scans the area ×12`.
 - **Download logs** saves every robot's complete log for the game as a text file.
 - **One clock.** Everything on screen and in the downloaded logs shows ticks counted up from the start of the game. Only the "Time left" label at the top counts down. (In your program, `gameTime` and the times in your own log still count down.)
+- **Failed actions are logged** too, for example `Take failed: no Railgun here`, so a robot stuck retrying something shows it in its log.
+- **Errors show their line.** Pressing **Apply changes** (or loading a script) checks the code and points to the line of any syntax error, selecting it in the editor. Errors your program throws while running are logged with their line number, such as `Program error: Cannot read properties of null (reading 'pos') (line 42)`.
 - **`lastAction`**, in your own `myData.robots[myData.myID]`, tells your program how its last action turned out. For example: `{ command: 'take', status: 'failed', reason: 'inventory full' }`. Failed actions and invalid return values show up here too, so check it when your robot seems stuck.
   Possible failure reasons:
 
@@ -241,7 +244,7 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
   | `take` | `no <item> here`, `inventory full` |
   | `drop`, `equip`, `unequip` | `has no <item>` |
   | any | `unknown command "<command>"`, `not a valid action`, or the error message if `run` threw an error |
-- **`lastHit`** tells you who last shot you and from where.
+- **`lastHit`** tells you who last shot you, and from where if they were within your scan range.
 - **`console.log`** works inside your program. Its output appears in the browser's developer console (usually opened with F12).
 
 ## myData
@@ -277,7 +280,7 @@ Scanning a robot shows its current position, nest, name, ID, whether it's alive,
 | `items` | Item[] | Inventory. Equipped items come first. |
 | `lastScan` | number | The `gameTime` when this data was recorded. |
 | `lastAction` | object or null | How the robot's last action turned out: `command`, `status` (`'done'` or `'failed'`), `reason` (why it failed) and `time`. |
-| `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position), `time` and `damage` (per element, after shields). `null` until it is first hit. |
+| `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position, or `null` if it was beyond this robot's scan range), `time` and `damage` (per element, after shields). `null` until it is first hit. |
 
 ### Stats
 Arrays indexed by element use 0 = Kinetic, 1 = Thermal, 2 = ElectroMagnetic.

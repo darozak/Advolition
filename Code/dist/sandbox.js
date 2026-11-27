@@ -54,7 +54,47 @@ class SandboxedBot {
      * Loads a program's source code into a new sandbox. Rejects with a
      * readable message if the code has an error or doesn't create a program.
      */
-    static load(code) {
+    static async load(code) {
+        // Catch syntax errors first, with their line number, without running anything.
+        const syntax = await SandboxedBot.findSyntaxError(code);
+        if (syntax)
+            throw new Error(`its program has an error on line ${syntax.line}:\n${syntax.message}`);
+        return SandboxedBot.start(code);
+    }
+    /**
+     * Checks code for syntax errors without running it. Returns the first
+     * error's message and line (and column), or null if the code parses.
+     */
+    static async findSyntaxError(code) {
+        // new Function only parses the code; it never runs it.
+        try {
+            new Function(code);
+            return null;
+        }
+        catch (e) {
+            if (!(e instanceof SyntaxError))
+                return null;
+        }
+        // The parser's exception has no line number, but a worker started from
+        // the code reports one when it fails to start. Code with a syntax error
+        // never runs at all, so this is safe.
+        return new Promise((resolve) => {
+            const url = URL.createObjectURL(new Blob([code], { type: 'text/javascript' }));
+            const worker = new Worker(url);
+            const done = (result) => {
+                clearTimeout(timer);
+                worker.terminate();
+                URL.revokeObjectURL(url);
+                resolve(result);
+            };
+            const timer = setTimeout(() => done({ message: 'SyntaxError', line: 0, column: 0 }), 2000);
+            worker.onerror = (event) => {
+                event.preventDefault();
+                done({ message: String(event.message).replace(/^Uncaught /, ''), line: event.lineno, column: event.colno });
+            };
+        });
+    }
+    static start(code) {
         const source = new Blob([SandboxedBot.workerSource()], { type: 'text/javascript' });
         const url = URL.createObjectURL(source);
         const worker = new Worker(url);
@@ -138,6 +178,19 @@ for (let o = self.navigator; o; o = Object.getPrototypeOf(o)) {
 
 let program = null;
 
+// Whatever was thrown, describe it as text (so one odd error only costs a
+// turn), with the line in the program where it happened, when known.
+function describeError(e, withName) {
+    let text;
+    try { text = String(withName || !(e && e.message !== undefined) ? e : e.message); }
+    catch (e2) { text = 'an error that could not be shown as text'; }
+    try {
+        const at = e && typeof e.stack === 'string' && e.stack.match(/<anonymous>:(\\d+):(\\d+)\\)/);
+        if (at) text += ' (line ' + at[1] + ')';
+    } catch (e3) {}
+    return text;
+}
+
 self.onmessage = (event) => {
     const message = event.data;
 
@@ -150,9 +203,7 @@ self.onmessage = (event) => {
                 error = "its program file must end by creating the program, for example: new MyProgram();";
             }
         } catch (e) {
-            let text;
-            try { text = String(e); } catch (e2) { text = 'an error that could not be shown as text'; }
-            error = "its program has an error:\\n" + text;
+            error = "its program has an error:\\n" + describeError(e, true);
         }
         self.postMessage({ type: 'loaded', error: error });
 
@@ -161,12 +212,7 @@ self.onmessage = (event) => {
             const action = program.run(message.myData);
             self.postMessage({ type: 'decision', id: message.id, action: action });
         } catch (e) {
-            // Whatever was thrown, report it as text, so one odd error only
-            // costs this turn.
-            let text;
-            try { text = String(e && e.message !== undefined ? e.message : e); }
-            catch (e2) { text = 'an error that could not be shown as text'; }
-            self.postMessage({ type: 'decision', id: message.id, error: text });
+            self.postMessage({ type: 'decision', id: message.id, error: describeError(e) });
         }
     }
 };
