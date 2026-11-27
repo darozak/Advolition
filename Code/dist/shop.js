@@ -109,7 +109,7 @@ new MyRobot();
         const apply = el('button', 'primary', 'Apply changes');
         const hint = el('span', 'hint', 'Read the code before it fights. Edits apply to this slot; save it as a new card to share them.');
         reviewBar.append(apply, hint);
-        review.append(editor, reviewBar);
+        review.append(CodeEditor.attach(editor), reviewBar);
         root.append(head, body, review);
         // Loading
         file.onchange = () => { if (file.files && file.files[0])
@@ -156,7 +156,13 @@ new MyRobot();
         v.review.hidden = !open || !slots[i].code;
         v.reviewButton.textContent = v.review.hidden ? 'Review code' : 'Hide code';
         if (!v.review.hidden)
-            v.editor.value = slots[i].code || '';
+            showCode(v, slots[i].code || '');
+    }
+    function showCode(v, code) {
+        if (v.editor.value === code)
+            return; // keeps the reader's place after "Apply changes"
+        v.editor.value = code;
+        CodeEditor.refresh(v.editor);
     }
     function setStatus(i, text, kind = '') {
         const s = views[i].status;
@@ -185,7 +191,7 @@ new MyRobot();
         v.source.textContent = slot.source;
         v.root.style.setProperty('--slot-hue', `${Cards.hueOf(slot.code)}`);
         if (!v.review.hidden)
-            v.editor.value = slot.code;
+            showCode(v, slot.code);
         try {
             await Cards.draw(v.card, slot.code);
             v.card.hidden = false;
