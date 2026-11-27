@@ -253,6 +253,10 @@ new MyRobot();
     const changes = [];
     function setSlot(i, code, source, message, kind = 'ok') {
         changes[i] = (changes[i] || 0) + 1;
+        // A lone half of a surrogate pair can't be stored on a card (it becomes
+        // U+FFFD), so replace it here, keeping the slot and its card the same.
+        if (typeof code.toWellFormed === 'function')
+            code = code.toWellFormed();
         slots[i] = { code, source };
         save();
         setStatus(i, message, kind);
