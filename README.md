@@ -2,21 +2,32 @@
 ## Overview
 Advolition is a roguelike game in which 1-4 players program robots that compete to explore a randomly generated dungeon, collect items, and bring their wealth home.
 
-Robots are programmed by uploading a JavaScript class. The game engine runs that class to decide how each robot responds to its surroundings.
+Robots are programmed by writing a JavaScript class. The game engine runs that class to decide how each robot responds to its surroundings.
 
 Every robot starts out the same. What sets them apart are their programs and the items they find and equip in the dungeon.
 
 You can play the most recent version of the game at https://darozak.github.io/Advolition/
 
 ## Playing a game
-1. Open the game page.
-2. Use the **Robot 1**–**Robot 4** buttons to upload a program file for each robot you want in the game. Empty slots are left out.
-3. Click **Run** to start a new game, or **Stop** to end it. Stopping can't be undone: clicking **Run** again starts a new game.
-4. Click **Download logs** at any point to save every robot's full log from the current or last game as a text file.
+The game has three screens: the home page, **the pit** and **the arena**.
 
-5. Use **Pause** and **Speed** (1x to 100x) to control playback.
+**The pit** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
+- **Load card or script:** load a robot from a card image (PNG or JPEG) or from a `.js` file. You can also drag a file onto the slot.
+- **New robot:** start a robot from a short template.
+- **Review code:** read and edit the robot's code. When you load a card, its code opens for review automatically, so you can see what you're about to run. Press **Apply changes** to use your edits.
+- **Save as card:** save the robot as a card image to share (see "Robot cards" below).
+- **Save script:** save the robot's code as a `.js` file.
+- **Clear:** empty the slot.
 
-The top of the screen is the spectator view:
+**Add sample robots** fills empty slots with the sample robots (this works on the live site). The pit remembers your robots in this browser, so they're still there next time.
+
+When you're ready, press **Start battle**. **The arena** then runs the battle with every loaded robot:
+- **Restart battle** starts a new battle with the same robots, and **Stop** ends it.
+- **Pause** and **Speed** (1x to 100x) control playback.
+- **Download logs** saves every robot's full log from the current or last battle as a text file.
+- **Back to the pit** ends the battle and returns to the pit.
+
+In the arena, the top of the screen is the spectator view:
 - **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit). At high speeds every shot stays on screen for at least 3 frames. Piles that hold only respawn kit, which is worth nothing, are drawn faded, and the "On Ground" list marks such items "(no value)".
 - **A scoreboard**, sorted by score. It shows each robot's score, the worth banked on its nest, the worth it's carrying, its kills and deaths, and whether it's home, out exploring, or waiting to respawn.
 - **A worth chart** showing, for each robot, the score it would have if it were home: banked items plus everything it's carrying. Unlike the score itself, this doesn't drop every time a robot leaves its nest, so changes in the lead are real.
@@ -24,7 +35,36 @@ The top of the screen is the spectator view:
 
 Below that, each robot has its own panel showing its stats, its event log, a map of what it has scanned (the robot only knows what's on this map), its inventory, and any items on the ground beneath it.
 
-A sample robot is included at [`Samples/gatherer.js`](Samples/gatherer.js). It explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot. An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
+Two sample robots are included, as scripts and as cards:
+- **Gatherer** ([script](Samples/gatherer.js), [card](Samples/cards/Gatherer-v1.0.png)) explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot.
+- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.0.png)) stays home and shoots any robot that comes close.
+
+An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
+
+## Robot cards
+A robot card is a trading-card image of a robot that carries the robot's complete code. Save one from the pit with **Save as card**, share the image, and anyone can load it into their pit.
+
+The card shows:
+- the robot's name (its `Program` class);
+- a robot picture and colours generated from its code, so every robot looks different;
+- trait badges guessed from the actions it uses;
+- a description;
+- the **code strip**.
+
+The code strip is the band of small shaded blocks along the bottom. It holds the code, compressed and protected by error correction, so a card still loads after normal JPEG re-compression or resizing. If it's damaged too badly, the pit says so rather than loading broken code. A card holds about 2,900 bytes of compressed code, which is roughly 9–10 KB of JavaScript; bigger robots can still battle, they just can't be saved as cards. Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
+
+**Card fields.** Add these lines to the comment block at the top of your robot's code, and the card shows them in place of the comment summary:
+```javascript
+// @description What your robot does. It can carry on
+//   over more than one line.
+// @designer Your name
+// @version 1.0
+//
+```
+Leave a blank comment line (`//`) after the fields. Without them, the card shows the first comment line and any numbered list in the comment block.
+
+
+
 
 ## The dungeon
 Each game builds a new 25×25 dungeon of rooms and corridors. Every grid space is one of these tiles:
