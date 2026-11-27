@@ -131,14 +131,7 @@ new MyRobot();
         };
         // Reviewing and editing
         reviewButton.onclick = () => openReview(i, review.hidden);
-        apply.onclick = () => {
-            const code = editor.value;
-            if (!code.trim()) {
-                clearSlot(i);
-                return;
-            }
-            setSlot(i, code, slots[i].source.replace(/ \(edited\)$/, '') + ' (edited)', 'Changes applied.');
-        };
+        apply.onclick = () => applyEdits(i);
         // Saving
         saveCard.onclick = () => saveAsCard(i);
         saveScript.onclick = () => {
@@ -149,16 +142,44 @@ new MyRobot();
         };
         clear.onclick = () => { if (confirm('Remove this robot from the shop?'))
             clearSlot(i); };
-        return { root, name, source, status, card, placeholder, review, editor, reviewButton, saveCard, saveScript, clear };
+        return { root, name, source, status, card, placeholder, review, editor, reviewButton, saveCard, saveScript, clear, shown: '' };
     }
+    function applyEdits(i) {
+        const code = views[i].editor.value;
+        if (!code.trim()) {
+            clearSlot(i);
+            return;
+        }
+        setSlot(i, code, slots[i].source.replace(/ \(edited\)$/, '') + ' (edited)', 'Changes applied.');
+    }
+    /**
+     * Applies any code edits that haven't been applied yet, so a battle never
+     * runs older code than the shop shows. Returns the slot numbers changed.
+     */
+    function applyPendingEdits() {
+        const changed = [];
+        views.forEach((v, i) => {
+            if (slots[i].code && v.editor.value !== v.shown) {
+                applyEdits(i);
+                changed.push(i + 1);
+            }
+        });
+        return changed;
+    }
+    Shop.applyPendingEdits = applyPendingEdits;
     function openReview(i, open) {
         const v = views[i];
         v.review.hidden = !open || !slots[i].code;
         v.reviewButton.textContent = v.review.hidden ? 'Review code' : 'Hide code';
         if (!v.review.hidden)
-            showCode(v, slots[i].code || '');
+            showCode(v, slots[i].code || '', false); // keeps unapplied edits
     }
-    function showCode(v, code) {
+    // Puts code in a slot's editor. Unless `replace` is set, edits that haven't
+    // been applied are kept.
+    function showCode(v, code, replace) {
+        if (!replace && v.editor.value !== v.shown)
+            return;
+        v.shown = code;
         if (v.editor.value === code)
             return; // keeps the reader's place after "Apply changes"
         v.editor.value = code;
@@ -190,8 +211,7 @@ new MyRobot();
         v.name.textContent = info.name;
         v.source.textContent = slot.source;
         v.root.style.setProperty('--slot-hue', `${Cards.hueOf(slot.code)}`);
-        if (!v.review.hidden)
-            showCode(v, slot.code);
+        showCode(v, slot.code, true); // new code replaces the editor's
         try {
             await Cards.draw(v.card, slot.code);
             v.card.hidden = false;
