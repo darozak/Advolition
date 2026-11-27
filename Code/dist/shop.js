@@ -40,10 +40,27 @@ new MyRobot();
     // Saving slots between visits (in this browser only).
     // ------------------------------------------------------------------------
     function save() {
+        const message = document.getElementById('shop-message');
         try {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(slots));
+            if (message && message.dataset.storage) {
+                message.textContent = '';
+                delete message.dataset.storage;
+            }
         }
-        catch (e) { /* storage unavailable: slots just aren't remembered */ }
+        catch (e) {
+            // Out of room (or storage is off). Remove the old copy so a reload
+            // doesn't bring back robots from before, and say so.
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+                localStorage.removeItem(OLD_STORAGE_KEY);
+            }
+            catch (e2) { /* storage unavailable */ }
+            if (message) {
+                message.textContent = "Your robots are too big to remember in this browser, so they won't be here after a reload. Save them as cards or scripts to keep them.";
+                message.dataset.storage = '1';
+            }
+        }
     }
     function restore() {
         slots = [];
@@ -90,7 +107,7 @@ new MyRobot();
         const file = el('input');
         file.type = 'file';
         file.accept = 'image/*,.js,.txt,text/javascript,text/plain';
-        file.hidden = true;
+        file.className = 'visually-hidden'; // still reachable with Tab, unlike `hidden`
         fileLabel.append(file);
         const newButton = el('button', '', 'New robot');
         const reviewButton = el('button', '', 'Review code');
@@ -114,11 +131,16 @@ new MyRobot();
         // Loading
         file.onchange = () => { if (file.files && file.files[0])
             loadFile(i, file.files[0]); file.value = ''; };
-        root.addEventListener('dragover', (e) => { e.preventDefault(); root.classList.add('drop'); });
+        // Only file drags are handled here, so text can still be dragged within the editor.
+        const hasFiles = (e) => !!e.dataTransfer && Array.from(e.dataTransfer.types).includes('Files');
+        root.addEventListener('dragover', (e) => { if (!hasFiles(e))
+            return; e.preventDefault(); root.classList.add('drop'); });
         root.addEventListener('dragleave', () => root.classList.remove('drop'));
         root.addEventListener('drop', (e) => {
-            e.preventDefault();
             root.classList.remove('drop');
+            if (!hasFiles(e))
+                return;
+            e.preventDefault();
             const f = e.dataTransfer && e.dataTransfer.files[0];
             if (f)
                 loadFile(i, f);
@@ -226,7 +248,11 @@ new MyRobot();
             v.saveCard.disabled = true;
         }
     }
+    // Counts changes to each slot, so a file that finishes loading after the
+    // slot has changed again (another file, Clear, Apply) is ignored.
+    const changes = [];
     function setSlot(i, code, source, message, kind = 'ok') {
+        changes[i] = (changes[i] || 0) + 1;
         slots[i] = { code, source };
         save();
         setStatus(i, message, kind);
@@ -234,6 +260,7 @@ new MyRobot();
         updateBattleButton();
     }
     function clearSlot(i) {
+        changes[i] = (changes[i] || 0) + 1;
         slots[i] = { code: null, source: '' };
         save();
         setStatus(i, '');
@@ -244,6 +271,8 @@ new MyRobot();
     // Loading cards and scripts.
     // ------------------------------------------------------------------------
     async function loadFile(i, file) {
+        const change = changes[i] = (changes[i] || 0) + 1;
+        const stale = () => changes[i] !== change;
         if (file.type.startsWith('image/') || /\.(png|jpe?g|webp|gif|bmp)$/i.test(file.name)) {
             setStatus(i, `Reading ${file.name}…`);
             let image;
@@ -251,10 +280,13 @@ new MyRobot();
                 image = await createImageBitmap(file);
             }
             catch (e) {
-                setStatus(i, `${file.name} couldn't be opened as an image.`, 'error');
+                if (!stale())
+                    setStatus(i, `${file.name} couldn't be opened as an image.`, 'error');
                 return;
             }
             const result = await Cards.read(image);
+            if (stale())
+                return;
             if (!result.ok) {
                 setStatus(i, `${file.name}: ${result.reason}`, 'error');
                 return;
@@ -265,6 +297,8 @@ new MyRobot();
         }
         else {
             const text = await file.text();
+            if (stale())
+                return;
             if (!/extends\s+Program/.test(text)) {
                 setStatus(i, `${file.name} doesn't look like a robot script: it should define a class that extends Program.`, 'error');
                 return;
@@ -309,7 +343,7 @@ new MyRobot();
     function fileName(code) {
         const info = Cards.describe(code);
         const version = info.fields.version ? '-v' + info.fields.version.replace(/[^\w.]+/g, '') : '';
-        return (info.name + version).replace(/[^\w.-]+/g, '-');
+        return (info.name + version).replace(/[^\p{L}\p{N}_.-]+/gu, '-');
     }
     function download(blob, name) {
         const link = document.createElement('a');
