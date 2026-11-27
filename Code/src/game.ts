@@ -980,6 +980,26 @@ class Game {
                     return;
                 }
             }
+
+            // A robot stepping onto its own nest always gets in: whoever is
+            // standing there swaps places with it, so no robot can be locked
+            // out of its nest by another parking on it.
+            let owner = this.arena.robots[action.robotID];
+            if(destination.isEqualTo(owner.nest)) {
+                let squatter = this.arena.robots[occupantID];
+                let ownerFrom = owner.pos;
+                owner.pos = destination;
+                squatter.pos = ownerFrom;
+                this.arena.robotMap[owner.pos.x][owner.pos.y] = action.robotID;
+                this.arena.robotMap[squatter.pos.x][squatter.pos.y] = occupantID;
+                this.appendToLog(owner, this.gameTime, `Takes back its nest from ${squatter.name}`);
+                this.appendToLog(squatter, this.gameTime, `Pushed off ${owner.name}'s nest`);
+                this.setActionResult(action.robotID, 'move');
+                this.coreColor[action.robotID].deactivate();
+                this.batteryColor[action.robotID].deactivate();
+                this.powerColor[action.robotID].deactivate();
+                return;
+            }
         }
 
         // Can the robot move into this tile?
