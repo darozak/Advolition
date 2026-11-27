@@ -107,7 +107,7 @@ new MyRobot();
         editor.setAttribute('aria-label', `Code for slot ${i + 1}`);
         const reviewBar = el('div', 'slot-review-bar');
         const apply = el('button', 'primary', 'Apply changes');
-        const hint = el('span', 'hint', 'Read the code before it fights. Edits apply to this slot; save it as a new card to share them.');
+        const hint = el('span', 'hint', 'Read the code before it fights. Edits apply to this slot; save it as a new card to share them. Tab indents; press Esc, then Tab, to leave the editor.');
         reviewBar.append(apply, hint);
         review.append(CodeEditor.attach(editor), reviewBar);
         root.append(head, body, review);

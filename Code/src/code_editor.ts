@@ -95,8 +95,76 @@ namespace CodeEditor {
         editors.set(textarea, { code, gutter: gutterText, lines: 0 });
         textarea.addEventListener('input', () => refresh(textarea));
         textarea.addEventListener('scroll', () => syncScroll(textarea));
+        textarea.addEventListener('keydown', (e) => handleKey(textarea, e));
+        textarea.addEventListener('blur', () => escaped.delete(textarea));
         refresh(textarea);
         return root;
+    }
+
+    // ------------------------------------------------------------------------
+    // Tab indents. Tab inserts spaces up to the next tab stop, or indents every
+    // selected line; Shift+Tab outdents. Press Escape first to let Tab move to
+    // the next control as usual, so keyboard users are never stuck in the editor.
+    // ------------------------------------------------------------------------
+    const INDENT = 4;
+    const escaped = new WeakSet<HTMLTextAreaElement>();
+
+    function handleKey(textarea: HTMLTextAreaElement, e: KeyboardEvent) {
+        if (e.key === 'Escape') { escaped.add(textarea); return; }
+        if (e.key !== 'Tab' || e.ctrlKey || e.altKey || e.metaKey) { escaped.delete(textarea); return; }
+        if (escaped.has(textarea)) { escaped.delete(textarea); return; }   // let Tab leave the editor
+        e.preventDefault();
+
+        const text = textarea.value;
+        const start = textarea.selectionStart, end = textarea.selectionEnd;
+        const lineStart = text.lastIndexOf('\n', start - 1) + 1;
+        const multiLine = text.slice(start, end).includes('\n');
+
+        if (!e.shiftKey && !multiLine) {
+            // Spaces up to the next tab stop.
+            const column = start - lineStart;
+            replace(textarea, start, end, ' '.repeat(INDENT - (column % INDENT)));
+            return;
+        }
+
+        // Indent or outdent every line the selection touches. (A selection that
+        // ends at the very start of a line doesn't include that line.)
+        const lastLineEnd = end > start && text[end - 1] === '\n' ? end - 1 : end;
+        let blockEnd = text.indexOf('\n', lastLineEnd);
+        if (blockEnd < 0) blockEnd = text.length;
+        const lines = text.slice(lineStart, blockEnd).split('\n');
+        let firstChange = 0, totalChange = 0;
+        const changed = lines.map((line, n) => {
+            let delta: number;
+            if (e.shiftKey) {
+                delta = -Math.min(line.match(/^ */)![0].length, INDENT);
+                line = line.slice(-delta);
+            } else {
+                delta = line.length ? INDENT : 0;   // leave blank lines blank
+                line = ' '.repeat(delta) + line;
+            }
+            if (n === 0) firstChange = delta;
+            totalChange += delta;
+            return line;
+        });
+        const block = changed.join('\n');
+        if (block === text.slice(lineStart, blockEnd)) return;
+        replace(textarea, lineStart, blockEnd, block);
+        if (multiLine) {
+            textarea.setSelectionRange(lineStart, lineStart + block.length);   // keep the lines selected for another Tab
+        } else {
+            const caret = Math.max(lineStart, start + firstChange);
+            textarea.setSelectionRange(caret, Math.max(lineStart, end + totalChange));
+        }
+    }
+
+    // Replaces text in a way that the browser's undo can take back.
+    function replace(textarea: HTMLTextAreaElement, from: number, to: number, text: string) {
+        textarea.setSelectionRange(from, to);
+        if (!document.execCommand('insertText', false, text)) {
+            textarea.setRangeText(text, from, to, 'end');
+            textarea.dispatchEvent(new Event('input'));
+        }
     }
 
     /** Redraws the colors and line numbers. Call after setting the value in code. */
