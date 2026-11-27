@@ -89,6 +89,7 @@ A grid space can hold one robot and any number of items. Ten random items are sc
 - **Bulk.** A bare robot has a bulk of 4, and every item it carries (equipped or not) adds its own bulk. A robot with its three starting items has an action time of 11, so it gets a new turn every 12 ticks.
 - **Moving.** `Move` takes one step toward its target, along a straight line. It doesn't find a way around walls: if the next tile on that line is a wall, the robot bumps into it and stays put. Use `findPath` (below) to get a route around obstacles. Diagonal steps take about 1.4 times as long.
 - **Meeting other robots.** If the next tile has a robot on it, the move fails (`lastAction` says which robot blocked it), unless that robot is stepping into your tile at the same time. Then the two robots swap places, so robots meeting head-on in a corridor can always get past each other. The swap happens when the slower of the two moves finishes.
+- **Your own nest.** A robot stepping onto its own nest always gets in: if another robot is standing on it, the two swap places (the owner's log says "Takes back its nest from …", the other's "Pushed off …'s nest"). So no robot can lock another out of its nest by parking on it.
 - **Ties.** Actions that finish on the same tick happen in a random order, so no robot always goes first.
 - **Failed actions.** If an action can't be started (for example, equipping an item you don't have), nothing is queued and the program is called again on the next tick. `lastAction` says why.
 - **Memory.** Your map only updates when you scan. Items you've picked up still show in your `itemMap` until you scan that spot again.
@@ -215,7 +216,7 @@ A program's `run` method returns one of these:
 
 | Action | What it does |
 | ------ | ------------ |
-| `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable or another robot is standing on it, the robot stays put, unless that robot is stepping into its tile, in which case they swap places. |
+| `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable or another robot is standing on it, the robot stays put, unless that robot is stepping into its tile, or the tile is the moving robot's own nest, in which case they swap places. |
 | `new Scan()` | Updates the robot's map within its scan range. Walls and doors block line of sight. |
 | `new Take(itemName)` | Picks up the named item from the robot's tile, if it has room. |
 | `new Drop(itemName)` | Drops the named item onto the robot's tile. |
