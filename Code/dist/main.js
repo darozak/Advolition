@@ -33,6 +33,7 @@ function showScreen() {
     window.scrollTo(0, 0);
 }
 function startBattle() {
+    Shop.applyPendingEdits(); // battle with the code the shop shows
     battleRobots = Shop.robots();
     if (battleRobots.length === 0)
         return;
@@ -74,6 +75,14 @@ async function runGame() {
             return;
         }
         game.addRobot(bot, robot.name, true);
+    }
+    // Stop if the battle was restarted or stopped while the last program was
+    // loading, or if no robot could be loaded at all.
+    if (runID != gameRunID || game.programs.length === 0) {
+        game.stop();
+        if (runID == gameRunID && empty)
+            empty.hidden = false;
+        return;
     }
     currentGame = game;
     lastGame = game;

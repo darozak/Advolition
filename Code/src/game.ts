@@ -110,11 +110,12 @@ class Game {
                     // and the error goes in its log.
                     let result = results[k];
                     if(result.error !== undefined) {
-                        let entry = result.error.startsWith('Program stopped') ? result.error : `Program error: ${result.error}`;
+                        const errorText = String(result.error);
+                        let entry = errorText.startsWith('Program stopped') ? errorText : `Program error: ${errorText}`;
                         let robot = this.arena.robots[i];
                         if(robot.logEntry[robot.logEntry.length - 1] != entry) {
                             this.appendToLog(robot, this.gameTime, entry);
-                            console.error(`${robot.name}: ${result.error}`);
+                            console.error(`${robot.name}: ${errorText}`);
                         }
                     }
 

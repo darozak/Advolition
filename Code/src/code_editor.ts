@@ -27,7 +27,9 @@ namespace CodeEditor {
         /('(?:\\[\s\S]|[^'\\\n])*'?|"(?:\\[\s\S]|[^"\\\n])*"?|`(?:\\[\s\S]|[^`\\])*`?)/.source, // 2 string
         /(\b(?:0[xXbBoO][\da-fA-F_]+|\d[\d_]*(?:\.\d*)?(?:[eE][+-]?\d+)?)n?\b|\.\d+\b)/.source, // 3 number
         /([A-Za-z_$][\w$]*)/.source,                                                           // 4 word
-        /(\/(?![*\/])(?:\\.|\[(?:\\.|[^\]\\\n])*\]|[^\/\\\n\[])+\/[dgimsuyv]*)/.source,              // 5 regex (or division)
+        // 5 regex (or division). Its length is capped so that a line full of
+        // "/" and "[" can't make each attempt scan to the end of the line.
+        /(\/(?![*\/])(?:\\.|\[(?:\\.|[^\]\\\n]){0,200}\]|[^\/\\\n\[]){1,200}\/[dgimsuyv]*)/.source,
     ].join('|'), 'g');
 
     // Words after which a "/" starts a regular expression rather than a division.

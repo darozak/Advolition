@@ -144,6 +144,22 @@ class SandboxedBot implements Bot {
 
         return `${api}
 
+// Cut the program off from everything but its own messages with the game:
+// no channels shared with other robots' workers (BroadcastChannel, storage,
+// locks), no new workers, and no network. Each name is removed from the
+// worker's global object and its prototypes, then pinned to undefined.
+for (const name of ['BroadcastChannel', 'indexedDB', 'caches', 'Worker', 'SharedWorker',
+        'fetch', 'XMLHttpRequest', 'WebSocket', 'WebTransport', 'EventSource', 'importScripts']) {
+    for (let o = self; o; o = Object.getPrototypeOf(o)) {
+        try { delete o[name]; } catch (e) {}
+    }
+    try { Object.defineProperty(self, name, { value: undefined, writable: false, configurable: false }); } catch (e) {}
+}
+for (let o = self.navigator; o; o = Object.getPrototypeOf(o)) {
+    try { delete o.locks; } catch (e) {}
+    try { delete o.storage; } catch (e) {}
+}
+
 let program = null;
 
 self.onmessage = (event) => {
@@ -158,7 +174,9 @@ self.onmessage = (event) => {
                 error = "its program file must end by creating the program, for example: new MyProgram();";
             }
         } catch (e) {
-            error = "its program has an error:\\n" + e;
+            let text;
+            try { text = String(e); } catch (e2) { text = 'an error that could not be shown as text'; }
+            error = "its program has an error:\\n" + text;
         }
         self.postMessage({ type: 'loaded', error: error });
 
@@ -167,7 +185,11 @@ self.onmessage = (event) => {
             const action = program.run(message.myData);
             self.postMessage({ type: 'decision', id: message.id, action: action });
         } catch (e) {
-            const text = (e && e.message) ? e.message : String(e);
+            // Whatever was thrown, report it as text, so one odd error only
+            // costs this turn.
+            let text;
+            try { text = String(e && e.message !== undefined ? e.message : e); }
+            catch (e2) { text = 'an error that could not be shown as text'; }
             self.postMessage({ type: 'decision', id: message.id, error: text });
         }
     }

@@ -14,7 +14,7 @@ The game has three screens: the home page, **the shop** and **the arena**.
 **The shop** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
 - **Load card or script:** load a robot from a card image (PNG or JPEG) or from a `.js` file. You can also drag a file onto the slot.
 - **New robot:** start a robot from a short template.
-- **Review code:** read and edit the robot's code. When you load a card, its code opens for review automatically, so you can see what you're about to run. Press **Apply changes** to use your edits.
+- **Review code:** read and edit the robot's code. When you load a card, its code opens for review automatically, so you can see what you're about to run. Press **Apply changes** to use your edits; any edits you haven't applied are applied when you start a battle.
 - **Save as card:** save the robot as a card image to share (see "Robot cards" below).
 - **Save script:** save the robot's code as a `.js` file.
 - **Clear:** empty the slot.
@@ -37,7 +37,7 @@ Below that, each robot has its own panel showing its stats, its event log, a map
 
 Two sample robots are included, as scripts and as cards:
 - **Gatherer** ([script](Samples/gatherer.js), [card](Samples/cards/Gatherer-v1.0.png)) explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot.
-- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.0.png)) stays home and shoots any robot that comes close.
+- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.1.png)) stays home and shoots any robot that comes close.
 
 An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
@@ -199,6 +199,8 @@ If a program throws an error, that robot does nothing for that turn and the erro
 ### The sandbox
 Each program runs in its own sandbox (a Web Worker), separate from the game and from the other robots' programs.
 - A program can use `Program`, `Vector` and the action classes below. It can't see the game, the page, or other programs. The only information it gets is the `myData` passed to `run`.
+- Programs can't talk to each other or reach the network: browser features such as `fetch`, `BroadcastChannel`, `indexedDB` and `Worker` are removed from the sandbox.
+- If a program throws an error, its robot does nothing that turn and the error goes in its log.
 - `console.log` output appears in the browser's developer console.
 - A program has 1 second to load and 1 second to choose each action. If it takes longer, it is stopped and its robot does nothing for the rest of the game.
 - Each tick waits until every program that is choosing an action has answered, so a slow program slows the whole game.
