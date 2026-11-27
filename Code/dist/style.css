@@ -62,7 +62,8 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
 .hero-cards { flex: 1 1 420px; display: flex; gap: 16px; justify-content: center; }
 .hero-cards a { display: block; flex: 0 1 280px; }
-.hero-cards img { width: 100%; height: auto; display: block; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: transform 0.15s; }
+.hero-cards img { width: 100%; height: auto; aspect-ratio: 750 / 1050; object-fit: cover; object-position: left center; display: block; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.6); transition: transform 0.15s, object-position 0.35s; }
+.hero-cards a:hover img, .hero-cards a:focus-visible img { object-position: right center; }
 .hero-cards a:nth-child(1) img { transform: rotate(-3deg); }
 .hero-cards a:nth-child(2) img { transform: rotate(3deg) translateY(16px); }
 .hero-cards a:hover img { transform: rotate(0) scale(1.03); }
@@ -94,7 +95,10 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .slot-source { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .slot-body { display: flex; gap: 14px; align-items: flex-start; }
 .slot-card-box { flex: 0 0 200px; }
-.slot-card { width: 200px; height: auto; display: block; border-radius: 9px; }
+.card-view { display: block; width: 200px; aspect-ratio: 750 / 1050; overflow: hidden; border-radius: 9px; padding: 0; border: 0; background: none; cursor: pointer; }
+.card-view:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.slot-card { width: 200%; height: auto; display: block; transition: transform 0.35s; }
+.card-view.back .slot-card { transform: translateX(-50%); }
 .slot-placeholder {
   width: 200px; aspect-ratio: 750 / 1050; border: 2px dashed var(--line); border-radius: 10px;
   display: grid; place-items: center; text-align: center; color: var(--muted); padding: 14px; font-size: 14px;
@@ -157,7 +161,7 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
   .topbar { padding: 10px 16px; }
   .hero-text h1 { font-size: 32px; }
   .slot-body { flex-direction: column; }
-  .slot-card-box, .slot-card, .slot-placeholder { width: 100%; max-width: 320px; flex-basis: auto; }
+  .slot-card-box, .card-view, .slot-placeholder { width: 100%; max-width: 320px; flex-basis: auto; }
   .slot.empty .slot-placeholder { aspect-ratio: auto; min-height: 90px; max-width: none; }
   .slot.empty .slot-card-box { max-width: none; }
 }
