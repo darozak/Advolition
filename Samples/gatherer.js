@@ -1,5 +1,10 @@
 // Gatherer: a sample robot for Advolition.
 //
+// @description Explores the dungeon, collects items and banks them on its nest,
+//   fights back when shot, and always makes it home before time runs out.
+// @designer darozak
+// @version 1.0
+//
 // What it does, in order of priority each turn:
 //   1. Equips its gear (Scanner, Armor, Blaster).
 //   2. Fights back: if it was shot recently, it fires at the attacker.
@@ -12,8 +17,8 @@
 //   8. Explores toward the nearest unscanned area.
 // It scans every few steps so its map stays fresh.
 //
-// Copy this file and change it to make your own robot. Upload it with one of
-// the Robot buttons on the game page.
+// Copy this file and change it to make your own robot. Load it into a slot in
+// the pit, where you can also save it as a card to share.
 
 class Gatherer extends Program {
     constructor() {

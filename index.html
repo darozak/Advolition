@@ -4,41 +4,104 @@
   <title>Advolition</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Advolition: program a robot in JavaScript, share it as a trading card, and battle it in a random dungeon.">
   <link rel="stylesheet" href="Code/dist/style.css">
 </head>
 <body>
-  <p>ADVOLITION (<a href="https://github.com/darozak/Advolition">Learn how to play!</a>) </p>
+  <header class="topbar">
+    <a class="logo" href="#home">ADVOLITION</a>
+    <nav>
+      <a href="#home" data-screen="home">Home</a>
+      <a href="#pit" data-screen="pit">The Pit</a>
+      <a href="#arena" data-screen="arena">The Arena</a>
+      <a href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">How to play</a>
+    </nav>
+  </header>
 
-  <b>Robot 1: </b>
-  <input type="file" onchange="loadFile(0, this)"/>
-  <b>Robot 3: </b>
-  <input type="file" onchange="loadFile(2, this)"/> 
-  <button  id="run" onclick="runGame()">Run</button>  <br>
+  <main>
+    <!-- Home -->
+    <section id="screen-home" class="screen">
+      <div class="hero">
+        <div class="hero-text">
+          <h1>Program a robot.<br>Send it into the dungeon.</h1>
+          <p>Advolition is a game for programmers. You write a robot's brain in JavaScript, then up to four robots explore a random dungeon at once: scanning, collecting loot, fighting, and racing to bring their wealth home before time runs out.</p>
+          <p>Every robot can be saved as a <strong>trading card</strong> that carries its complete code in the code strip along the bottom. Share the card, and anyone can load it into their pit.</p>
+          <div class="cta">
+            <a class="button primary big" href="#pit">Enter the Pit</a>
+            <a class="button big" href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">How to play</a>
+          </div>
+        </div>
+        <div class="hero-cards">
+          <a href="Samples/cards/Gatherer-v1.0.png" download><img src="Samples/cards/Gatherer-v1.0.png" alt="Gatherer robot card"></a>
+          <a href="Samples/cards/Sentinel-v1.0.png" download><img src="Samples/cards/Sentinel-v1.0.png" alt="Sentinel robot card"></a>
+        </div>
+      </div>
 
-  <b>Robot 2: </b>
-  <input type="file" onchange="loadFile(1, this)"/>
-  <b>Robot 4: </b>
-  <input type="file" onchange="loadFile(3, this)"/>
-  <button id="stop" onclick="stopGame()">Stop</button>
-  <button id="logs" onclick="downloadLogs()">Download logs</button> <br>
+      <div class="steps">
+        <div class="step">
+          <h3><span>1</span> Load your robots</h3>
+          <p>In the pit, load up to four robots from card images or JavaScript files, or start a new robot from a template.</p>
+        </div>
+        <div class="step">
+          <h3><span>2</span> Review the code</h3>
+          <p>Read every robot's code before it fights. Edit it if you like, then save it as a new card to share.</p>
+        </div>
+        <div class="step">
+          <h3><span>3</span> Battle in the arena</h3>
+          <p>Start the battle and watch the robots explore, fight and bank their loot. The highest score when time runs out wins.</p>
+        </div>
+      </div>
 
-  <button id="pause" onclick="togglePause()">Pause</button>
-  <b>Speed: </b>
-  <select id="speed" onchange="setSpeed(this.value)">
-    <option value="1">1x</option>
-    <option value="2">2x</option>
-    <option value="5">5x</option>
-    <option value="20">20x</option>
-    <option value="100">100x</option>
-  </select> <br>
+      <div class="note">
+        <h3>Sample cards</h3>
+        <p>The two cards above are working robots. Download one (tap or click it), then load the image in the pit to see its code. When you share a card, share the image file itself: sites that shrink or heavily re-compress images can damage the code strip.</p>
+      </div>
+    </section>
 
+    <!-- The pit -->
+    <section id="screen-pit" class="screen" hidden>
+      <div class="pit-head">
+        <div>
+          <h2>The Pit</h2>
+          <p>Load up to four robots from cards or scripts, review their code, and save them as cards. Then start the battle.</p>
+        </div>
+        <div class="pit-actions">
+          <button id="pit-samples" onclick="Pit.loadSamples()">Add sample robots</button>
+          <button id="pit-battle" class="primary big" onclick="startBattle()">Start battle</button>
+        </div>
+      </div>
+      <p id="pit-message" class="message"></p>
+      <div id="slots" class="slots"></div>
+    </section>
 
-  
+    <!-- The arena -->
+    <section id="screen-arena" class="screen" hidden>
+      <div class="arena-bar">
+        <a class="button" href="#pit">← Back to the pit</a>
+        <button id="run" onclick="runGame()">Restart battle</button>
+        <button id="stop" class="danger" onclick="stopGame()">Stop</button>
+        <button id="pause" onclick="togglePause()">Pause</button>
+        <label>Speed
+          <select id="speed" onchange="setSpeed(this.value)">
+            <option value="1">1x</option>
+            <option value="2">2x</option>
+            <option value="5">5x</option>
+            <option value="20">20x</option>
+            <option value="100">100x</option>
+          </select>
+        </label>
+        <button id="logs" onclick="downloadLogs()">Download logs</button>
+      </div>
+      <div id="arena-empty" class="message big" hidden>
+        No battle yet. <a href="#pit">Load robots in the pit</a>, then press Start battle.
+      </div>
+      <canvas id="canvas"></canvas>
+    </section>
+  </main>
+
   <div style="display:none;">
     <img id="sprites" src="Code/dist/tiles.png"/>
   </div>
-
-  <canvas id="canvas"></canvas>
 
   <script src="Code/dist/rng.js"></script>
   <script src="Code/dist/generator.js"></script>
@@ -49,7 +112,7 @@
   <script src="Code/dist/world_data.js"></script>
   <script src="Code/dist/scan_data.js"></script>
   <script src="Code/dist/action.js"></script>
-  <script src="Code/dist/arena.js"></script> 
+  <script src="Code/dist/arena.js"></script>
   <script src="Code/dist/game_event.js"></script>
   <script src="Code/dist/robot_data.js"></script>
   <script src="Code/dist/fov.js"></script>
@@ -60,6 +123,8 @@
   <script src="Code/dist/target.js"></script>
   <script src="Code/dist/animations.js"></script>
   <script src="Code/dist/game.js"></script>
+  <script src="Code/dist/cards.js"></script>
+  <script src="Code/dist/pit.js"></script>
   <script src="Code/dist/main.js"></script>
 </body>
 
