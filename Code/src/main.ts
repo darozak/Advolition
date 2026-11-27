@@ -55,6 +55,8 @@ async function runGame() {
       return;
     }
     if (empty) empty.hidden = true;
+    const bench = document.getElementById('bench');
+    if (bench) bench.hidden = true;
 
     const game = new Game(new GaiaData(), 10000);
 
@@ -109,6 +111,73 @@ async function runGame() {
     };
     step();
 }
+
+// ---------------------------------------------------------------------------
+// The test bench: one battle is mostly luck (the map, where the nests are),
+// so this plays several full battles on new maps without drawing them, and
+// shows how each robot did over all of them.
+// ---------------------------------------------------------------------------
+async function runBench(count: number = 10) {
+    Shop.applyPendingEdits();
+    const robots = Shop.robots();
+    if (robots.length === 0) { location.hash = '#shop'; return; }
+    battleRobots = robots;
+    if (location.hash !== '#arena') location.hash = '#arena';
+    stopGame();
+    const runID = gameRunID;
+    const panel = document.getElementById('bench') as HTMLElement;
+    const empty = document.getElementById('arena-empty');
+    if (empty) empty.hidden = true;
+    panel.hidden = false;
+
+    type Tally = { wins: number, scores: number[], kills: number, deaths: number };
+    const tally = new Map<string, Tally>(robots.map(r => [r.name, { wins: 0, scores: [], kills: 0, deaths: 0 }]));
+    const problems = new Set<string>();
+    const show = (heading: string) => {
+        const rows = [...tally.entries()].sort((a, b) => avg(b[1].scores) - avg(a[1].scores)).map(([name, t]) =>
+            `<tr><td>${escapeHtml(name)}</td><td>${fmt(t.wins)}</td><td>${t.scores.length ? Math.round(avg(t.scores)) : '–'}</td>` +
+            `<td>${t.scores.length ? Math.min(...t.scores) + '–' + Math.max(...t.scores) : '–'}</td><td>${t.kills}</td><td>${t.deaths}</td></tr>`).join('');
+        panel.innerHTML = `<h3>${heading}</h3>
+            <table><thead><tr><th>Robot</th><th>Wins</th><th>Average score</th><th>Range</th><th>Kills</th><th>Deaths</th></tr></thead><tbody>${rows}</tbody></table>
+            ${[...problems].map(p => `<p class="message">${escapeHtml(p)}</p>`).join('')}
+            <p class="hint">Each battle is on a new random map. Scores swing a lot from map to map, so compare averages and wins rather than single battles.</p>`;
+    };
+
+    for (let n = 1; n <= count; n++) {
+        show(`Test bench: battle ${n} of ${count}…`);
+        const game = new Game(new GaiaData(), 10000);
+        for (const robot of robots) {
+            try { game.addRobot(await SandboxedBot.load(robot.code), robot.name, true); }
+            catch (error) { problems.add(`${robot.name} couldn't battle because ${error instanceof Error ? error.message : error}`); }
+            if (runID != gameRunID) { game.stop(); return; }
+        }
+        if (game.programs.length === 0) break;
+        lastGame = game;
+        let ticks = 0;
+        while (game.gameTime > 0) {
+            await game.run(false);
+            if (++ticks % 250 === 0) await new Promise(r => setTimeout(r, 0));   // keep the page responsive
+            if (runID != gameRunID) { game.stop(); return; }
+        }
+        game.stop();
+        const scores = game.arena.robots.map((r, i) => game.arena.getScore(i));
+        const best = Math.max(...scores);
+        const winners = scores.filter(s => s === best).length;
+        game.arena.robots.forEach((r, i) => {
+            const t = tally.get(r.name);
+            if (!t) return;
+            t.scores.push(scores[i]);
+            t.kills += game.kills[i];
+            t.deaths += game.deaths[i];
+            if (scores[i] === best) t.wins += 1 / winners;
+        });
+    }
+    show(`Test bench: ${count} battles`);
+}
+
+const avg = (values: number[]) => values.length ? values.reduce((a, b) => a + b, 0) / values.length : -1;
+const fmt = (n: number) => Number.isInteger(n) ? `${n}` : n.toFixed(1);
+const escapeHtml = (text: string) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 function togglePause() {
     isPaused = !isPaused;

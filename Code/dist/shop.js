@@ -173,6 +173,20 @@ new MyRobot();
             return;
         }
         setSlot(i, code, slots[i].source.replace(/ \(edited\)$/, '') + ' (edited)', 'Changes applied.');
+        checkSyntax(i, true);
+    }
+    // Warns about a syntax error in a slot's code, with its line, and (when
+    // asked) selects that line in the editor. The code is kept either way.
+    async function checkSyntax(i, showLine) {
+        const change = changes[i], code = slots[i].code;
+        if (!code)
+            return;
+        const error = await SandboxedBot.findSyntaxError(code);
+        if (!error || changes[i] !== change)
+            return;
+        setStatus(i, `Line ${error.line}: ${error.message}. This robot can't battle until that's fixed.`, 'error');
+        if (showLine && !views[i].review.hidden)
+            CodeEditor.goToLine(views[i].editor, error.line);
     }
     /**
      * Applies any code edits that haven't been applied yet, so a battle never
@@ -308,6 +322,7 @@ new MyRobot();
                 return;
             }
             setSlot(i, text, `Script: ${file.name}`, 'Script loaded.');
+            checkSyntax(i, false);
         }
     }
     /** Loads the sample robots into empty slots (needs the game to be served from a website). */

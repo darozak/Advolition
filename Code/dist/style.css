@@ -144,6 +144,12 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 /* The arena */
 .arena-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
 .arena-bar label { color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
+.bench { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 14px 18px; margin-bottom: 14px; overflow-x: auto; }
+.bench h3 { margin: 0 0 10px; font-size: 18px; }
+.bench table { border-collapse: collapse; min-width: 420px; }
+.bench th, .bench td { text-align: left; padding: 5px 14px 5px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.bench th { color: var(--muted); font-weight: 600; font-size: 13px; }
+.bench .hint { margin: 10px 0 0; }
 #canvas { display: block; width: 100%; height: auto; background: #000; border-radius: 8px; }
 
 @media (max-width: 640px) {

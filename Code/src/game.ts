@@ -121,7 +121,7 @@ class Game {
 
                     let action = this.checkAction(i, result.action);
                     if(result.error !== undefined) {
-                        this.setActionResult(i, '', result.error);
+                        this.setActionResult(i, '', result.error, false);   // already logged as a program error
                     } else if(!action) {
                         this.setActionResult(i, '', 'not a valid action');
                     }
@@ -796,9 +796,13 @@ class Game {
 
             // Hit the first robot in the path (other than the attacker). This is
             // checked before the tile, so a robot standing in a doorway can be hit.
+            // A spawn-protected robot doesn't stop a shot aimed past it.
             if(robotID >= 0 && robotID != action.robotID) {
-                targetID = robotID;
-                break;
+                const aimedHere = path[i].x == action.action.target.x && path[i].y == action.action.target.y;
+                if(aimedHere || !this.isProtected(this.arena.robots[robotID])) {
+                    targetID = robotID;
+                    break;
+                }
             }
 
             // Otherwise stop if the tile blocks the shot.
@@ -832,13 +836,8 @@ class Game {
             this.appendToLog(attacker, this.gameTime, `attacks ${defender.name}, but it is protected`);
             this.appendToLog(defender, this.gameTime, `Shot by ${attacker.name} while protected`);
             this.setActionResult(action.robotID, 'attack', 'target is protected');
-            defender.lastHit = {
-                attackerID: action.robotID,
-                attackerName: attacker.name,
-                from: new Vector(attacker.pos.x, attacker.pos.y),
-                time: this.gameTime,
-                damage: [0, 0, 0],
-            };
+            // No damage, so no lastHit: a protected robot isn't baited into
+            // firing back (which would end its protection).
             targetID = -2;
         }
 
@@ -856,15 +855,16 @@ class Game {
             }
             let total = damage.reduce((a, b) => a + b, 0);
 
-            // Both robots learn about the hit. The defender also learns who
-            // fired and from where, even if it can't see the attacker.
+            // Both robots learn about the hit. The defender learns who fired,
+            // and from where only if the attacker is within its scan range.
             this.appendToLog(attacker, this.gameTime, `attacks ${defender.name} for ${total} damage`);
             this.setActionResult(action.robotID, 'attack');
             this.appendToLog(defender, this.gameTime, `Hit by ${attacker.name} for ${total} damage`);
+            const inRange = defender.pos.getDistanceTo(attacker.pos) <= defender.stats.scanRange;
             defender.lastHit = {
                 attackerID: action.robotID,
                 attackerName: attacker.name,
-                from: new Vector(attacker.pos.x, attacker.pos.y),
+                from: inRange ? new Vector(attacker.pos.x, attacker.pos.y) : null,
                 time: this.gameTime,
                 damage: damage.slice(),
             };
@@ -953,6 +953,15 @@ class Game {
             if(otherMove) {
                 let otherStep = other.pos.getPathTo(otherMove.action.target)[0];
                 if(otherStep.isEqualTo(mover.pos)) {
+                    // If the other robot's move finishes later, wait for it: the
+                    // swap happens when the slower of the two moves finishes.
+                    if(Math.floor(otherMove.duration) < Math.floor(this.gameTime)) {
+                        const wait = new GameEvent(action.robotID, action.action, otherMove.duration);
+                        wait.tieBreak = otherMove.tieBreak - 1;   // just before the other's move, which finds it and swaps
+                        wait.slowed = action.slowed;
+                        this.events.push(wait);
+                        return;
+                    }
                     let moverFrom = mover.pos;
                     mover.pos = destination;
                     other.pos = moverFrom;
@@ -1269,7 +1278,13 @@ class Game {
     }
 
     // Records how the robot's last action turned out, for its program to read.
-    setActionResult(robotID: number, command: string, failure: string = '') {
+    setActionResult(robotID: number, command: string, failure: string = '', log: boolean = true) {
+        // Failed attacks and moves are already logged ("Misses", "Bumps into", ...);
+        // log every other failure so a program's mistakes show up in its log.
+        if(log && failure && command != 'attack' && command != 'move') {
+            const what = command ? command.charAt(0).toUpperCase() + command.slice(1) : 'Action';
+            this.appendToLog(this.arena.robots[robotID], this.gameTime, `${what} failed: ${failure}`);
+        }
         this.arena.robots[robotID].lastAction = {
             command: command,
             status: failure ? 'failed' : 'done',

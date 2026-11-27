@@ -3,7 +3,7 @@
 // @description Explores the dungeon, collects items and banks them on its nest,
 //   fights back when shot, and always makes it home before time runs out.
 // @designer darozak
-// @version 1.0
+// @version 1.1
 //
 // What it does, in order of priority each turn:
 //   1. Equips its gear (Scanner, Armor, Blaster).
@@ -62,8 +62,9 @@ class Gatherer extends Program {
         if (armed && hit && hit.time - myData.gameTime < 40) {
             const attacker = myData.robots[hit.attackerID];
             const seenSinceHit = attacker && attacker.isAlive && attacker.lastScan <= hit.time;
+            // hit.from is null when the attacker fired from beyond our scan range.
             const target = seenSinceHit ? attacker.pos : hit.from;
-            return new Attack(new Vector(target.x, target.y));
+            if (target) return new Attack(new Vector(target.x, target.y));
         }
 
         // Keep the map fresh.
