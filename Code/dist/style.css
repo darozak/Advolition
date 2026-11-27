@@ -70,11 +70,11 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .step h3 span { display: inline-grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; background: var(--accent-strong); color: #fff; font-size: 15px; margin-right: 6px; }
 .step p, .note p { margin: 0; color: #c9cdd3; }
 
-/* The pit */
-.pit-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
-.pit-head h2 { margin: 0 0 4px; font-size: 30px; }
-.pit-head p { margin: 0; color: var(--muted); }
-.pit-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+/* The shop */
+.shop-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.shop-head h2 { margin: 0 0 4px; font-size: 30px; }
+.shop-head p { margin: 0; color: var(--muted); }
+.shop-actions { display: flex; gap: 10px; flex-wrap: wrap; }
 .message { color: #ffcf7a; min-height: 1.5em; margin: 8px 0; }
 .message.big { font-size: 18px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 24px; }
 .slots { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr)); gap: 16px; }

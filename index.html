@@ -12,7 +12,7 @@
     <a class="logo" href="#home">ADVOLITION</a>
     <nav>
       <a href="#home" data-screen="home">Home</a>
-      <a href="#pit" data-screen="pit">The Pit</a>
+      <a href="#shop" data-screen="shop">The Shop</a>
       <a href="#arena" data-screen="arena">The Arena</a>
       <a href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">How to play</a>
     </nav>
@@ -25,9 +25,9 @@
         <div class="hero-text">
           <h1>Program a robot.<br>Send it into the dungeon.</h1>
           <p>Advolition is a game for programmers. You write a robot's brain in JavaScript, then up to four robots explore a random dungeon at once: scanning, collecting loot, fighting, and racing to bring their wealth home before time runs out.</p>
-          <p>Every robot can be saved as a <strong>trading card</strong> that carries its complete code in the code strip along the bottom. Share the card, and anyone can load it into their pit.</p>
+          <p>Every robot can be saved as a <strong>trading card</strong> that carries its complete code in the code strip along the bottom. Share the card, and anyone can load it into their shop.</p>
           <div class="cta">
-            <a class="button primary big" href="#pit">Enter the Pit</a>
+            <a class="button primary big" href="#shop">Enter the Shop</a>
             <a class="button big" href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">How to play</a>
           </div>
         </div>
@@ -40,7 +40,7 @@
       <div class="steps">
         <div class="step">
           <h3><span>1</span> Load your robots</h3>
-          <p>In the pit, load up to four robots from card images or JavaScript files, or start a new robot from a template.</p>
+          <p>In the shop, load up to four robots from card images or JavaScript files, or start a new robot from a template.</p>
         </div>
         <div class="step">
           <h3><span>2</span> Review the code</h3>
@@ -54,30 +54,30 @@
 
       <div class="note">
         <h3>Sample cards</h3>
-        <p>The two cards above are working robots. Download one (tap or click it), then load the image in the pit to see its code. When you share a card, share the image file itself: sites that shrink or heavily re-compress images can damage the code strip.</p>
+        <p>The two cards above are working robots. Download one (tap or click it), then load the image in the shop to see its code. When you share a card, share the image file itself: sites that shrink or heavily re-compress images can damage the code strip.</p>
       </div>
     </section>
 
-    <!-- The pit -->
-    <section id="screen-pit" class="screen" hidden>
-      <div class="pit-head">
+    <!-- The shop -->
+    <section id="screen-shop" class="screen" hidden>
+      <div class="shop-head">
         <div>
-          <h2>The Pit</h2>
+          <h2>The Shop</h2>
           <p>Load up to four robots from cards or scripts, review their code, and save them as cards. Then start the battle.</p>
         </div>
-        <div class="pit-actions">
-          <button id="pit-samples" onclick="Pit.loadSamples()">Add sample robots</button>
-          <button id="pit-battle" class="primary big" onclick="startBattle()">Start battle</button>
+        <div class="shop-actions">
+          <button id="shop-samples" onclick="Shop.loadSamples()">Add sample robots</button>
+          <button id="shop-battle" class="primary big" onclick="startBattle()">Start battle</button>
         </div>
       </div>
-      <p id="pit-message" class="message"></p>
+      <p id="shop-message" class="message"></p>
       <div id="slots" class="slots"></div>
     </section>
 
     <!-- The arena -->
     <section id="screen-arena" class="screen" hidden>
       <div class="arena-bar">
-        <a class="button" href="#pit">← Back to the pit</a>
+        <a class="button" href="#shop">← Back to the shop</a>
         <button id="run" onclick="runGame()">Restart battle</button>
         <button id="stop" class="danger" onclick="stopGame()">Stop</button>
         <button id="pause" onclick="togglePause()">Pause</button>
@@ -93,7 +93,7 @@
         <button id="logs" onclick="downloadLogs()">Download logs</button>
       </div>
       <div id="arena-empty" class="message big" hidden>
-        No battle yet. <a href="#pit">Load robots in the pit</a>, then press Start battle.
+        No battle yet. <a href="#shop">Load robots in the shop</a>, then press Start battle.
       </div>
       <canvas id="canvas"></canvas>
     </section>
@@ -124,7 +124,7 @@
   <script src="Code/dist/animations.js"></script>
   <script src="Code/dist/game.js"></script>
   <script src="Code/dist/cards.js"></script>
-  <script src="Code/dist/pit.js"></script>
+  <script src="Code/dist/shop.js"></script>
   <script src="Code/dist/main.js"></script>
 </body>
 

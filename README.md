@@ -9,9 +9,9 @@ Every robot starts out the same. What sets them apart are their programs and the
 You can play the most recent version of the game at https://darozak.github.io/Advolition/
 
 ## Playing a game
-The game has three screens: the home page, **the pit** and **the arena**.
+The game has three screens: the home page, **the shop** and **the arena**.
 
-**The pit** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
+**The shop** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
 - **Load card or script:** load a robot from a card image (PNG or JPEG) or from a `.js` file. You can also drag a file onto the slot.
 - **New robot:** start a robot from a short template.
 - **Review code:** read and edit the robot's code. When you load a card, its code opens for review automatically, so you can see what you're about to run. Press **Apply changes** to use your edits.
@@ -19,13 +19,13 @@ The game has three screens: the home page, **the pit** and **the arena**.
 - **Save script:** save the robot's code as a `.js` file.
 - **Clear:** empty the slot.
 
-**Add sample robots** fills empty slots with the sample robots (this works on the live site). The pit remembers your robots in this browser, so they're still there next time.
+**Add sample robots** fills empty slots with the sample robots (this works on the live site). The shop remembers your robots in this browser, so they're still there next time.
 
 When you're ready, press **Start battle**. **The arena** then runs the battle with every loaded robot:
 - **Restart battle** starts a new battle with the same robots, and **Stop** ends it.
 - **Pause** and **Speed** (1x to 100x) control playback.
 - **Download logs** saves every robot's full log from the current or last battle as a text file.
-- **Back to the pit** ends the battle and returns to the pit.
+- **Back to the shop** ends the battle and returns to the shop.
 
 In the arena, the top of the screen is the spectator view:
 - **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit). At high speeds every shot stays on screen for at least 3 frames. Piles that hold only respawn kit, which is worth nothing, are drawn faded, and the "On Ground" list marks such items "(no value)".
@@ -42,7 +42,7 @@ Two sample robots are included, as scripts and as cards:
 An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
 ## Robot cards
-A robot card is a trading-card image of a robot that carries the robot's complete code. Save one from the pit with **Save as card**, share the image, and anyone can load it into their pit.
+A robot card is a trading-card image of a robot that carries the robot's complete code. Save one from the shop with **Save as card**, share the image, and anyone can load it into their shop.
 
 The card shows:
 - the robot's name (its `Program` class);
@@ -51,7 +51,7 @@ The card shows:
 - a description;
 - the **code strip**.
 
-The code strip is the band of small shaded blocks along the bottom. It holds the code, compressed and protected by error correction, so a card still loads after normal JPEG re-compression or resizing. If it's damaged too badly, the pit says so rather than loading broken code. A card holds about 2,900 bytes of compressed code, which is roughly 9–10 KB of JavaScript; bigger robots can still battle, they just can't be saved as cards. Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
+The code strip is the band of small shaded blocks along the bottom. It holds the code, compressed and protected by error correction, so a card still loads after normal JPEG re-compression or resizing. If it's damaged too badly, the shop says so rather than loading broken code. A card holds about 2,900 bytes of compressed code, which is roughly 9–10 KB of JavaScript; bigger robots can still battle, they just can't be saved as cards. Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
 
 **Card fields.** Add these lines to the comment block at the top of your robot's code, and the card shows them in place of the comment summary:
 ```javascript

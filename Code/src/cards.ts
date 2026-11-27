@@ -1,7 +1,7 @@
 /**
  * Robot cards: a trading-card image of a robot with its full source code stored
  * in a visible "code strip" of small shaded blocks along the bottom. Cards can
- * be shared as images; loading one in the pit reads the code back out.
+ * be shared as images; loading one in the shop reads the code back out.
  *
  * How the code strip works:
  * - The code is compressed, followed by a checksum, and split into Reed-Solomon

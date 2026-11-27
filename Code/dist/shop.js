@@ -1,13 +1,14 @@
 "use strict";
 /**
- * The pit: the staging area where players load up to four robots (from card
+ * The shop: the staging area where players load up to four robots (from card
  * images or script files), review and edit their code, save them as new cards,
  * and then start a battle in the arena.
  */
-var Pit;
-(function (Pit) {
-    Pit.SLOT_COUNT = 4;
-    const STORAGE_KEY = 'advolition-pit-v1';
+var Shop;
+(function (Shop) {
+    Shop.SLOT_COUNT = 4;
+    const STORAGE_KEY = 'advolition-shop-v1';
+    const OLD_STORAGE_KEY = 'advolition-pit-v1'; // from when the shop was called the pit
     let slots = [];
     // A minimal robot to start from.
     const TEMPLATE = `// MyRobot: a new robot.
@@ -46,12 +47,12 @@ new MyRobot();
     }
     function restore() {
         slots = [];
-        for (let i = 0; i < Pit.SLOT_COUNT; i++)
+        for (let i = 0; i < Shop.SLOT_COUNT; i++)
             slots.push({ code: null, source: '' });
         try {
-            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || localStorage.getItem(OLD_STORAGE_KEY) || '[]');
             if (Array.isArray(saved))
-                saved.slice(0, Pit.SLOT_COUNT).forEach((s, i) => {
+                saved.slice(0, Shop.SLOT_COUNT).forEach((s, i) => {
                     if (s && typeof s.code === 'string')
                         slots[i] = { code: s.code, source: String(s.source || '') };
                 });
@@ -146,7 +147,7 @@ new MyRobot();
                 return;
             download(new Blob([code], { type: 'text/javascript' }), `${fileName(code)}.js`);
         };
-        clear.onclick = () => { if (confirm('Remove this robot from the pit?'))
+        clear.onclick = () => { if (confirm('Remove this robot from the shop?'))
             clearSlot(i); };
         return { root, name, source, status, card, placeholder, review, editor, reviewButton, saveCard, saveScript, clear };
     }
@@ -249,7 +250,7 @@ new MyRobot();
     async function loadSamples() {
         const samples = ['Samples/gatherer.js', 'Samples/sentinel.js'];
         const empty = slots.map((s, i) => s.code ? -1 : i).filter(i => i >= 0);
-        const message = document.getElementById('pit-message');
+        const message = document.getElementById('shop-message');
         if (empty.length === 0) {
             if (message)
                 message.textContent = 'All four slots are full. Clear one to add a sample robot.';
@@ -275,7 +276,7 @@ new MyRobot();
         if (message)
             message.textContent = '';
     }
-    Pit.loadSamples = loadSamples;
+    Shop.loadSamples = loadSamples;
     // ------------------------------------------------------------------------
     // Saving cards.
     // ------------------------------------------------------------------------
@@ -324,10 +325,10 @@ new MyRobot();
             return { name: used[base] > 1 ? `${base} ${used[base]}` : base, code: s.code };
         });
     }
-    Pit.robots = robots;
+    Shop.robots = robots;
     function updateBattleButton() {
         const count = slots.filter(s => s.code).length;
-        const button = document.getElementById('pit-battle');
+        const button = document.getElementById('shop-battle');
         if (button) {
             button.disabled = count === 0;
             button.textContent = count ? `Start battle with ${count} robot${count > 1 ? 's' : ''}` : 'Start battle';
@@ -338,7 +339,7 @@ new MyRobot();
         const container = document.getElementById('slots');
         if (!container)
             return;
-        for (let i = 0; i < Pit.SLOT_COUNT; i++) {
+        for (let i = 0; i < Shop.SLOT_COUNT; i++) {
             const v = buildSlot(i);
             views.push(v);
             container.append(v.root);
@@ -346,5 +347,5 @@ new MyRobot();
         }
         updateBattleButton();
     }
-    Pit.init = init;
-})(Pit || (Pit = {}));
+    Shop.init = init;
+})(Shop || (Shop = {}));
