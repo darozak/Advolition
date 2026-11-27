@@ -103,10 +103,38 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .slot-status.error { color: #ff9a9a; }
 .slot-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .slot-review { margin-top: 12px; }
-.slot-editor {
-  width: 100%; height: 320px; resize: vertical; background: #0b0d10; color: #dfe6ee; border: 1px solid var(--line);
-  border-radius: 8px; padding: 10px; font: 12.5px/1.45 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; tab-size: 4;
+/* Code editor: a transparent textarea over a highlighted copy, with line numbers */
+.code-editor {
+  --code-font: 12.5px/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  display: flex; height: 360px; min-height: 120px; resize: vertical; overflow: hidden;
+  background: #0b0d10; border: 1px solid var(--line); border-radius: 8px;
 }
+.code-editor:focus-within { border-color: var(--accent-strong); }
+.code-gutter { flex: none; overflow: hidden; background: #101318; border-right: 1px solid var(--line); }
+.code-gutter pre { margin: 0; padding: 10px 10px 10px 12px; font: var(--code-font); color: #5c6370; text-align: right; user-select: none; min-width: 3ch; }
+.code-area { position: relative; flex: 1; min-width: 0; overflow: hidden; }
+.code-highlight, .code-input {
+  margin: 0; padding: 10px; border: 0; font: var(--code-font); tab-size: 4;
+  white-space: pre; overflow-wrap: normal; word-break: normal; letter-spacing: normal;
+}
+.code-highlight { position: absolute; top: 0; left: 0; pointer-events: none; color: #d4d4d4; }
+.code-highlight code { font: inherit; }
+.code-input {
+  position: absolute; inset: 0; width: 100%; height: 100%; resize: none; outline: none;
+  background: transparent; color: transparent; caret-color: #f0f0f0; overflow: auto;
+}
+.code-input::selection { background: rgba(80, 140, 230, 0.35); color: transparent; }
+/* Colors follow common dark editor themes */
+.tok-comment { color: #6a9955; font-style: italic; }
+.tok-tag { color: #569cd6; font-style: normal; font-weight: 600; }
+.tok-string { color: #ce9178; }
+.tok-number { color: #b5cea8; }
+.tok-keyword { color: #569cd6; }
+.tok-control { color: #c586c0; }
+.tok-literal { color: #569cd6; }
+.tok-function { color: #dcdcaa; }
+.tok-class { color: #4ec9b0; }
+.tok-property { color: #9cdcfe; }
 .slot-review-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .hint { color: var(--muted); font-size: 13px; }
 
