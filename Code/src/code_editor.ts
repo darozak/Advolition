@@ -33,22 +33,26 @@ namespace CodeEditor {
     // Words after which a "/" starts a regular expression rather than a division.
     const BEFORE_REGEX = new Set(['return', 'typeof', 'instanceof', 'in', 'of', 'new', 'delete', 'void', 'throw', 'case', 'do', 'else', 'yield', 'await']);
 
-    // The last non-space character before position i, and the word ending there.
-    function previous(code: string, i: number): { char: string, word: string } {
-        let j = i - 1;
-        while (j >= 0 && /\s/.test(code[j])) j--;
-        if (j < 0) return { char: '', word: '' };
-        let k = j;
-        while (k >= 0 && /[\w$]/.test(code[k])) k--;
-        return { char: code[j], word: code.slice(k + 1, j + 1) };
+    // What came just before the current position, ignoring spaces and comments:
+    // the last punctuation mark, or the last word. `blockEnd` says whether a
+    // closing brace ended a block of code (rather than an object).
+    interface Before { char: string, word: string, blockEnd: boolean }
+
+    // Whether a "/" here begins a regular expression rather than a division. It
+    // does unless it follows something that ends a value: a name, number,
+    // string, closing bracket, or the brace of an object. (After a block's
+    // closing brace a new statement starts, so it is a regular expression.)
+    function startsRegex(b: Before): boolean {
+        if (b.word) return BEFORE_REGEX.has(b.word) || (CONTROL.has(b.word) && b.word !== 'default');
+        if (b.char === '}') return b.blockEnd;
+        return !/^[)\]'"0]$/.test(b.char);
     }
 
-    // Whether a "/" at position i begins a regular expression: it does unless
-    // it follows something that ends a value (a name, number, or closing bracket).
-    function startsRegex(code: string, i: number): boolean {
-        const { char, word } = previous(code, i);
-        if (word) return BEFORE_REGEX.has(word) || (CONTROL.has(word) && word !== 'default');
-        return !/[)\]}'"`]/.test(char);
+    // Whether a "{" here opens a block of code (after `)`, `=>`, `else`, a class
+    // name, or at the start of a statement) rather than an object literal.
+    function opensBlock(b: Before): boolean {
+        if (b.word) return b.word === 'else' || b.word === 'do' || !BEFORE_REGEX.has(b.word);
+        return ['', ';', '{', '}', ')', '=>'].includes(b.char);
     }
 
     const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -57,25 +61,49 @@ namespace CodeEditor {
     /** Returns the code as HTML with each token wrapped in a colored span. */
     export function highlight(code: string): string {
         let html = '', last = 0;
+        let before: Before = { char: '', word: '', blockEnd: false };
+        const braces: boolean[] = [];   // for each open "{": does it open a block?
+
+        // Notes the punctuation between tokens.
+        const punctuation = (text: string) => {
+            for (const c of text) {
+                if (/\s/.test(c)) continue;
+                let blockEnd = false, char = c;
+                if (c === '{') braces.push(opensBlock(before));
+                else if (c === '}') blockEnd = braces.length ? braces.pop()! : true;
+                else if (c === '>' && before.char === '=') char = '=>';
+                before = { char, word: '', blockEnd };
+            }
+        };
+
         TOKENS.lastIndex = 0;
         for (let m: RegExpExecArray | null; (m = TOKENS.exec(code)); ) {
-            html += escape(code.slice(last, m.index));
+            const gap = code.slice(last, m.index);
+            html += escape(gap);
+            punctuation(gap);
             last = TOKENS.lastIndex;
             if (m[1]) {
-                // Comments, with the card's @fields picked out.
+                // Comments, with the card's @fields picked out. They don't change `before`.
                 html += `<span class="tok-comment">${escape(m[1]).replace(/@(description|designer|version)\b/g, '<span class="tok-tag">@$1</span>')}</span>`;
             } else if (m[5]) {
-                if (startsRegex(code, m.index)) html += span('regex', m[5]);
-                else {
+                if (startsRegex(before)) {
+                    html += span('regex', m[5]);
+                    before = { char: ')', word: '', blockEnd: false };   // a value, like a closing bracket
+                } else {
                     // A division sign: leave it plain and read on from the next character.
                     html += '/';
+                    before = { char: '/', word: '', blockEnd: false };
                     TOKENS.lastIndex = last = m.index + 1;
                 }
-            } else if (m[2]) html += span('string', m[2]);
-            else if (m[3]) html += span('number', m[3]);
-            else {
+            } else if (m[2]) {
+                html += span('string', m[2]);
+                before = { char: '"', word: '', blockEnd: false };
+            } else if (m[3]) {
+                html += span('number', m[3]);
+                before = { char: '0', word: '', blockEnd: false };
+            } else {
                 const word = m[4];
-                const isProperty = previous(code, m.index).char === '.';
+                const isProperty = before.char === '.';
                 const next = code.slice(last).match(/^\s*(\S)/);
                 if (!isProperty && CONTROL.has(word)) html += span('control', word);
                 else if (!isProperty && KEYWORDS.has(word)) html += span('keyword', word);
@@ -84,6 +112,8 @@ namespace CodeEditor {
                 else if (/^[A-Z]/.test(word) && /[a-z]/.test(word)) html += span('class', word);
                 else if (isProperty) html += span('property', word);
                 else html += escape(word);
+                // A property named like a keyword (obj.return) is just a name.
+                before = { char: '', word: isProperty ? '_' : word, blockEnd: false };
             }
         }
         return html + escape(code.slice(last));
