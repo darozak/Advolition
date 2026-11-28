@@ -38,7 +38,7 @@ Below that, each robot has its own panel showing its stats, its event log, a map
 
 Two sample robots are included, as scripts and as cards:
 - **Gatherer** ([script](Samples/gatherer.js), [card](Samples/cards/Gatherer-v1.1.png)) explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot.
-- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.2.png)) stays home, scans, and shoots any robot its latest scan found, scanning again after every shot.
+- **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.3.png)) stays home, scans, and shoots any robot its latest scan found, scanning again after a miss.
 
 An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
@@ -92,7 +92,7 @@ A grid space can hold one robot and any number of items. Ten random items are sc
 - **Your own nest.** A robot stepping onto its own nest always gets in: if another robot is standing on it, the two swap places (the owner's log says "Takes back its nest from …", the other's "Pushed off …'s nest"). So no robot can lock another out of its nest by parking on it.
 - **Ties.** Actions that finish on the same tick happen in a random order, so no robot always goes first.
 - **Failed actions.** If an action can't be started (for example, equipping an item you don't have), nothing is queued and the program is called again on the next tick. `lastAction` says why.
-- **Memory.** Your map only updates when you scan. Items you've picked up still show in your `itemMap` until you scan that spot again.
+- **Memory.** Your map only updates when you scan, except the tile you're standing on: after you take or drop an item, your `itemMap` for that tile shows what's really there.
 
 ## Robots
 Every robot starts with:
@@ -151,11 +151,11 @@ Because damage adds up, carrying two different weapons works. Because shields on
 
 Both robots are told about every hit:
 - The attacker's log shows the damage it did, and its missed shots.
-- The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired. It also says where from, but only if the attacker was within the defender's scan range; otherwise `from` is `null`. (A robot without a Scanner can't see where shots come from.)
+- The defender's log shows "Hit by" and the damage taken. Its `lastHit` record says who fired and roughly which way the shot came from (`direction`, one of eight compass directions). It also says exactly where from, but only if the attacker was within the defender's scan range; otherwise `from` is `null`.
 
 While a robot stands on its nest, each equipped Armor item repairs by 1 point every 15 ticks, up to its original 60.
 
-A destroyed robot respawns 500 ticks later at its nest. If another robot is standing on the nest, it appears on the nearest free tile instead. It comes back with a fresh starting kit (Blaster, Scanner and Armor), already equipped. The kit is worth 0 points, so destroying a respawned robot can't be farmed for score. Items it banked on its nest are still there to pick up again.
+A destroyed robot respawns 500 ticks later at its nest. If another robot is standing on the nest, it appears on the nearest free tile instead. It comes back with a fresh starting kit (Blaster, Scanner and Armor), already equipped. The kit is worth 0 points, so destroying a respawned robot can't be farmed for score. Items it banked on its nest are still there to pick up again: while a robot is destroyed, its nest is **locked**, and nobody can take items from it until it respawns.
 
 For 100 ticks after respawning, a robot is **protected**: a shot aimed at it does no damage and doesn't set its `lastHit`, and shots aimed past it fly straight through. The protection ends early if the robot attacks.
 
@@ -218,7 +218,7 @@ A program's `run` method returns one of these:
 | ------ | ------------ |
 | `new Move(target)` | Moves one step toward the `target` Vector. If the next tile isn't passable or another robot is standing on it, the robot stays put, unless that robot is stepping into its tile, or the tile is the moving robot's own nest, in which case they swap places. |
 | `new Scan()` | Updates the robot's map within its scan range. Walls and doors block line of sight. |
-| `new Take(itemName)` | Picks up the named item from the robot's tile, if it has room. |
+| `new Take(itemName)` | Picks up the named item from the robot's tile, if it has room. If there are several, it takes the most valuable. Items on the nest of a destroyed robot can't be taken until it respawns. |
 | `new Drop(itemName)` | Drops the named item onto the robot's tile. |
 | `new Equip(itemName)` | Equips the named item. If this goes over the limit of 4, the item equipped longest ago is unequipped. |
 | `new Unequip(itemName)` | Unequips the named item. |
@@ -246,7 +246,7 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
   |---|---|
   | `move` | `blocked by Wall` (or another tile name), `blocked by <robot name>` |
   | `attack` | `missed`, `target is protected` |
-  | `take` | `no <item> here`, `inventory full` |
+  | `take` | `no <item> here`, `inventory full`, `nest is locked while its owner is destroyed` |
   | `drop`, `equip`, `unequip` | `has no <item>` |
   | any | `unknown command "<command>"`, `not a valid action`, or the error message if `run` threw an error |
 - **`lastHit`** tells you who last shot you, and from where if they were within your scan range.
@@ -285,7 +285,7 @@ Scanning a robot shows its current position, nest, name, ID, whether it's alive,
 | `items` | Item[] | Inventory. Equipped items come first. |
 | `lastScan` | number | The `gameTime` when this data was recorded. |
 | `lastAction` | object or null | How the robot's last action turned out: `command`, `status` (`'done'` or `'failed'`), `reason` (why it failed) and `time`. |
-| `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position, or `null` if it was beyond this robot's scan range), `time` and `damage` (per element, after shields). `null` until it is first hit. |
+| `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position, or `null` if it was beyond this robot's scan range), `direction` (a Vector whose `x` and `y` are each -1, 0 or 1: roughly which way the shot came from), `time` and `damage` (per element, after shields). `null` until it is first hit. |
 
 ### Stats
 Arrays indexed by element use 0 = Kinetic, 1 = Thermal, 2 = ElectroMagnetic.

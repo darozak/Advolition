@@ -16,7 +16,7 @@ class RobotData {
 
     // The last time this robot was hit: who fired, from where, and the
     // damage per element after shields. Null until it is first hit.
-    lastHit: { attackerID: number, attackerName: string, from: Vector | null, time: number, damage: number[] } | null = null;
+    lastHit: { attackerID: number, attackerName: string, from: Vector | null, direction: Vector, time: number, damage: number[] } | null = null;
     name: string;
     isDisplayed: boolean;
     pos = new Vector(0, 0);

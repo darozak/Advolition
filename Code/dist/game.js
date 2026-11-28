@@ -737,8 +737,9 @@ class Game {
                 damage.push(Math.max(0, attack - blocked));
             }
             let total = damage.reduce((a, b) => a + b, 0);
-            // Both robots learn about the hit. The defender learns who fired,
-            // and from where only if the attacker is within its scan range.
+            // Both robots learn about the hit. The defender learns who fired and
+            // roughly which way the shot came from (one of eight directions), and
+            // exactly where from only if the attacker is within its scan range.
             this.appendToLog(attacker, this.gameTime, `attacks ${defender.name} for ${total} damage`);
             this.setActionResult(action.robotID, 'attack');
             this.appendToLog(defender, this.gameTime, `Hit by ${attacker.name} for ${total} damage`);
@@ -747,6 +748,7 @@ class Game {
                 attackerID: action.robotID,
                 attackerName: attacker.name,
                 from: inRange ? new Vector(attacker.pos.x, attacker.pos.y) : null,
+                direction: this.compassDirection(defender.pos, attacker.pos),
                 time: this.gameTime,
                 damage: damage.slice(),
             };
@@ -792,6 +794,13 @@ class Game {
                 this.addToFeed(`${attacker.name} destroyed ${defender.name}`, this.colourOf(action.robotID));
             }
         }
+    }
+    // The rough direction from one position to another: a Vector whose x and y
+    // are each -1, 0 or 1 (one of the eight compass directions).
+    compassDirection(from, to) {
+        let angle = Math.atan2(to.y - from.y, to.x - from.x);
+        let step = Math.round(angle / (Math.PI / 4));
+        return new Vector(Math.round(Math.cos(step * Math.PI / 4)), Math.round(Math.sin(step * Math.PI / 4)));
     }
     requestMove(robotID, action) {
         let destination = this.arena.robots[robotID].pos.getPathTo(action.target)[0];
@@ -987,10 +996,13 @@ class Game {
     requestTake(robotID, action) {
         // Does the robot have enough room in its inventory?
         if (this.arena.robots[robotID].stats.maxCarry > this.arena.robots[robotID].items.length) {
-            // Does item exist in tile?
+            // Does item exist in tile? Is the tile a nest whose owner is destroyed?
             let location = this.arena.robots[robotID].pos;
-            let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === action.item);
-            if (itemID >= 0) {
+            let itemID = this.findItemOnTile(location, action.item);
+            if (itemID >= 0 && this.isLockedNest(robotID, location)) {
+                this.setActionResult(robotID, 'take', 'nest is locked while its owner is destroyed');
+            }
+            else if (itemID >= 0) {
                 let delay = this.arena.robots[robotID].stats.getActionTime();
                 // Add action to event que.
                 this.events.push(new GameEvent(robotID, action, this.gameTime - delay));
@@ -1006,8 +1018,11 @@ class Game {
     resolveTake(event) {
         // Move item to inventory.
         let location = this.arena.robots[event.robotID].pos;
-        let itemID = this.arena.itemMap[location.x][location.y].findLastIndex(d => d.name === event.action.item);
-        if (itemID >= 0) {
+        let itemID = this.findItemOnTile(location, event.action.item);
+        if (itemID >= 0 && this.isLockedNest(event.robotID, location)) {
+            this.setActionResult(event.robotID, 'take', 'nest is locked while its owner is destroyed');
+        }
+        else if (itemID >= 0) {
             let item = this.arena.itemMap[location.x][location.y].splice(itemID, 1)[0];
             this.arena.robots[event.robotID].items.push(item);
             // Write to event log.
@@ -1016,6 +1031,7 @@ class Game {
             let ownerID = this.arena.robots.findIndex((r, i) => i != event.robotID && r.nest.isEqualTo(location));
             if (ownerID >= 0 && item.stats.worth > 0)
                 this.addRaidToFeed(event.robotID, ownerID, item.stats.worth);
+            this.seeOwnTile(event.robotID);
             this.setActionResult(event.robotID, 'take');
         }
         else {
@@ -1074,6 +1090,29 @@ class Game {
             }
         }
     }
+    // The item of this name on a tile that a Take picks up: the most valuable
+    // copy, so a robot never takes a worthless copy when a valuable one is there.
+    findItemOnTile(location, name) {
+        let cell = this.arena.itemMap[location.x][location.y], best = -1;
+        cell.forEach((item, i) => {
+            if (item.name === name && (best < 0 || item.stats.worth >= cell[best].stats.worth))
+                best = i;
+        });
+        return best;
+    }
+    // A nest's items can't be taken while its owner is destroyed, so a robot
+    // can't be shot off its nest and then robbed before it can come back.
+    isLockedNest(robotID, location) {
+        return this.arena.robots.some((r, i) => i != robotID && !r.isAlive && r.nest.isEqualTo(location));
+    }
+    // A robot always knows what is on its own tile after it takes or drops
+    // something there, so its item map doesn't go stale.
+    seeOwnTile(robotID) {
+        let robot = this.arena.robots[robotID];
+        if (!robot.isAlive)
+            return;
+        this.scanData[robotID].itemMap[robot.pos.x][robot.pos.y] = structuredClone(this.arena.itemMap[robot.pos.x][robot.pos.y]);
+    }
     dropItem(robot, itemID) {
         if (robot.items.length > itemID) {
             let location = robot.pos;
@@ -1081,6 +1120,7 @@ class Game {
             robot.items[itemID].isEquipped = false;
             this.arena.itemMap[location.x][location.y].push(robot.items.splice(itemID, 1)[0]);
             this.equipItems(robot);
+            this.seeOwnTile(robot.robotID);
         }
     }
     appendToLog(robot, time, entry) {
