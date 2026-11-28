@@ -19,6 +19,8 @@ class GaiaData extends WorldData {
         this.items.push(new KineticShield());
         this.items.push(new EMShield());
         this.items.push(new Armor());
+        this.treasures.push(new Ruby());
+        this.treasures.push(new GoldenStatue());
 
         console.log(this.items);
 

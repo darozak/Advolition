@@ -78,6 +78,26 @@ class EMShield extends Item {
     }
 }
 
+// Treasure: no use, but valuable. A Golden Statue is heavy, so carrying one
+// home slows a robot down.
+class Ruby extends Item {
+    constructor() {
+        super('Ruby', new Stats());
+        this.isTreasure = true;
+        this.stats.worth = 25;
+        this.stats.bulk = 1;
+    }
+}
+
+class GoldenStatue extends Item {
+    constructor() {
+        super('Golden Statue', new Stats());
+        this.isTreasure = true;
+        this.stats.worth = 60;
+        this.stats.bulk = 5;
+    }
+}
+
 class Armor extends Item {
     constructor() {
         super('Armor', new Stats());

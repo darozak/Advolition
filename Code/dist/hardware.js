@@ -4,6 +4,7 @@ class Item {
     stats;
     timeToEquip = 10;
     isEquipped = false;
+    isTreasure = false; // treasure does nothing; it is only worth points
     constructor(name, effects) {
         this.name = name;
         this.stats = effects;
@@ -124,6 +125,18 @@ class WorldData {
     startingItems = 10;
     itemSpawnInterval = 500;
     respawnDelay = 500;
+    // Items that appear later are worth more: an item's worth is multiplied by
+    // 1 + lateValueBonus * (the fraction of the game gone), so by the end new
+    // items are worth (1 + lateValueBonus) times as much. New items are also
+    // more often treasure as the game goes on: from treasureChanceStart at the
+    // start to treasureChanceEnd at the end.
+    treasures = [];
+    lateValueBonus = 2;
+    treasureChanceStart = 0.1;
+    treasureChanceEnd = 0.6;
+    // Destroying a robot earns a bounty: this share of the worth it was
+    // carrying (0 for a robot carrying only its worthless respawn kit).
+    bountyShare = 0.1;
     // A respawned robot can't be damaged for this many ticks, unless it
     // attacks first. 0 turns protection off.
     respawnProtection = 100;

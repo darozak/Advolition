@@ -62,16 +62,29 @@ class Arena {
         for (var i = 0; i < this.world.startingItems; i++)
             this.spawnItem();
     }
-    // Places a random item on a random floor tile (never on a nest).
-    spawnItem() {
+    // Destroying a robot earns its attacker a bounty, which counts in its score.
+    bounty = [];
+    // Places a random item on a random floor tile (never on a nest). `progress`
+    // is the fraction of the game gone: later items are worth more, and are
+    // more often treasure (a Golden Statue more often than a Ruby).
+    spawnItem(progress = 0) {
         let x = 0;
         let y = 0;
         while (this.world.tiles[this.tileMap[x][y]].key != '.') {
             x = rng.getUniformInt(0, this.world.size.x - 1);
             y = rng.getUniformInt(0, this.world.size.y - 1);
         }
-        let item = rng.getUniformInt(0, this.world.items.length - 1);
-        this.itemMap[x][y].push(structuredClone(this.world.items[item]));
+        let item;
+        let treasureChance = this.world.treasureChanceStart + (this.world.treasureChanceEnd - this.world.treasureChanceStart) * progress;
+        if (this.world.treasures.length > 0 && rng.getUniform() < treasureChance) {
+            let statue = this.world.treasures.length > 1 && rng.getUniform() < progress;
+            item = structuredClone(this.world.treasures[statue ? this.world.treasures.length - 1 : 0]);
+        }
+        else {
+            item = structuredClone(this.world.items[rng.getUniformInt(0, this.world.items.length - 1)]);
+        }
+        item.stats.worth = Math.round(item.stats.worth * (1 + this.world.lateValueBonus * progress));
+        this.itemMap[x][y].push(item);
         return new Vector(x, y);
     }
     // Walking distance (in steps) from one tile to every other tile.
@@ -240,6 +253,8 @@ class Arena {
         if (this.robotMap[nest.x][nest.y] == robotID) {
             score += this.robots[robotID].stats.worth;
         }
+        // Add bounties earned for destroying robots.
+        score += this.bounty[robotID] || 0;
         // Add worth of local items
         let itemCount = this.itemMap[nest.x][nest.y].length;
         for (let i = 0; i < itemCount; i++) {
