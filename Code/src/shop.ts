@@ -31,6 +31,8 @@ class MyRobot extends Program {
         super();
         this.turns = 0;
         this.skip = new Set();   // "x,y" tiles to stop heading for (no route, or a Take failed)
+        this.danger = null;      // where we were last shot from, and until when to keep away
+        this.lastHitTime = null;
     }
 
     run(myData) {
@@ -50,13 +52,22 @@ class MyRobot extends Program {
             if (item && !item.isEquipped) return new Equip(name);
         }
 
-        // 2. Fire back for a while after being hit. lastHit.from is null when
-        //    the shooter was beyond scan range (lastHit.direction still says
-        //    roughly which way the shot came from).
+        // 2. After being hit, remember roughly where the shot came from and keep
+        //    away from there for a while. lastHit.from is null when the shooter
+        //    was beyond scan range; lastHit.direction still says which way.
         const hit = me.lastHit;
-        if (hit && hit.from && hit.time - myData.gameTime < 30) {
-            return new Attack(new Vector(hit.from.x, hit.from.y));
+        const recentlyHit = hit && hit.time - myData.gameTime < 30;
+        if (recentlyHit && hit.time !== this.lastHitTime) {
+            this.lastHitTime = hit.time;
+            const from = hit.from ? new Vector(hit.from.x, hit.from.y)
+                : new Vector(here.x + 4 * hit.direction.x, here.y + 4 * hit.direction.y);
+            this.danger = { pos: from, until: myData.gameTime - 1500 };   // gameTime counts down
         }
+        if (this.danger && myData.gameTime < this.danger.until) this.danger = null;
+
+        // Fire back while our armor holds; when it runs low, head home to repair.
+        const hurt = me.stats.armor < 30;
+        if (recentlyHit && hit.from && !hurt) return new Attack(new Vector(hit.from.x, hit.from.y));
 
         // 3. Bank loot: at home, drop everything that isn't equipped.
         const loot = me.items.filter(i => !i.isEquipped);
@@ -74,7 +85,7 @@ class MyRobot extends Program {
         // 6. Carrying loot? Go home. Otherwise go to the nearest valuable item
         //    seen, or explore: the nearest known tile next to an unscanned one.
         let target = null;
-        if (loot.length >= 2 || me.items.length >= me.stats.maxCarry) target = home;
+        if (hurt || loot.length >= 2 || me.items.length >= me.stats.maxCarry) target = home;
         if (!target) target = this.nearest(myData, here, (x, y) =>
             !(x === home.x && y === home.y) && myData.itemMap[x][y].some(i => i.stats.worth > 0));
         if (!target) target = this.nearest(myData, here, (x, y) => this.isFrontier(myData, me, x, y));
@@ -93,6 +104,7 @@ class MyRobot extends Program {
         for (let x = 0; x < myData.mapSize.x; x++) {
             for (let y = 0; y < myData.mapSize.y; y++) {
                 if (this.skip.has(x + ',' + y) || !test(x, y)) continue;
+                if (this.danger && this.danger.pos.getDistanceTo(new Vector(x, y)) < 5) continue;   // too close to a shooter
                 const distance = from.getDistanceTo(new Vector(x, y));
                 if (distance < bestDistance) { best = new Vector(x, y); bestDistance = distance; }
             }

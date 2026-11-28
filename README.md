@@ -54,7 +54,7 @@ The **front** shows:
 - a description;
 - the card ID and how much of the card the code uses.
 
-The **back** shows the start of the code as text, above the **code strip**: the band of small shaded blocks that holds the complete code. It is compressed and protected by error correction, so a card still loads after normal JPEG re-compression, resizing, or a thin border or crop. If it's damaged too badly, the shop says so rather than loading broken code. The strip grows to fit the code, and a card holds about 14,000 bytes of compressed code, roughly 45–50 KB of JavaScript, so even large, competitive robots fit with room to spare. (Bigger robots can still battle; they just can't be saved as cards.) In the shop, click a card to turn it over. Cards made before the two-sided design still load.
+The **back** shows the start of the code as text, above the **code strip**: the band of small shaded blocks that holds the complete code. It is compressed and protected by error correction, so a card still loads after normal JPEG re-compression, resizing, a thin border or crop, a slight tilt (up to about 3 degrees, as in a crooked photo or scan), or with only its back side. If it's damaged too badly, the shop says so rather than loading broken code. The strip grows to fit the code, and a card holds about 14,000 bytes of compressed code, roughly 45–50 KB of JavaScript, so even large, competitive robots fit with room to spare. (Bigger robots can still battle; they just can't be saved as cards.) In the shop, click a card to turn it over. Cards made before the two-sided design still load.
 
 Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
 
