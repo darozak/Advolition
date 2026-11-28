@@ -78,23 +78,15 @@ class EMShield extends Item {
     }
 }
 
-// Treasure: no use, but valuable. A Golden Statue is heavy, so carrying one
-// home slows a robot down.
-class Ruby extends Item {
-    constructor() {
-        super('Ruby', new Stats());
+// Treasure: no use, but valuable. Each is a trade-off between worth and bulk:
+// small gems are light, while a Golden Statue or a Dragon Egg is worth a lot
+// but slows down the robot carrying it home.
+class Treasure extends Item {
+    constructor(name: string, worth: number, bulk: number) {
+        super(name, new Stats());
         this.isTreasure = true;
-        this.stats.worth = 25;
-        this.stats.bulk = 1;
-    }
-}
-
-class GoldenStatue extends Item {
-    constructor() {
-        super('Golden Statue', new Stats());
-        this.isTreasure = true;
-        this.stats.worth = 60;
-        this.stats.bulk = 5;
+        this.stats.worth = worth;
+        this.stats.bulk = bulk;
     }
 }
 
