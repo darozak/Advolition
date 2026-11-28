@@ -25,7 +25,7 @@ When you're ready, press **Start battle**. **The arena** then runs the battle wi
 - **Restart battle** starts a new battle with the same robots, and **Stop** ends it.
 - **Pause** and **Speed** (1x to 100x) control playback.
 - **Download logs** saves every robot's full log from the current or last battle as a text file.
-- **Run 10 battles** plays ten full battles on new random maps without animating them, then shows each robot's wins, average score, score range, kills and deaths. One battle is mostly luck (the map and where the nests are), so use this to tell whether a change really made your robot better.
+- **Run** (the test bench) plays 10, 25 or 50 full battles without animating them, then shows each robot's wins, average score (± its uncertainty), score range, kills, deaths and program errors. One battle is mostly luck (the map and where the nests are), so use this to tell whether a change really made your robot better. Tick **Same maps** to use the same set of maps every time, so you can compare two versions of a robot fairly. The arena then shows the last battle's final screen.
 - **Back to the shop** ends the battle and returns to the shop.
 
 In the arena, the top of the screen is the spectator view:
@@ -169,6 +169,16 @@ Scores are shown live in each robot's panel. When time runs out, the winner (or 
 
 Starting positions are fair. All nests are chosen together, as far apart as possible (by walking distance), out of each other's line of sight, and on empty tiles. They're then handed out to the robots in random order, so no seat gets a better spot.
 
+## What changed for robot programs
+Rule changes sometimes change the data your program gets. Robots saved as cards keep their old code, so check this list if a robot that used to work starts logging program errors.
+
+- **`lastHit.from` can be `null`.** It is only given when the attacker was within your scan range. Check it before using it (`if (hit.from) ...`). The new **`lastHit.direction`** always says roughly which way the shot came from.
+- **Nests are locked while their owner is destroyed.** A `Take` there fails with `nest is locked while its owner is destroyed`.
+- **`Take` picks the most valuable copy** of the named item on your tile, and after a `Take` or `Drop` your `itemMap` for your own tile is up to date.
+- **Failed actions are logged**, and program errors are logged with their line number.
+- **Swaps:** a swap with a robot stepping into your tile happens when the slower move finishes, and stepping onto your own nest always swaps you with whoever is on it.
+- **Spawn protection:** shots aimed past a protected robot fly through it, and shooting a protected robot doesn't set its `lastHit`.
+
 ## Programming your robot
 A program file must define a class that extends `Program`, give it a `run` method that takes the robot's scan data and returns an action, and end with an expression that creates an instance of the class.
 
@@ -238,7 +248,7 @@ Positions use the `Vector` class: `new Vector(x, y)`. `Move` and `Attack` target
 - **Download logs** saves every robot's complete log for the game as a text file.
 - **One clock.** Everything on screen and in the downloaded logs shows ticks counted up from the start of the game. Only the "Time left" label at the top counts down. (In your program, `gameTime` and the times in your own log still count down.)
 - **Failed actions are logged** too, for example `Take failed: no Railgun here`, so a robot stuck retrying something shows it in its log.
-- **Errors show their line.** Pressing **Apply changes** (or loading a script) checks the code and points to the line of any syntax error, selecting it in the editor. Errors your program throws while running are logged with their line number, such as `Program error: Cannot read properties of null (reading 'pos') (line 42)`.
+- **Errors show their line.** Pressing **Apply changes** (or loading a script) checks the code and points to the line of any syntax error, selecting it in the editor. Errors your program throws while running are logged with their line number, such as `Program error on line 42: Cannot read properties of null (reading 'pos')`.
 - **`lastAction`**, in your own `myData.robots[myData.myID]`, tells your program how its last action turned out. For example: `{ command: 'take', status: 'failed', reason: 'inventory full' }`. Failed actions and invalid return values show up here too, so check it when your robot seems stuck.
   Possible failure reasons:
 
@@ -284,6 +294,8 @@ Scanning a robot shows its current position, nest, name, ID, whether it's alive,
 | `baseStats` | Stats | Stats with no items equipped. |
 | `items` | Item[] | Inventory. Equipped items come first. |
 | `lastScan` | number | The `gameTime` when this data was recorded. |
+| `deathTime` | number | The `gameTime` when the robot was last destroyed, or -1 if it never has been. It respawns 500 ticks later (at `deathTime - 500`, since `gameTime` counts down). |
+| `protectedUntil` | number | While `gameTime` is greater than this, the robot has just respawned and is protected. `Infinity` when it isn't protected. |
 | `lastAction` | object or null | How the robot's last action turned out: `command`, `status` (`'done'` or `'failed'`), `reason` (why it failed) and `time`. |
 | `lastHit` | object or null | The last time this robot was hit: `attackerID`, `attackerName`, `from` (the attacker's position, or `null` if it was beyond this robot's scan range), `direction` (a Vector whose `x` and `y` are each -1, 0 or 1: roughly which way the shot came from), `time` and `damage` (per element, after shields). `null` until it is first hit. |
 

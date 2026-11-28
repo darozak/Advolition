@@ -111,7 +111,11 @@ class Game {
                     let result = results[k];
                     if(result.error !== undefined) {
                         const errorText = String(result.error);
-                        let entry = errorText.startsWith('Program stopped') ? errorText : `Program error: ${errorText}`;
+                        // Put the line number first, so it survives when the
+                        // on-screen log shortens a long entry.
+                        const at = errorText.match(/^(.*) \(line (\d+)\)$/s);
+                        let entry = errorText.startsWith('Program stopped') ? errorText
+                            : at ? `Program error on line ${at[2]}: ${at[1]}` : `Program error: ${errorText}`;
                         let robot = this.arena.robots[i];
                         if(robot.logEntry[robot.logEntry.length - 1] != entry) {
                             this.appendToLog(robot, this.gameTime, entry);
