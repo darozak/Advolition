@@ -9,9 +9,9 @@ Every robot starts out the same. What sets them apart are their programs and the
 You can play the most recent version of the game at https://darozak.github.io/Advolition/
 
 ## Playing a game
-The game has three screens: the home page, **the shop** and **the arena**. **How to play** in the menu shows this guide on the site.
+The game has three screens: the home page, **the workshop** and **the arena**. **How to play** in the menu shows this guide on the site.
 
-**The shop** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
+**The workshop** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
 - **Load card or script:** load a robot from a card image (PNG or JPEG) or from a `.js` file. You can also drag a file onto the slot.
 - **New robot:** start a robot from a short template.
 - **Review code:** read and edit the robot's code. When you load a card, its code opens for review automatically, so you can see what you're about to run. Press **Apply changes** to use your edits; any edits you haven't applied are applied when you start a battle.
@@ -19,14 +19,14 @@ The game has three screens: the home page, **the shop** and **the arena**. **How
 - **Save script:** save the robot's code as a `.js` file.
 - **Clear:** empty the slot.
 
-**Add sample robots** fills empty slots with sample robots, in the order of the sample list below (this works on the live site). All the sample robots are also on the home page, as cards to download. The shop remembers your robots in this browser, so they're still there next time.
+**Add sample robots** fills empty slots with sample robots, in the order of the sample list below (this works on the live site). All the sample robots are also on the home page, as cards to download. The workshop remembers your robots in this browser, so they're still there next time.
 
 When you're ready, press **Start battle**. **The arena** then runs the battle with every loaded robot:
 - **Restart battle** starts a new battle with the same robots, and **Stop** ends it.
 - **Pause** and **Speed** (1x to 100x) control playback.
 - **Download logs** saves every robot's full log from the current or last battle as a text file.
 - **Run** (the test bench) plays 10, 25 or 50 full battles without animating them, then shows each robot's wins, average score (± its uncertainty), score range, kills, deaths and program errors. One battle is mostly luck (the map and where the nests are), so use this to tell whether a change really made your robot better. Tick **Same maps** to use the same set of maps every time, so you can compare two versions of a robot fairly. The arena then shows the last battle's final screen.
-- **Back to the shop** ends the battle and returns to the shop.
+- **Back to the workshop** ends the battle and returns to the workshop.
 
 In the arena, the top of the screen is the spectator view:
 - **The whole map** as it really is. Each robot is a numbered dot in its own colour, and each nest is a square outline in the same colour. Item piles show how many items they hold, and shots appear as lines that end in a ring (a white ring is a hit). At high speeds every shot stays on screen for at least 3 frames. Piles that hold only respawn kit, which is worth nothing, are drawn faded, and the "On Ground" list marks such items "(no value)".
@@ -48,7 +48,7 @@ Seven sample robots are included, as scripts and as cards, each with a different
 An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
 ## Robot cards
-A robot card is a trading-card image of a robot that carries the robot's complete code. Save one from the shop with **Save as card**, share the image, and anyone can load it into their shop.
+A robot card is a trading-card image of a robot that carries the robot's complete code. Save one from the workshop with **Save as card**, share the image, and anyone can load it into their workshop.
 
 A card has two sides, saved side by side in one image.
 
@@ -59,7 +59,7 @@ The **front** shows:
 - a description;
 - the card ID and how much of the card the code uses.
 
-The **back** shows the start of the code as text, above the **code strip**: the band of small shaded blocks that holds the complete code. It is compressed and protected by error correction, so a card still loads after normal JPEG re-compression, resizing, a thin border or crop, a slight tilt (up to about 3 degrees, as in a crooked photo or scan), or with only its back side. If it's damaged too badly, the shop says so rather than loading broken code. The strip grows to fit the code, and a card holds about 14,000 bytes of compressed code, roughly 45–50 KB of JavaScript, so even large, competitive robots fit with room to spare. (Bigger robots can still battle; they just can't be saved as cards.) In the shop, click a card to turn it over. Cards made before the two-sided design still load.
+The **back** shows the start of the code as text, above the **code strip**: the band of small shaded blocks that holds the complete code. It is compressed and protected by error correction, so a card still loads after normal JPEG re-compression, resizing, a thin border or crop, a slight tilt (up to about 3 degrees, as in a crooked photo or scan), or with only its back side. If it's damaged too badly, the workshop says so rather than loading broken code. The strip grows to fit the code, and a card holds about 14,000 bytes of compressed code, roughly 45–50 KB of JavaScript, so even large, competitive robots fit with room to spare. (Bigger robots can still battle; they just can't be saved as cards.) In the workshop, click a card to turn it over. Cards made before the two-sided design still load.
 
 Share the image file itself where you can: sites that shrink images a lot or re-compress them heavily can damage the strip.
 

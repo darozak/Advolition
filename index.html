@@ -12,7 +12,7 @@
     <a class="logo" href="#home">ADVOLITION</a>
     <nav>
       <a href="#home" data-screen="home">Home</a>
-      <a href="#shop" data-screen="shop">The Shop</a>
+      <a href="#workshop" data-screen="workshop">The Workshop</a>
       <a href="#arena" data-screen="arena">The Arena</a>
       <a href="#help" data-screen="help">How to play</a>
     </nav>
@@ -25,9 +25,9 @@
         <div class="hero-text">
           <h1>Program a robot.<br>Send it into the dungeon.</h1>
           <p>Advolition is a game for programmers. You write a robot's brain in JavaScript, then up to four robots explore a random dungeon at once: scanning, collecting loot, fighting, and racing to bring their wealth home before time runs out.</p>
-          <p>Every robot can be saved as a <strong>trading card</strong> that carries its complete code on its back, in a strip of shaded blocks. Share the card, and anyone can load it into their shop.</p>
+          <p>Every robot can be saved as a <strong>trading card</strong> that carries its complete code on its back, in a strip of shaded blocks. Share the card, and anyone can load it into their workshop.</p>
           <div class="cta">
-            <a class="button primary big" href="#shop">Enter the Shop</a>
+            <a class="button primary big" href="#workshop">Enter the Workshop</a>
             <a class="button big" href="#help">How to play</a>
           </div>
         </div>
@@ -40,7 +40,7 @@
       <div class="steps">
         <div class="step">
           <h3><span>1</span> Load your robots</h3>
-          <p>In the shop, load up to four robots from card images or JavaScript files, or start a new robot from a template.</p>
+          <p>In the workshop, load up to four robots from card images or JavaScript files, or start a new robot from a template.</p>
         </div>
         <div class="step">
           <h3><span>2</span> Review the code</h3>
@@ -54,7 +54,7 @@
 
       <div class="note">
         <h3>Sample robots</h3>
-        <p>These cards are working robots, each with a different style of play, for you to battle against, learn from, or use as a starting point. Each card has two sides: the front shows the robot, and the back holds its complete code (hover over a card to turn it over). Download a card and load the image in the shop to see and edit its code, or view the script. When you share a card, share the image file itself: sites that shrink or heavily re-compress images can damage the code strip.</p>
+        <p>These cards are working robots, each with a different style of play, for you to battle against, learn from, or use as a starting point. Each card has two sides: the front shows the robot, and the back holds its complete code (hover over a card to turn it over). Download a card and load the image in the workshop to see and edit its code, or view the script. When you share a card, share the image file itself: sites that shrink or heavily re-compress images can damage the code strip.</p>
         <div class="samples">
           <figure class="sample">
             <a class="sample-card" href="Samples/cards/Gatherer-v1.1.png" download title="Download the Gatherer card"><img src="Samples/cards/Gatherer-v1.1.png" alt="Gatherer robot card" loading="lazy"></a>
@@ -116,19 +116,19 @@
       </div>
     </section>
 
-    <!-- The shop -->
-    <section id="screen-shop" class="screen" hidden>
-      <div class="shop-head">
+    <!-- The workshop -->
+    <section id="screen-workshop" class="screen" hidden>
+      <div class="workshop-head">
         <div>
-          <h2>The Shop</h2>
+          <h2>The Workshop</h2>
           <p>Load up to four robots from cards or scripts, review their code, and save them as cards. Then start the battle.</p>
         </div>
-        <div class="shop-actions">
-          <button id="shop-samples" onclick="Shop.loadSamples()">Add sample robots</button>
-          <button id="shop-battle" class="primary big" onclick="startBattle()">Start battle</button>
+        <div class="workshop-actions">
+          <button id="workshop-samples" onclick="Workshop.loadSamples()">Add sample robots</button>
+          <button id="workshop-battle" class="primary big" onclick="startBattle()">Start battle</button>
         </div>
       </div>
-      <p id="shop-message" class="message"></p>
+      <p id="workshop-message" class="message"></p>
       <div id="slots" class="slots"></div>
     </section>
 
@@ -147,7 +147,7 @@
     <!-- The arena -->
     <section id="screen-arena" class="screen" hidden>
       <div class="arena-bar">
-        <a class="button" href="#shop">← Back to the shop</a>
+        <a class="button" href="#workshop">← Back to the workshop</a>
         <button id="run" onclick="runGame()">Restart battle</button>
         <button id="stop" class="danger" onclick="stopGame()">Stop</button>
         <button id="pause" onclick="togglePause()">Pause</button>
@@ -168,7 +168,7 @@
         </span>
       </div>
       <div id="arena-empty" class="message big" hidden>
-        No battle yet. <a href="#shop">Load robots in the shop</a>, then press Start battle.
+        No battle yet. <a href="#workshop">Load robots in the workshop</a>, then press Start battle.
       </div>
       <div id="bench" class="bench" hidden></div>
       <canvas id="canvas"></canvas>
@@ -201,7 +201,7 @@
   <script src="Code/dist/game.js"></script>
   <script src="Code/dist/cards.js"></script>
   <script src="Code/dist/code_editor.js"></script>
-  <script src="Code/dist/shop.js"></script>
+  <script src="Code/dist/workshop.js"></script>
   <script src="Code/dist/help.js"></script>
   <script src="Code/dist/main.js"></script>
 </body>

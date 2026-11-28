@@ -3,7 +3,7 @@
  * in a visible "code strip" of small shaded blocks. The image shows both sides
  * of the card next to each other: the front (name, art, description) and the
  * back (a listing of the code above the code strip, which grows to fit). Cards
- * can be shared as images; loading one in the shop reads the code back out.
+ * can be shared as images; loading one in the workshop reads the code back out.
  *
  * How the code strip works:
  * - The code is compressed, followed by a checksum, and split into Reed-Solomon
