@@ -762,51 +762,84 @@ var Cards;
         ctx.drawImage(source, 0, 0);
         const data = ctx.getImageData(0, 0, w, h).data;
         // Two-sided cards are landscape; the first, front-only cards are portrait.
-        // Try the layout that matches the image's shape first.
-        const layouts = Math.abs(w / h - CARD.width / CARD.height) < Math.abs(w / h - OLD_CARD.width / OLD_CARD.height) ? [CARD, OLD_CARD] : [OLD_CARD, CARD];
-        const framings = (L) => {
-            // [left, top, card width, card height] in image pixels.
-            const list = [[0, 0, w, h]];
-            const unit = w / L.width; // one card pixel
-            const reach = Math.max(1, Math.round(16 * unit));
-            const steps = [];
-            for (let d = 1; d <= reach; d++)
-                steps.push(d, -d);
-            const pairs = [];
-            for (const a of [0, ...steps])
-                for (const b of [0, ...steps])
-                    if (a || b)
-                        pairs.push([a, b]);
-            pairs.sort((p, q) => Math.abs(p[0]) + Math.abs(p[1]) - Math.abs(q[0]) - Math.abs(q[1]));
-            for (const [a, b] of pairs) {
-                list.push([a, b, w - 2 * a, h - 2 * b]); // a border (or crop) on every side
-                list.push([a, b, w, h]); // the card shifted
-            }
-            return list;
-        };
+        // Try the layout that matches the image's shape first. A portrait image
+        // may also be just the back of a two-sided card.
+        const portrait = Math.abs(w / h - OLD_CARD.width / OLD_CARD.height) < Math.abs(w / h - CARD.width / CARD.height);
+        const layouts = portrait ? [OLD_CARD, CARD] : [CARD, OLD_CARD];
+        const basesFor = (L) => L === CARD && portrait ? [[-w, 0, 2 * w, h]] : [[0, 0, w, h]];
         // A framing that is nearly right can find the strip's header but misread
         // the rows further down, so keep looking until the whole code checks out.
         let found = null;
-        for (const L of layouts)
-            for (const [left, top, cw, ch] of framings(L)) {
-                if (cw < L.width / 4 || ch < L.height / 4)
-                    continue;
-                const result = await readAt(L, data, w, h, left, top, cw / L.width, ch / L.height);
-                if (result && result.ok)
-                    return result;
-                if (result && !found)
-                    found = result;
-            }
+        const tryAll = async (angle, bases, reach) => {
+            for (const L of layouts)
+                for (const base of bases(L))
+                    for (const [left, top, cw, ch] of framings(base, L, reach)) {
+                        if (cw < L.width / 4 || ch < L.height / 4)
+                            continue;
+                        const result = await readAt(L, data, w, h, left, top, cw / L.width, ch / L.height, angle);
+                        if (result && result.ok)
+                            return result;
+                        if (result && !found)
+                            found = result;
+                    }
+            return null;
+        };
+        // First as it is: allowing for a border, crop or shift.
+        const straight = await tryAll(0, basesFor, 16);
+        if (straight)
+            return straight;
+        // Then turned slightly, as when a photo or scan is a little crooked. The
+        // card either fills the image (rotated in place) or sits inside the
+        // larger canvas the rotation made.
+        for (const angle of [0.5, -0.5, 1, -1, 1.5, -1.5, 2, -2, 3, -3]) {
+            const a = angle * Math.PI / 180, cos = Math.cos(a), sin = Math.abs(Math.sin(a));
+            const inner = [0, 0, (w * cos - h * sin) / Math.cos(2 * a), (h * cos - w * sin) / Math.cos(2 * a)];
+            inner[0] = (w - inner[2]) / 2;
+            inner[1] = (h - inner[3]) / 2;
+            const result = await tryAll(a, L => [...basesFor(L), inner], 6);
+            if (result)
+                return result;
+        }
         return found || { ok: false, reason: 'No Advolition code strip was found on this image.' };
     }
     Cards.read = read;
+    // Framings near a base one: the base itself, then a border (or crop) on
+    // every side, or the card shifted, by up to `reach` card pixels, nearest first.
+    function framings(base, L, reach) {
+        const [l, t, cw, ch] = base;
+        const list = [base];
+        const unit = cw / L.width; // one card pixel
+        const steps = [];
+        for (let d = 1; d <= Math.max(1, Math.round(reach * unit)); d++)
+            steps.push(d, -d);
+        const pairs = [];
+        for (const a of [0, ...steps])
+            for (const b of [0, ...steps])
+                if (a || b)
+                    pairs.push([a, b]);
+        pairs.sort((p, q) => Math.abs(p[0]) + Math.abs(p[1]) - Math.abs(q[0]) - Math.abs(q[1]));
+        for (const [a, b] of pairs) {
+            list.push([l + a, t + b, cw - 2 * a, ch - 2 * b]);
+            list.push([l + a, t + b, cw, ch]);
+        }
+        return list;
+    }
     // Reads the strip, taking the card to sit at (left, top) in the image at the
     // given scale. Returns null if no strip header is found there.
-    async function readAt(L, data, w, h, left, top, sx, sy) {
-        // Brightness at the centre of a block, averaged over a small patch.
-        const r = Math.max(0, Math.floor(Math.min(sx, sy) * CELL / 2 - 0.5));
+    // If the image is turned by `angle` (radians, clockwise) around its centre,
+    // each sample point is turned the same way.
+    async function readAt(L, data, w, h, left, top, sx, sy, angle = 0) {
+        // Brightness at the centre of a block, averaged over a small patch
+        // (just the centre pixel when turned, since the edges are blurred).
+        const r = angle ? 0 : Math.max(0, Math.floor(Math.min(sx, sy) * CELL / 2 - 0.5));
+        const cos = Math.cos(angle), sin = Math.sin(angle);
         const luma = (col, row) => {
-            const cx = left + (L.x + (col + 0.5) * CELL) * sx, cy = top + (rowTop(L, row) + 0.5 * CELL) * sy;
+            let cx = left + (L.x + (col + 0.5) * CELL) * sx, cy = top + (rowTop(L, row) + 0.5 * CELL) * sy;
+            if (angle) {
+                const dx = cx - w / 2, dy = cy - h / 2;
+                cx = w / 2 + dx * cos - dy * sin;
+                cy = h / 2 + dx * sin + dy * cos;
+            }
             let sum = 0, n = 0;
             for (let dy = -r; dy <= r; dy++)
                 for (let dx = -r; dx <= r; dx++) {
