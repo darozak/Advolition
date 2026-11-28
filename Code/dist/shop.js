@@ -11,7 +11,8 @@ var Shop;
     const OLD_STORAGE_KEY = 'advolition-pit-v1'; // from when the shop was called the pit
     let slots = [];
     // A minimal robot to start from.
-    const TEMPLATE = `// MyRobot: a new robot.
+    const TEMPLATE = `// MyRobot: a new robot. It already works: it explores, picks up items,
+// brings them home and fires back when shot. Change it to make it your own.
 //
 // @description Describe what your robot does. This text appears on its card.
 // @designer Your name
@@ -20,17 +21,90 @@ var Shop;
 // See the README ("How to play") for the actions and data your robot can use.
 
 class MyRobot extends Program {
+    constructor() {
+        super();
+        this.turns = 0;
+        this.skip = new Set();   // "x,y" tiles to stop heading for (no route, or a Take failed)
+    }
+
     run(myData) {
         const me = myData.robots[myData.myID];
+        const here = new Vector(me.pos.x, me.pos.y);
+        const home = new Vector(me.nest.x, me.nest.y);
+        const atHome = here.isEqualTo(home);
+        this.turns++;
 
-        // Equip the starting gear first.
+        // If the last Take failed (for example, the nest is locked), stop trying there.
+        const last = me.lastAction;
+        if (last && last.command === 'take' && last.status === 'failed') this.skip.add(here.x + ',' + here.y);
+
+        // 1. Equip the starting gear.
         for (const name of ['Scanner', 'Armor', 'Blaster']) {
             const item = me.items.find(i => i.name === name);
             if (item && !item.isEquipped) return new Equip(name);
         }
 
-        // Then look around.
-        return new Scan();
+        // 2. Fire back for a while after being hit. lastHit.from is null when
+        //    the shooter was beyond scan range (lastHit.direction still says
+        //    roughly which way the shot came from).
+        const hit = me.lastHit;
+        if (hit && hit.from && hit.time - myData.gameTime < 30) {
+            return new Attack(new Vector(hit.from.x, hit.from.y));
+        }
+
+        // 3. Bank loot: at home, drop everything that isn't equipped.
+        const loot = me.items.filter(i => !i.isEquipped);
+        if (atHome && loot.length > 0) return new Drop(loot[0].name);
+
+        // 4. Pick up a valuable item on this tile.
+        const itemHere = myData.itemMap[here.x][here.y].find(i => i.stats.worth > 0);
+        if (!atHome && itemHere && !this.skip.has(here.x + ',' + here.y) && me.items.length < me.stats.maxCarry) {
+            return new Take(itemHere.name);
+        }
+
+        // 5. Look around every few turns.
+        if (this.turns % 6 === 1) return new Scan();
+
+        // 6. Carrying loot? Go home. Otherwise go to the nearest valuable item
+        //    seen, or explore: the nearest known tile next to an unscanned one.
+        let target = null;
+        if (loot.length >= 2 || me.items.length >= me.stats.maxCarry) target = home;
+        if (!target) target = this.nearest(myData, here, (x, y) =>
+            !(x === home.x && y === home.y) && myData.itemMap[x][y].some(i => i.stats.worth > 0));
+        if (!target) target = this.nearest(myData, here, (x, y) => this.isFrontier(myData, me, x, y));
+        if (!target) target = home;
+        if (target.isEqualTo(here)) return new Scan();
+
+        let route = findPath(myData, target);
+        if (route.length === 0) route = findPath(myData, target, true);   // try through unscanned tiles
+        if (route.length === 0) { this.skip.add(target.x + ',' + target.y); return new Scan(); }
+        return new Move(route[0]);
+    }
+
+    // The closest tile (in a straight line) that passes a test.
+    nearest(myData, from, test) {
+        let best = null, bestDistance = Infinity;
+        for (let x = 0; x < myData.mapSize.x; x++) {
+            for (let y = 0; y < myData.mapSize.y; y++) {
+                if (this.skip.has(x + ',' + y) || !test(x, y)) continue;
+                const distance = from.getDistanceTo(new Vector(x, y));
+                if (distance < bestDistance) { best = new Vector(x, y); bestDistance = distance; }
+            }
+        }
+        return best;
+    }
+
+    // A tile we can walk on with an unscanned tile next to it.
+    isFrontier(myData, me, x, y) {
+        const tile = myData.tileMap[x][y];
+        if (tile < 0 || !me.stats.permissiveTerrain.includes(myData.tiles[tile].name)) return false;
+        for (let dx = -1; dx <= 1; dx++) {
+            for (let dy = -1; dy <= 1; dy++) {
+                const nx = x + dx, ny = y + dy;
+                if (nx >= 0 && ny >= 0 && nx < myData.mapSize.x && ny < myData.mapSize.y && myData.tileMap[nx][ny] < 0) return true;
+            }
+        }
+        return false;
     }
 }
 

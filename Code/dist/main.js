@@ -117,7 +117,14 @@ async function runGame() {
 // so this plays several full battles on new maps without drawing them, and
 // shows how each robot did over all of them.
 // ---------------------------------------------------------------------------
-async function runBench(count = 10) {
+// The test bench controls: how many battles, and whether to use the same maps
+// every time (so two versions of a robot can be compared on identical maps).
+function runBenchFromControls() {
+    const count = parseInt(document.getElementById('bench-count').value) || 10;
+    const sameMaps = document.getElementById('bench-same').checked;
+    return runBench(count, sameMaps);
+}
+async function runBench(count = 10, sameMaps = false) {
     Shop.applyPendingEdits();
     const robots = Shop.robots();
     if (robots.length === 0) {
@@ -134,18 +141,22 @@ async function runBench(count = 10) {
     if (empty)
         empty.hidden = true;
     panel.hidden = false;
-    const tally = new Map(robots.map(r => [r.name, { wins: 0, scores: [], kills: 0, deaths: 0 }]));
+    const tally = new Map(robots.map(r => [r.name, { wins: 0, scores: [], kills: 0, deaths: 0, errors: 0 }]));
     const problems = new Set();
     const show = (heading) => {
-        const rows = [...tally.entries()].sort((a, b) => avg(b[1].scores) - avg(a[1].scores)).map(([name, t]) => `<tr><td>${escapeHtml(name)}</td><td>${fmt(t.wins)}</td><td>${t.scores.length ? Math.round(avg(t.scores)) : '–'}</td>` +
-            `<td>${t.scores.length ? Math.min(...t.scores) + '–' + Math.max(...t.scores) : '–'}</td><td>${t.kills}</td><td>${t.deaths}</td></tr>`).join('');
+        const rows = [...tally.entries()].sort((a, b) => avg(b[1].scores) - avg(a[1].scores)).map(([name, t]) => `<tr><td>${escapeHtml(name)}</td><td>${fmt(t.wins)}</td><td>${t.scores.length ? Math.round(avg(t.scores)) + (t.scores.length > 1 ? ' ± ' + Math.round(stdErr(t.scores)) : '') : '–'}</td>` +
+            `<td>${t.scores.length ? Math.min(...t.scores) + '–' + Math.max(...t.scores) : '–'}</td><td>${t.kills}</td><td>${t.deaths}</td>` +
+            `<td class="${t.errors ? 'bad' : ''}">${t.errors}</td></tr>`).join('');
         panel.innerHTML = `<h3>${heading}</h3>
-            <table><thead><tr><th>Robot</th><th>Wins</th><th>Average score</th><th>Range</th><th>Kills</th><th>Deaths</th></tr></thead><tbody>${rows}</tbody></table>
+            <table><thead><tr><th>Robot</th><th>Wins</th><th>Average score</th><th>Range</th><th>Kills</th><th>Deaths</th><th>Program errors</th></tr></thead><tbody>${rows}</tbody></table>
             ${[...problems].map(p => `<p class="message">${escapeHtml(p)}</p>`).join('')}
-            <p class="hint">Each battle is on a new random map. Scores swing a lot from map to map, so compare averages and wins rather than single battles.</p>`;
+            <p class="hint">${sameMaps ? `The same ${count} maps are used every time you tick "Same maps", so you can compare two versions of a robot fairly.` : 'Each battle is on a new random map.'}
+            Scores swing a lot from map to map: the ± is the uncertainty of the average (one standard error), so a difference smaller than about twice that may just be luck. The map below shows the last battle.</p>`;
     };
     for (let n = 1; n <= count; n++) {
         show(`Test bench: battle ${n} of ${count}…`);
+        if (sameMaps)
+            rng.setSeed(1000 + n); // battle n always gets the same map
         const game = new Game(new GaiaData(), 10000);
         for (const robot of robots) {
             try {
@@ -183,13 +194,20 @@ async function runBench(count = 10) {
             t.scores.push(scores[i]);
             t.kills += game.kills[i];
             t.deaths += game.deaths[i];
+            t.errors += (game.fullLogs[i] || []).filter(line => line.entry.startsWith('Program error')).reduce((sum, line) => sum + line.count, 0);
             if (scores[i] === best)
                 t.wins += 1 / winners;
         });
     }
-    show(`Test bench: ${count} battles`);
+    if (sameMaps)
+        rng.setSeed(Date.now()); // back to new maps for normal battles
+    show(`Test bench: ${count} battles${sameMaps ? ' on the same maps' : ''}`);
 }
 const avg = (values) => values.length ? values.reduce((a, b) => a + b, 0) / values.length : -1;
+const stdErr = (values) => {
+    const m = avg(values);
+    return Math.sqrt(values.reduce((s, v) => s + (v - m) * (v - m), 0) / (values.length - 1) / values.length);
+};
 const fmt = (n) => Number.isInteger(n) ? `${n}` : n.toFixed(1);
 const escapeHtml = (text) => text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 function togglePause() {

@@ -154,6 +154,9 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .bench th, .bench td { text-align: left; padding: 5px 14px 5px 0; border-bottom: 1px solid var(--line); white-space: nowrap; }
 .bench th { color: var(--muted); font-weight: 600; font-size: 13px; }
 .bench .hint { margin: 10px 0 0; }
+.bench td.bad { color: #ff9a9a; font-weight: 600; }
+.bench-controls { display: inline-flex; gap: 6px; align-items: center; padding-left: 8px; border-left: 1px solid var(--line); }
+.bench-controls label { color: var(--muted); display: inline-flex; gap: 4px; align-items: center; }
 #canvas { display: block; width: 100%; height: auto; background: #000; border-radius: 8px; }
 
 @media (max-width: 640px) {
