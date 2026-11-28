@@ -66,7 +66,7 @@ class Arena {
     bounty = [];
     // Places a random item on a random floor tile (never on a nest). `progress`
     // is the fraction of the game gone: later items are worth more, and are
-    // more often treasure (a Golden Statue more often than a Ruby).
+    // more often treasure, and more often the most valuable kinds of treasure.
     spawnItem(progress = 0) {
         let x = 0;
         let y = 0;
@@ -77,8 +77,12 @@ class Arena {
         let item;
         let treasureChance = this.world.treasureChanceStart + (this.world.treasureChanceEnd - this.world.treasureChanceStart) * progress;
         if (this.world.treasures.length > 0 && rng.getUniform() < treasureChance) {
-            let statue = this.world.treasures.length > 1 && rng.getUniform() < progress;
-            item = structuredClone(this.world.treasures[statue ? this.world.treasures.length - 1 : 0]);
+            // Early on every kind of treasure is equally likely; later the
+            // choice leans towards the valuable end of the list (u^(1/k) with
+            // k growing from 1 to 3 pushes the pick towards the end).
+            let sorted = this.world.treasures.slice().sort((a, b) => a.stats.worth - b.stats.worth);
+            let pick = Math.floor(sorted.length * Math.pow(rng.getUniform(), 1 / (1 + 2 * progress)));
+            item = structuredClone(sorted[Math.min(sorted.length - 1, pick)]);
         }
         else {
             item = structuredClone(this.world.items[rng.getUniformInt(0, this.world.items.length - 1)]);

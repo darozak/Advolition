@@ -19,8 +19,19 @@ class GaiaData extends WorldData {
         this.items.push(new KineticShield());
         this.items.push(new EMShield());
         this.items.push(new Armor());
-        this.treasures.push(new Ruby());
-        this.treasures.push(new GoldenStatue());
+        // Treasure, from least to most valuable: [name, worth, bulk].
+        const treasures: [string, number, number][] = [
+            ['Ancient Coin', 12, 0],
+            ['Pearl Necklace', 18, 1],
+            ['Ruby', 25, 1],
+            ['Meteorite Shard', 35, 3],
+            ['Crystal Skull', 45, 2],
+            ['Jeweled Crown', 55, 2],
+            ['Golden Statue', 60, 5],
+            ['Ancient AI Core', 70, 1],
+            ['Dragon Egg', 90, 6],
+        ];
+        treasures.forEach(([name, worth, bulk]) => this.treasures.push(new Treasure(name, worth, bulk)));
 
         console.log(this.items);
 
