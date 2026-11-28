@@ -1,6 +1,6 @@
-// The page has three screens: the home page, the shop (where robots are loaded,
-// reviewed and saved as cards) and the arena (where they battle). The address
-// bar's #home, #shop or #arena picks the screen.
+// The page has four screens: the home page, the shop (where robots are loaded,
+// reviewed and saved as cards), the arena (where they battle) and How to play
+// (the README). The address bar's #home, #shop, #arena or #help picks the screen.
 
 // The game being played, and a counter that changes whenever a game starts
 // or stops, so an old game loop knows to quit.
@@ -22,7 +22,7 @@ var isPaused = false;
 function showScreen() {
     let screen = (location.hash || '#home').slice(1);
     if (screen === 'pit') screen = 'shop';   // the shop used to be called the pit
-    const name = ['home', 'shop', 'arena'].includes(screen) ? screen : 'home';
+    const name = ['home', 'shop', 'arena', 'help'].includes(screen) ? screen : 'home';
     // (Sections are named "screen-..." so the browser doesn't also scroll to them.)
     document.querySelectorAll<HTMLElement>('.screen').forEach(s => s.hidden = s.id !== 'screen-' + name);
     document.querySelectorAll<HTMLAnchorElement>('nav a[data-screen]').forEach(a => a.classList.toggle('active', a.dataset.screen === name));
@@ -30,6 +30,7 @@ function showScreen() {
     if (name !== 'arena') stopGame();
     const empty = document.getElementById('arena-empty');
     if (empty) empty.hidden = !(name === 'arena' && battleRobots.length === 0 && !lastGame);
+    if (name === 'help') Help.load();
     window.scrollTo(0, 0);
 }
 

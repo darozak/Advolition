@@ -9,7 +9,7 @@ Every robot starts out the same. What sets them apart are their programs and the
 You can play the most recent version of the game at https://darozak.github.io/Advolition/
 
 ## Playing a game
-The game has three screens: the home page, **the shop** and **the arena**.
+The game has three screens: the home page, **the shop** and **the arena**. **How to play** in the menu shows this guide on the site.
 
 **The shop** is where you get your robots ready. It has four slots, one per robot. In each slot you can:
 - **Load card or script:** load a robot from a card image (PNG or JPEG) or from a `.js` file. You can also drag a file onto the slot.

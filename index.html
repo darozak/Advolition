@@ -14,7 +14,7 @@
       <a href="#home" data-screen="home">Home</a>
       <a href="#shop" data-screen="shop">The Shop</a>
       <a href="#arena" data-screen="arena">The Arena</a>
-      <a href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">How to play</a>
+      <a href="#help" data-screen="help">How to play</a>
     </nav>
   </header>
 
@@ -28,7 +28,7 @@
           <p>Every robot can be saved as a <strong>trading card</strong> that carries its complete code on its back, in a strip of shaded blocks. Share the card, and anyone can load it into their shop.</p>
           <div class="cta">
             <a class="button primary big" href="#shop">Enter the Shop</a>
-            <a class="button big" href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">How to play</a>
+            <a class="button big" href="#help">How to play</a>
           </div>
         </div>
         <div class="hero-cards">
@@ -72,6 +72,18 @@
       </div>
       <p id="shop-message" class="message"></p>
       <div id="slots" class="slots"></div>
+    </section>
+
+    <!-- How to play: the README, shown as a page -->
+    <section id="screen-help" class="screen" hidden>
+      <div class="help">
+        <aside class="help-side">
+          <h2>How to play</h2>
+          <nav id="help-toc" class="help-toc" aria-label="Sections"></nav>
+          <a class="help-source" href="https://github.com/darozak/Advolition#readme" target="_blank" rel="noopener">View on GitHub</a>
+        </aside>
+        <article id="help-content" class="help-content"><p class="hint">Loading the guide…</p></article>
+      </div>
     </section>
 
     <!-- The arena -->
@@ -132,6 +144,7 @@
   <script src="Code/dist/cards.js"></script>
   <script src="Code/dist/code_editor.js"></script>
   <script src="Code/dist/shop.js"></script>
+  <script src="Code/dist/help.js"></script>
   <script src="Code/dist/main.js"></script>
 </body>
 
