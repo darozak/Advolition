@@ -120,6 +120,10 @@ A robot's stats are its base stats plus the stats of all its equipped items. Wor
 | Kinetic Shield | 8 | 1 | Kinetic shield +4 |
 | EM Shield | 8 | 1 | ElectroMagnetic shield +3. Also makes the robot immune to the Ion Gun's slow. |
 | Armor | 6 | 2 | 60 armor points, which absorb damage of every element |
+| Ruby | 25 | 1 | None: treasure, worth points only |
+| Golden Statue | 60 | 5 | None: treasure, worth points only. Heavy, so carrying one home slows a robot down. |
+
+**New items keep appearing** all game, one every 500 ticks, and they're worth more the later they appear: an item's worth (in the table) is multiplied by 1 + 2 × the fraction of the game gone, so items appearing near the end are worth almost three times as much. Later items are also more often treasure (from 10% of new items at the start to 60% at the end), and a treasure is more often a Golden Statue the later it appears. Treasure is marked with a gold diamond on the spectator map, and its data has `isTreasure: true`.
 
 Every robot starts with a Blaster, a Scanner and Armor. The other items are only found in the dungeon.
 
@@ -163,7 +167,8 @@ For 100 ticks after respawning, a robot is **protected**: a shot aimed at it doe
 The tile where a robot starts becomes its **nest**. A robot's score is:
 
 - the worth of all items lying on its nest, plus
-- the robot's own worth (base worth plus everything it's carrying), if it is standing on its nest. Other robots standing on your nest don't add to your score.
+- the robot's own worth (base worth plus everything it's carrying), if it is standing on its nest. Other robots standing on your nest don't add to your score, plus
+- its **bounties**: destroying a robot earns 10% of the worth it was carrying (rounded). A robot carrying only its worthless respawn kit earns no bounty, so killing freshly respawned robots doesn't pay.
 
 Scores are shown live in each robot's panel. When time runs out, the winner (or a tie) is announced at the top of the screen.
 
@@ -175,6 +180,8 @@ Rule changes sometimes change the data your program gets. Robots saved as cards 
 - **`lastHit.from` can be `null`.** It is only given when the attacker was within your scan range. Check it before using it (`if (hit.from) ...`). The new **`lastHit.direction`** always says roughly which way the shot came from.
 - **Nests are locked while their owner is destroyed.** A `Take` there fails with `nest is locked while its owner is destroyed`.
 - **`Take` picks the most valuable copy** of the named item on your tile, and after a `Take` or `Drop` your `itemMap` for your own tile is up to date.
+- **Treasure and rising values:** new items include treasure (`Ruby`, `Golden Statue`) that has no use but is worth a lot, and items appearing later are worth more, so the same item name can have different worths. Use `item.stats.worth`, not the name, to judge value.
+- **Bounties:** destroying a robot adds 10% of what it carried to your score.
 - **Failed actions are logged**, and program errors are logged with their line number.
 - **Swaps:** a swap with a robot stepping into your tile happens when the slower move finishes, and stepping onto your own nest always swaps you with whoever is on it.
 - **Spawn protection:** shots aimed past a protected robot fly through it, and shooting a protected robot doesn't set its `lastHit`.
@@ -335,6 +342,9 @@ The late-game and combat settings are on `WorldData` in `Code/src/hardware.ts`:
 | ------- | ------- | ------------ |
 | `startingItems` | 10 | Items on the map at the start. |
 | `itemSpawnInterval` | 500 | Ticks between new random items. 0 turns this off. |
+| `lateValueBonus` | 2 | New items' worth is multiplied by 1 + this × the fraction of the game gone. |
+| `treasureChanceStart`, `treasureChanceEnd` | 0.1, 0.6 | The chance that a new item is treasure, at the start and at the end of the game. |
+| `bountyShare` | 0.1 | The share of a destroyed robot's carried worth its attacker earns as a bounty. |
 | `respawnDelay` | 500 | Ticks before a destroyed robot respawns. 0 turns respawning off. |
 | `respawnProtection` | 100 | Ticks a respawned robot can't be damaged (unless it attacks first). 0 turns protection off. |
 | `maxShieldBlock` | 0.5 | The largest fraction of each element's damage a shield can block. |

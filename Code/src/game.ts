@@ -286,6 +286,7 @@ class Game {
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Score', this.arena.getScore(robotID), statRGB, true);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Banked', this.bankedWorth(robotID), statRGB, true);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Carrying', this.carriedWorth(robotID), statRGB, true);
+            topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bounty', this.arena.bounty[robotID] || 0, statRGB, true);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Bulk', this.arena.robots[robotID].stats.bulk, statRGB, false);
             topTextFrame = this.paper.showStatus(centerTextFrame, topTextFrame, 'Action Time', this.arena.robots[robotID].stats.getActionTime(), statRGB, false);
 
@@ -523,6 +524,8 @@ class Game {
                     const valuable = items.some(item => item.stats.worth > 0);
                     this.paper.drawSprite(left + x * tile, top + y * tile, this.world.itemSprite, tile, valuable ? 1 : 0.3);
                     if(items.length > 1) this.paper.drawText(left + x * tile + tile, top + y * tile + tile, `${items.length}`, [255, 255, 255], 'right', 'bold 9px Arial');
+                    // Treasure is marked with a gold diamond.
+                    if(items.some(item => item.isTreasure)) this.paper.drawText(left + x * tile + tile / 2, top + y * tile + tile * 0.75, '◆', [255, 205, 50], 'center', 'bold 13px Arial');
                 }
             }
         }
@@ -602,7 +605,7 @@ class Game {
 
     worthIfHome(robotID: number) {
         let robot = this.arena.robots[robotID];
-        return this.bankedWorth(robotID) + (robot.isAlive ? robot.stats.worth : 0);
+        return this.bankedWorth(robotID) + (this.arena.bounty[robotID] || 0) + (robot.isAlive ? robot.stats.worth : 0);
     }
 
     // A line chart of each robot's score over the game so far.
@@ -701,7 +704,7 @@ class Game {
     spawnItems() {
         let interval = this.world.itemSpawnInterval;
         let elapsed = this.duration - this.gameTime;
-        if(interval > 0 && elapsed > 0 && elapsed % interval == 0) this.arena.spawnItem();
+        if(interval > 0 && elapsed > 0 && elapsed % interval == 0) this.arena.spawnItem(elapsed / this.duration);
     }
 
     // Bring destroyed robots back respawnDelay ticks after they died, at their
@@ -903,6 +906,11 @@ class Game {
 
             // Any damage the armor couldn't absorb kills the robot.
             if(remaining > 0) {
+                // The attacker earns a bounty: a share of what the defender carried.
+                const carried = defender.items.reduce((sum, item) => sum + item.stats.worth, 0);
+                const bounty = Math.round(carried * this.world.bountyShare);
+                if(bounty > 0) this.arena.bounty[action.robotID] = (this.arena.bounty[action.robotID] || 0) + bounty;
+
                 defender.isAlive = false;
                 defender.deathTime = this.gameTime;
 
@@ -915,10 +923,10 @@ class Game {
 
                 // Write to event log.
                 this.appendToLog(defender, this.gameTime, `dies :( destroyed by ${attacker.name}`);
-                this.appendToLog(attacker, this.gameTime, `Destroys ${defender.name}`);
+                this.appendToLog(attacker, this.gameTime, bounty > 0 ? `Destroys ${defender.name} (+${bounty} bounty)` : `Destroys ${defender.name}`);
                 this.kills[action.robotID] ++;
                 this.deaths[targetID] ++;
-                this.addToFeed(`${attacker.name} destroyed ${defender.name}`, this.colourOf(action.robotID));
+                this.addToFeed(`${attacker.name} destroyed ${defender.name}${bounty > 0 ? ` (+${bounty} bounty)` : ''}`, this.colourOf(action.robotID));
             }
         }
     }
