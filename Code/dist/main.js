@@ -1,14 +1,14 @@
 "use strict";
-// The page has four screens: the home page, the shop (where robots are loaded,
+// The page has four screens: the home page, the workshop (where robots are loaded,
 // reviewed and saved as cards), the arena (where they battle) and How to play
-// (the README). The address bar's #home, #shop, #arena or #help picks the screen.
+// (the README). The address bar's #home, #workshop, #arena or #help picks the screen.
 // The game being played, and a counter that changes whenever a game starts
 // or stops, so an old game loop knows to quit.
 var currentGame = null;
 var lastGame = null; // kept after stopping, for downloading its logs
 var gameRunID = 0;
 var gameTimer = 0;
-// The robots in the last battle started from the shop, for "Restart battle".
+// The robots in the last battle started from the workshop, for "Restart battle".
 var battleRobots = [];
 // Playback controls: ticks played per frame, and whether the game is paused.
 var gameSpeed = 1;
@@ -18,9 +18,9 @@ var isPaused = false;
 // ---------------------------------------------------------------------------
 function showScreen() {
     let screen = (location.hash || '#home').slice(1);
-    if (screen === 'pit')
-        screen = 'shop'; // the shop used to be called the pit
-    const name = ['home', 'shop', 'arena', 'help'].includes(screen) ? screen : 'home';
+    if (screen === 'shop' || screen === 'pit')
+        screen = 'workshop'; // the workshop's earlier names
+    const name = ['home', 'workshop', 'arena', 'help'].includes(screen) ? screen : 'home';
     // (Sections are named "screen-..." so the browser doesn't also scroll to them.)
     document.querySelectorAll('.screen').forEach(s => s.hidden = s.id !== 'screen-' + name);
     document.querySelectorAll('nav a[data-screen]').forEach(a => a.classList.toggle('active', a.dataset.screen === name));
@@ -35,8 +35,8 @@ function showScreen() {
     window.scrollTo(0, 0);
 }
 function startBattle() {
-    Shop.applyPendingEdits(); // battle with the code the shop shows
-    battleRobots = Shop.robots();
+    Workshop.applyPendingEdits(); // battle with the code the workshop shows
+    battleRobots = Workshop.robots();
     if (battleRobots.length === 0)
         return;
     if (location.hash !== '#arena')
@@ -127,10 +127,10 @@ function runBenchFromControls() {
     return runBench(count, sameMaps);
 }
 async function runBench(count = 10, sameMaps = false) {
-    Shop.applyPendingEdits();
-    const robots = Shop.robots();
+    Workshop.applyPendingEdits();
+    const robots = Workshop.robots();
     if (robots.length === 0) {
-        location.hash = '#shop';
+        location.hash = '#workshop';
         return;
     }
     battleRobots = robots;
@@ -247,6 +247,6 @@ function stopGame() {
 // ---------------------------------------------------------------------------
 window.addEventListener('hashchange', showScreen);
 window.addEventListener('DOMContentLoaded', () => {
-    Shop.init();
+    Workshop.init();
     showScreen();
 });
