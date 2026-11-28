@@ -421,7 +421,7 @@ new MyRobot();
     }
     /** Loads the sample robots into empty slots (needs the game to be served from a website). */
     async function loadSamples() {
-        const samples = ['Samples/gatherer.js', 'Samples/sentinel.js'];
+        const samples = ['Samples/gatherer.js', 'Samples/sentinel.js', 'Samples/prospector.js', 'Samples/pirate.js', 'Samples/bounty-hunter.js', 'Samples/bulwark.js', 'Samples/sprinter.js'];
         const empty = slots.map((s, i) => s.code ? -1 : i).filter(i => i >= 0);
         const message = document.getElementById('shop-message');
         if (empty.length === 0) {

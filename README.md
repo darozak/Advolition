@@ -19,7 +19,7 @@ The game has three screens: the home page, **the shop** and **the arena**. **How
 - **Save script:** save the robot's code as a `.js` file.
 - **Clear:** empty the slot.
 
-**Add sample robots** fills empty slots with the sample robots (this works on the live site). The shop remembers your robots in this browser, so they're still there next time.
+**Add sample robots** fills empty slots with sample robots, in the order of the sample list below (this works on the live site). All the sample robots are also on the home page, as cards to download. The shop remembers your robots in this browser, so they're still there next time.
 
 When you're ready, press **Start battle**. **The arena** then runs the battle with every loaded robot:
 - **Restart battle** starts a new battle with the same robots, and **Stop** ends it.
@@ -36,9 +36,14 @@ In the arena, the top of the screen is the spectator view:
 
 Below that, each robot has its own panel showing its stats, its event log, a map of what it has scanned (the robot only knows what's on this map), its inventory, and any items on the ground beneath it.
 
-Two sample robots are included, as scripts and as cards:
+Seven sample robots are included, as scripts and as cards, each with a different style of play:
 - **Gatherer** ([script](Samples/gatherer.js), [card](Samples/cards/Gatherer-v1.1.png)) explores, collects items, banks them on its nest, fights back when shot, and heads home before time runs out. It's commented step by step, so it's a good starting point for your own robot.
 - **Sentinel** ([script](Samples/sentinel.js), [card](Samples/cards/Sentinel-v1.3.png)) stays home, scans, and shoots any robot its latest scan found, scanning again after a miss.
+- **Prospector** ([script](Samples/prospector.js), [card](Samples/cards/Prospector-v1.0.png)) is a treasure hunter: it picks loot by worth against distance and weight, and hurries heavy prizes straight home.
+- **Pirate** ([script](Samples/pirate.js), [card](Samples/cards/Pirate-v1.0.png)) raids other robots' nests while their owners are away, and leaves locked nests alone.
+- **Bounty Hunter** ([script](Samples/bounty-hunter.js), [card](Samples/cards/BountyHunter-v1.0.png)) arms up with the best guns it finds and hunts robots carrying loot for their bounties, going home to repair when hurt.
+- **Bulwark** ([script](Samples/bulwark.js), [card](Samples/cards/Bulwark-v1.0.png)) stacks Armor and shields, collects close to home, and guards its nest from intruders.
+- **Sprinter** ([script](Samples/sprinter.js), [card](Samples/cards/Sprinter-v1.0.png)) banks its Blaster and Armor to move almost twice as fast, grabs light treasure, and runs from other robots. It can't fight, so it dies more often.
 
 An older experimental robot, Tobor, is at [`Code/dist/tobor.js`](Code/dist/tobor.js).
 
