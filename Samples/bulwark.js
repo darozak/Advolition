@@ -1,7 +1,7 @@
 // Bulwark: a defender.
 //
 // @description Builds a fortress: stacks Armor and shields, works only close to home, and stands guard on its nest whenever another robot comes near.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.0
 //
 // What it does:

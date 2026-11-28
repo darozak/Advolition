@@ -1,7 +1,7 @@
 // Pirate: a nest raider.
 //
 // @description Raids other robots' nests while their owners are away, then sails home with the loot. It won't stay to fight a nest's owner, and leaves locked nests alone.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.0
 //
 // What it does:

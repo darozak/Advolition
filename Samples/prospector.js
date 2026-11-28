@@ -1,7 +1,7 @@
 // Prospector: a treasure hunter.
 //
 // @description Hunts treasure. It weighs each find's worth against how far away it is and how heavy it is, and hurries heavy prizes like Golden Statues and Dragon Eggs straight home.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.0
 //
 // What it does:

@@ -1,7 +1,7 @@
 // Sentinel: a sample robot that guards its nest.
 //
 // @description Stays home, scans every turn and shoots the nearest robot it can see.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.3
 //
 // What it does:
