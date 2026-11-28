@@ -145,6 +145,34 @@ select { font: inherit; background: var(--panel-2); color: var(--text); border: 
 .slot-review-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 8px; }
 .hint { color: var(--muted); font-size: 13px; }
 
+/* How to play */
+.help { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; align-items: start; }
+.help-side { position: sticky; top: 76px; }
+.help-side h2 { margin: 0 0 12px; font-size: 22px; }
+.help-toc { display: flex; flex-direction: column; gap: 2px; margin-bottom: 16px; }
+.help-toc a { color: var(--muted); text-decoration: none; padding: 4px 10px; border-radius: 6px; font-size: 14px; }
+.help-toc a:hover { color: var(--text); background: var(--panel-2); }
+.help-source { font-size: 13px; }
+.help-content { max-width: 900px; min-width: 0; color: #d6d9de; }
+.help-content h2 { font-size: 26px; margin: 36px 0 12px; padding-top: 8px; border-top: 1px solid var(--line); scroll-margin-top: 70px; }
+.help-content h2:first-child { margin-top: 0; border-top: 0; padding-top: 0; }
+.help-content h3 { font-size: 19px; margin: 24px 0 8px; scroll-margin-top: 70px; }
+.help-content p, .help-content li { line-height: 1.6; }
+.help-content ul, .help-content ol { padding-left: 22px; }
+.help-content li { margin: 4px 0; }
+.help-content code { font: 0.92em ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; background: var(--panel-2); border: 1px solid var(--line); border-radius: 4px; padding: 1px 5px; }
+.help-code { background: #0b0d10; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+.help-code code { background: none; border: 0; padding: 0; font: 13px/1.5 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace; color: #d4d4d4; }
+.help-table { overflow-x: auto; margin: 10px 0 14px; }
+.help-table table { border-collapse: collapse; font-size: 14px; }
+.help-table th, .help-table td { text-align: left; padding: 6px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.help-table th { color: var(--muted); font-weight: 600; background: var(--panel); }
+@media (max-width: 860px) {
+  .help { grid-template-columns: 1fr; gap: 12px; }
+  .help-side { position: static; }
+  .help-toc { flex-direction: row; flex-wrap: wrap; }
+}
+
 /* The arena */
 .arena-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
 .arena-bar label { color: var(--muted); display: inline-flex; gap: 6px; align-items: center; }
