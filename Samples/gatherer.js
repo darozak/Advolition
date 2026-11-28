@@ -2,7 +2,7 @@
 //
 // @description Explores the dungeon, collects items and banks them on its nest,
 //   fights back when shot, and always makes it home before time runs out.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.1
 //
 // What it does, in order of priority each turn:

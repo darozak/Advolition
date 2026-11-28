@@ -1,7 +1,7 @@
 // Bounty Hunter: a fighter.
 //
 // @description Arms up with the best guns it finds, then hunts robots that are carrying loot, since destroying them pays a bounty. Picks up what they drop, and limps home to repair when hurt.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.0
 //
 // What it does:

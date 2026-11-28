@@ -1,7 +1,7 @@
 // Sprinter: a fast, light collector.
 //
 // @description Travels light: banks its Blaster and Armor at home on the first turns, so it moves almost twice as fast, then dashes out for light, valuable items and away from other robots.
-// @designer darozak
+// @designer Advolition samples
 // @version 1.0
 //
 // What it does:
